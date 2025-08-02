@@ -453,7 +453,7 @@ if __name__ == '__main__':
     parser.add_argument("--memory", type=str_to_bool, default="False", help="memory")
     args = parser.parse_args()
 
-    api_key = "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"
+    api_key = ""
     client = OpenAI(api_key=api_key)
 
     if args.func == "image":
@@ -470,3 +470,4 @@ if __name__ == '__main__':
         calculate_avg(args.req, args.route, args.number, args.episode)
     elif args.func == "log":
         log_to_json(args.req, args.route, args.number, args.episode)
+
