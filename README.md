@@ -29,11 +29,11 @@ source install/setup.bash
 ```
 ros2 run test_pal_robotics test_hunav
 ```
-3. Repeat scenarios
+3. Repeat scenarios:
 ```
 ros2 run test_pal_robotics test_best_scenario
 ```
-4. Analyze and obtain results
+4. Analyze and obtain results:
 ```
 python ./src/test_pal_robotics/test_pal_robotics/analyze.py
 ```
