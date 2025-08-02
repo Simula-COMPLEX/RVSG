@@ -80,10 +80,8 @@ class HunavEvaluatorNode(Node):
         # Subscribe to the robot goal to add it to the robot state
         self.goal_sub = self.create_subscription(PoseStamped, 'current_goal_pose', self.goal_callback, 1)
 
-        # 订阅 ROS 日志 /rosout 监听 "Goal succeeded"
         self.rosout_sub = self.create_subscription(Log, '/rosout', self.rosout_callback, 10)
 
-        # 定时检查数据超时
         self.state_timer = self.create_timer(1.0, self.check_stop_conditions)
 
         self._stop_lock = threading.Lock()
