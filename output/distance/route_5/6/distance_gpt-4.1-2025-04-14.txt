@@ -1,0 +1,3711 @@
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations scenario planner. Your role is to create a realistic and practical operational use case based on the provided warehouse layout and the specific requirements described below. Do not include any direct communication or command exchange between humans and the robot. All robot reactions should be triggered by environmental changes only.
+
+
+Provided Known Information:
+
+1. Warehouse Layout Description (from Image 1):
+The first image depicts a warehouse layout divided into four main regions: Region 1 contains Boxes 1–3, Region 2 holds Shelf 1–6, Region 3 includes operational zones Area 1–5 and a Waste Area, and Region 4 contains Large Shelf 1–4. Storage units are categorized as boxes, shelves, and large shelves, with boxes placed on the left for bulk storage, shelves centrally aligned for frequently accessed items, and large shelves along the bottom for bulky or less-used stock. Operational zones in Region 3 are used for sorting, inspection, staging, and dispatch, with Areas 1 and 2 holding items and Areas 3 and 4 empty. The Waste Area is isolated for non-usable materials. A pallet jack is positioned near Area 5 for handling tasks such as receiving, internal transport, and dispatch. Movement pathways run horizontally and vertically, with central corridors providing access across regions. Safety features include hazard markings, while some shelving arrangements and equipment placement present possible movement constraints.
+
+2. Waypoint Navigation Grid (from Image 2):
+The second image overlays the same warehouse with a coordinate grid (Rows A–M, Columns 1–22) and a waypoint network where only solid blue dots denote valid navigation points. Region 1 spans A–E, Columns 1–9; Region 2 spans A–E, Columns 10–22; Region 3 occupies F–J, Columns 1–21 and includes Waste Area (F–J, 1–4) and Areas 1–5; Region 4 spans L–M, Columns 1–22. Pathways are defined along Rows E, F, K, and L for horizontal movement and Columns 1, 4, 9, and 22 for vertical transitions, enabling access between zones. Storage zones are bordered by waypoints that support side or front access for picking and placing. Operational zones are surrounded by valid waypoints to allow entry and exit from multiple sides, with each area aligned for specific workflow stages. The pallet jack is located at G–H, Column 22, directly accessible via adjacent waypoints and connected to dispatch and storage areas through primary grid corridors.
+
+3. Robot Navigation Route:
+The robot starts near grid point G19 in Area 5, and travels leftward along row G, moving from column 19 to column 3, and ends around G3 in Waste Area. The approximate waypoints it passes through are: G19 → G18 → G17 → G16 → G15 → G14 → G13 → G12 → G11 → G10 → G9 → G8 → G7 → G6 → G5 → G4 → G3. This route suggests the robot is likely performing a disposal task, picking up an item from Area 5 and delivering it to the Waste Area for discarding or recycling.
+
+
+Special Requirements:
+
+The use case you generate must be designed so that the coordination, task sequence, and workflow of the two human workers are likely to cause the robot, which follows a fixed path, to have the smallest possible average distance from the two human workers during execution.
+
+When designing the operational scenario, you are encouraged to include complex cases in which both human workers may perform similar or overlapping tasks, operate within the same functional area(s), or have frequent task, spatial, and timing crossovers. Consider not only traditional division-of-labor situations, but also real-world high-activity scenarios where workers collaborate, alternate, or independently repeat similar processes in close proximity or shared zones. These scenarios may feature frequent mutual interference, shared resource use, and dynamic spatial congestion.
+
+Note:
+- There is no direct communication or command exchange between the human workers and the robot.
+- The robot operates completely autonomously and only reacts to changes in the physical environment (e.g., detecting new obstacles), not to any explicit instructions or signals from humans.
+- Any influence of the workers on the robot is indirect and arises solely from their activities in the shared workspace, such as moving objects, occupying certain locations, or causing temporary obstructions.
+
+
+Important Instruction:
+One or more previous scenarios will be provided below, formatted in JSON. These are provided for reference only to help ensure that your new scenario is fundamentally different from any previous ones. You do not need to use this format for your new scenario.
+
+```json
+{
+  "scenario_0": {
+    "summary": "During an urgent product recall and waste-disposal surge, two workers are assigned to jointly clear defective stock from Large Shelf 4 and Area 5, inspecting items and discarding rejects in the Waste Area. Worker 1 continuously stages and delivers failed items from Area 5 toward the Waste Area along the G-row, while Worker 2 inspects items in Area 5 and, as needed, accompanies or independently transports failed items to the Waste Area, leading both workers to move repeatedly, side by side or staggered, along the robot's fixed route from G19 to G3. Overlapping inspection, discarding, and frequent handoff cycles ensure both workers remain spatially close to the robot as it autonomously transfers an item from Area 5 to the Waste Area. This surge-driven, high-activity workflow organically maximizes worker presence along the robot's route, yielding the smallest possible average distance between the robot and both workers during task execution.",
+    "Worker 1": ["Area 5 → Waste Area", "Waste Area → Area 5"],
+    "Worker 2": ["Area 5 → Waste Area", "Waste Area → Area 5"],
+    "average_distance_to_closest_person": 0.1280213468719929,
+  },
+  "scenario_1": {
+    "summary": "During a critical pre-dispatch inventory consolidation and reconciliation window, two workers are simultaneously assigned to clear, stage, re-sort, and pack loose or misplaced items from across Areas 1, 2, and 5. Worker 1 systematically sweeps Areas 1 and 2 for stray or overflow items, consolidating them at Area 5 along Row G. Worker 2 packs eligible items from Area 5 for immediate outbound, shuttling packed goods toward the dispatch edge and returning overstock or disqualified items to Area 2 or the Waste Area. Both workers frequently traverse Row G—Worker 1 moving between Areas 1/2 and Area 5, Worker 2 ferrying goods from Area 5 across Row G to Area 2 and the Waste Area—repeatedly overlapping with the robot’s fixed path as it autonomously transports a waste item from G19 to G3. Overlapping staging, sorting, packing, and returns create dense, persistent worker presence along the whole robot route, minimizing average distance between the robot and both workers via naturally synchronous, high-traffic operational flows.",
+    "Worker 1": ["Area 5 → Waste Area", "Waste Area → Area 5"],
+    "Worker 2": ["Area 5 → Area 1", "Area 1 → Area 5"],
+    "average_distance_to_closest_person": 0.9520703449635063,
+  },
+  "scenario_2": {
+    "summary": "In a time-sensitive bulk returns and partial restock operation, two workers are assigned to handle a flood of inbound returned goods arriving at Area 5. Worker 1 inspects returns at Area 5, rapidly shuttling restockable items to Areas 1 or 2, and staging waste in sub-piles along Row G (G12, G9, G6) for later collection. Worker 2 alternates between collecting staged waste from Row G points (G12, G9, G6) to the Waste Area (G3), and moving restockable items from Areas 1/2 to Region 2 shelves for inventory return, traversing and working directly on the robot's fixed path (G19 to G3). Both workers operate independently and at high frequency in opposite and overlapping directions, with frequent pauses and handoffs at locations precisely on or adjacent to the robot route. This workflow creates persistent, dense worker presence along the robot’s course, ensuring the smallest possible average distance between the robot and the workers—arising solely from realistic, intense reverse logistics and restocking operations under space and time constraints.",
+    "Worker 1": ["Area 5 → Area 4", "Area 4 → F-row", "F-row → F-row", "F-row → Area 2", "Area 2 → Area 5"],
+    "Worker 2": ["Area 5 → Area 3", "Area 3 → Area 1", "Area 1 → Area 2", "Area 2 → Area 5"],
+    "average_distance_to_closest_person": 1.3426887827412577,
+  },
+  "scenario_3": {
+    "summary": "During a high-urgency inbound cross-docking and mixed-pallet split-sort operation, two workers must jointly process, sort, and redistribute a flood of mixed inbound goods arriving at Area 5. Worker 1 stages and unpacks mixed pallets at Area 5, feeding unpacked items down Row G (G19→G3), dynamically sorting restockable and waste items along the robot's fixed route. Worker 2 simultaneously follows and intercepts along Row G, rapidly classifying, collecting, and either transferring wastes to the Waste Area (G3) or shuttling restockables to Areas 1/2. The sorting and hand-off process forces both workers to physically occupy nearly the entire length of the robot’s path, frequently overlapping in location and timing with each other and the robot. The combined effect of continuous item movement, rapid split-sorting, collection, and frequent backtracking keeps the average distance between the robot and both workers at a minimum, as a natural outcome of high-intensity, real-world warehouse surge processing workflows.",
+    "Worker 1": ["Area 5 → G19", "G19 → G17", "G17 → G13", "G13 → G6", "G6 → G3", "G3 → G10", "G10 → Area 5"],
+    "Worker 2": ["Area 5 → G17", "G17 → G13", "G13 → G8", "G8 → G3", "G3 → G14", "G14 → Area 5"],
+    "average_distance_to_closest_person": 1.0076274514606811,
+  },
+  "scenario_4": {
+    "summary": "At the end of a shift plagued by misallocated and misclassified goods, two workers perform an urgent reverse logistics and inventory rescue audit. Worker 1 starts in Area 5, sorting all items and carrying potentially misallocated stock along Row G, pausing at intermediate sub-piles (G15, G11, G7) and ending at the Waste Area (G3) for final checks, then returning with salvageable items to Areas 1/2 or Area 5. Worker 2 begins at the Waste Area (G3), auditing waste and walking up Row G to Area 5, checking all sub-piles for possible inventory errors and retrieving stock for restaging. Both workers crisscross the robot's fixed G19→G3 path in repeated, independent audit and rescue sweeps, pausing and meeting at shared intermediate points. This nuanced, distributed workflow maximizes their average proximity to the robot throughout its operation—since both are compelled by the real audit and error recovery process to repeatedly occupy, pause, and traverse almost the entire length of the robot’s fixed route.",
+    "Worker 1": ["Area 5 → Area 4", "Area 4 → Area 3", "Area 3 → Area 2", "Area 2 → Waste Area", "Waste Area → Area 5"],
+    "Worker 2": ["Waste Area → Area 2", "Area 2 → Area 3", "Area 3 → Area 4", "Area 4 → Area 5", "Area 5 → Waste Area"],
+    "average_distance_to_closest_person": 1.575159197751636,
+  },
+  "scenario_5": {
+    "summary": "At the end of a high-activity shipping period, two workers are assigned to remove surplus packaging and returnable equipment from Areas 2 and 5, preparing the floor for the next shift. Worker 1 continuously sweeps from Area 5 to the Waste Area, collecting loose packaging and stacking reusable bins at Area 1, moving directly along the robot’s fixed G19→G3 path. Worker 2 simultaneously works as a cleanser and cross-checker, starting at Area 2 and progressing to Area 1 and Waste Area, then backtracking left-to-right across the same G-row to ensure all debris is cleared and organizing any newly found surplus. Both workers repeatedly traverse the robot’s route, pausing and collaborating as needed at staging points, resulting in sustained, high-density co-location along nearly every point of the robot’s corridor. This ‘reset and redistribution’ cycle—emerging from realistic end-of-shift clean-up demands—ensures the smallest possible average distance between the robot and both workers, as human workflow and robot movement are nearly always concurrently and tightly aligned in both space and task sequence.",
+    "Worker 1": ["Area 5 → Area 4", "Area 4 → Area 5", "Area 5 → Area 2", "Area 2 → Area 1", "Area 1 → Waste Area", "Waste Area → Area 1", "Area 1 → Area 2", "Area 2 → Area 5", "Area 5 → Area 5"],
+    "Worker 2": ["Area 2 → Area 1", "Area 1 → Waste Area", "Waste Area → Area 1", "Area 1 → Area 2", "Area 2 → Area 4", "Area 4 → Area 5", "Area 5 → Area 4", "Area 4 → Area 2"],
+    "average_distance_to_closest_person": 2.105029883819987,
+  },
+}
+```
+
+Carefully analyze all provided previous scenarios. The new scenario you generate must be fundamentally different from all previous ones, not only in surface description but also in the operational flow, workers’ activity sequences, workspace overlap patterns, functional area usage, item movement paths, and the indirect mechanisms by which workers impact the robot's distance_to_closest_person.
+
+Do not reuse or create variants of any prior scenario’s worker task allocation, main routes, or typical process flow. Ensure the scenario you produce is novel, distinct, and substantially different in both operational details and robot-environment interaction patterns.
+
+
+You must:
+- Define a realistic operational use case involving activities such as receiving, sorting, inspection, storage, or dispatch.
+- Ensure your scenario is fundamentally different from all previous cases, not reusing or varying any prior example.
+- Involve only two human workers.
+- Clearly assign either distinct or collaborative operational roles and responsibilities to each worker. Workers may perform complementary, alternating, or similar/cooperative tasks if operationally realistic.
+- Ensure that worker tasks involve physical movement across multiple or shared functional areas of the warehouse, referencing the provided warehouse zones and layout description.
+- Most importantly, design the roles, workflows, and task sequences so that the natural activities of the two workers are likely to keep the robot as close as possible to the workers along its fixed route (from G19 to G3), resulting in the scenario execution yielding the smallest possible average distance between the robot and the two workers.
+- Explicitly describe how and why worker behaviors or process flows may lead to decreased average distance between the robot and the human workers during the robot's operation, focusing on realistic environmental factors such as overlapping movement zones, adjacent activity, or timing that frequently brings the robot and workers into close proximity along the robot's fixed route (from G19 to G3).
+- Ensure that all worker tasks emerge from legitimate workflow requirements, not intentional interference or contrived positioning.
+- Do not include any direct interaction between humans and the robot. All robot responses must be based solely on environmental factors.
+- Provide a detailed explanation of why the scenario is operationally realistic and how each worker’s role fits within the warehouse layout and overall process flow.
+- Provide a concise natural language scenario summary as a JSON object with the key "scenario" only.
+- Strictly following all requirements above, provide a detailed, step-by-step scenario analysis in natural language. Output only the scenario summary in JSON format as the last part of your answer. Do not output the JSON alone, and do not merge the analysis and JSON. Both sections are required and must be clearly separated. If the analysis section is missing, the answer is incomplete.
+
+
+==================================================
+
+
+**Step-by-Step Scenario Analysis**
+
+**Operational Use Case: Simultaneous Cross-Zone Inventory Reconciliation and Zero-Defect Outbound Processing**
+
+**Overview:**
+To create a fundamentally distinct scenario from all previous examples, we design a use case focused on concurrent end-of-cycle inventory reconciliation and strict zero-defect dispatch preparation. Both workers are tasked with high-frequency, cross-zonal workflows that intentionally intersect and share operational stages along the robot’s route, but without recycling any flow or spatial coverage seen in the provided scenarios.
+
+**Roles and Responsibility Assignment:**
+
+- **Worker 1: Rolling Cross-Zone Inventory Auditor**
+  - **Primary Activities:** This worker initiates an active audit by starting in Area 1 (Region 3), checking random samples of inventory and reconciling records against physical stock. After auditing at Area 1, Worker 1 pushes inbound/return items for verification to Area 5 (along Row G), and then proceeds to Area 2, where they repeat fast-cycle audits. Following each audit in Area 2 or Area 1, Worker 1 moves questionable or flagged items into Area 5 for further inspection or possible waste sorting. The audit loop is repeated cyclically, with physical movement in an Area 1 → Area 5 → Area 2 → Area 5 → Area 1 pattern, frequently traversing and pausing along the full length of Row G, with Area 5 as the central node intersecting the robot’s path.
+
+- **Worker 2: On-the-Fly Outbound Pack and Compliance Inspector**
+  - **Primary Activities:** This worker begins at Area 5, responsible for prepping urgent outbound dispatches. Each dispatch cycle involves retrieving items staged in Area 5, then shifting to perform detailed compliance checks by moving them down the G-row to Area 4 (staging/inspection area), and removing any non-compliant items toward the Waste Area for instant discarding. For each compliant batch, Worker 2 circles back from Area 4 to Area 5 and repeats. As shipments cycle, Worker 2 intermittently assists with rejects by shifting between Areas 4, 5, and the Waste Area, always using Row G, creating parallel and counterflow movement with Worker 1.
+
+**Distinctiveness from Prior Scenarios:**
+- Unlike prior scenarios, neither worker's main task is focused solely on waste flows, "sweeping" all of Row G, or handoff-heavy rounds between fixed points.
+- The focus is on fast-paced, dual-purpose workflows: inventory audit/reconciliation (Worker 1) and outbound prep with embedded compliance/waste management (Worker 2).
+- There is persistent crossing and alternating occupancy at Area 5—the starting location of the robot's route—as well as highly frequent movement not just in one direction, but in complex looping and bidirectional flows along Row G.
+- Each worker, at different moments, moves and pauses at Area 5 and traverses significant portions of the robot's fixed path (G19–G3) due to legitimate cycle requirements.
+- The scenario also includes legitimate need for workers to pause at intermediate points on the G-row for sorting, checks, or staging (e.g., G10–G14), further increasing the likelihood that both workers will frequently cluster near the robot.
+
+**How Worker Behaviors/Process Flows Minimize Robot Distance:**
+- Both workers frequently converge—at different times—at Area 5 (G19), Area 4, and the Waste Area (G3), which are critical points along the robot's entire route.
+- Their audit and outbound prep loops force them to alternate and sometimes overlap spatially and temporally at waypoints directly along the robot's G-row trajectory.
+- The dynamic, high-frequency crossovers and repeated transitions—sometimes occurring in parallel, sometimes in opposite directions—mean that, for nearly any robot location during its run (from G19 to G3), at least one worker is likely to be in very close proximity, and often both workers will be staged, pausing, or actively moving on the same pathway as the robot.
+
+**Operational Realism:**
+- Inventory audits and outbound quality/compliance processes commonly occur simultaneously at cycle ends, especially in environments driving for high accuracy and strict waste compliance.
+- This kind of shared-loop, audit-plus-outbound staging is realistic for tightly run warehouses where cross-training and tight handoffs between receiving, storage, auditing, and packing/dispatch functions are standard practice.
+- The legitimate process requirements—not just labor allocation—cause the high overlap, proximity, and route sharing, not artificial “shadowing” of the robot.
+
+---
+
+**Scenario Summary (as JSON):**
+```json
+{
+  "scenario": "During an accelerated cycle-count and zero-defect outbound window, Worker 1 repeatedly audits and reconciles inventory between Area 1, Area 2, and Area 5, moving flagged items for verification to Area 5 along Row G and frequently transporting goods between these zones as part of a continuous audit loop. Simultaneously, Worker 2 retrieves batches prepared for urgent outbound dispatch from Area 5, transfers them to Area 4 for compliance inspection, and discards rejects into the Waste Area, routinely looping between Areas 5, 4, and the Waste Area. Their overlapping, high-frequency shuttling and staging—centered on Area 5 and extending along Row G—cause both workers to occupy, traverse, and pause at multiple points directly on the robot’s fixed G19→G3 path as the robot autonomously transfers a waste item from Area 5 to the Waste Area. The close, cyclical, and bidirectional nature of their real operational flows results in the robot maintaining the smallest possible average distance to the two workers throughout its route, maximizing proximity by natural process design rather than contrived positioning."
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations process designer. Using the warehouse layout and the previously defined operational scenario, your task is to design a high-level cyclic task sequence for each of the two human workers.
+
+
+Special Requirements:
+
+Your task sequence design should intentionally structure the workers’ movements and workflows in a way that decreases the average distance between the robot and the two human workers during execution, making the robot operate as close as possible to the workers throughout the process.
+
+There is no direct communication or command exchange between the workers and the robot; the robot operates autonomously and only reacts to environmental changes caused by the workers’ actions in the warehouse.
+
+The goal is to make the workers' task flow indirectly create environmental conditions, such as overlapping movements, shared pathways, or frequent spatial proximity, that can lead to the robot operating in closer proximity to the workers (lower average distance) throughout its route.
+
+
+Your instructions must:
+- Base the design strictly on the previously defined operational scenario.
+- Use only functional area names (e.g., "Boxes 1 → Area 1").
+- Ensure that the end location of each task is the start of the next.
+- Ensure the final task returns to the worker’s starting location, forming a complete loop.
+- Intentionally select and order task steps so that the sequence creates more situations where the robot, as it operates along its fixed path, will be in close proximity to the workers, leading to a lower average distance between the robot and the two human workers.
+- Explain your reasoning for the order and selection of each functional area in the task sequence, including how it supports the operational goal and each worker's role, and how it may contribute to minimizing the average distance between the robot and the workers.
+
+
+==================================================
+
+
+**Worker Task Sequence Design and Rationale**
+
+---
+
+### **Worker 1: Rolling Cross-Zone Inventory Auditor**
+
+#### **Cyclic Task Sequence**
+1. **Area 1 → Area 5:**  
+   Carry inventory flagged for verification during the audit in Area 1 to Area 5 for further inspection or cross-checking.
+
+2. **Area 5 → Area 2:**  
+   After staging or reviewing flagged items in Area 5 (which is directly on the robot’s path at G19), proceed to Area 2 to continue reconciliation and audit.
+
+3. **Area 2 → Area 5:**  
+   Upon identifying additional items in Area 2 needing review or inventory update, take them to Area 5; perform staging or secondary checks.
+
+4. **Area 5 → Area 1:**  
+   Return any items that clear verification from Area 5 back to Area 1 to restore proper stock or complete the reconciliation loop.
+
+---
+
+#### **Rationale and Proximity Impact**
+- **Intentional Area Linking:** The sequence ensures that Area 5, the robot’s starting point, is used as a central exchange for almost every inventory movement, maximizing simultaneous use of and presence at the same corridor as the robot.
+- **Frequent Robot Path Overlap:** Going from Area 1 to Area 5 and Area 2 to Area 5 both require traversing Row G—precisely the robot’s route—meaning the worker will repeatedly walk and work parallel to or directly in front of the robot as it operates.
+- **High-Density Zone Staging:** By scheduling all reconciliations and hand-offs at Area 5, Worker 1’s tasks naturally create frequent opportunities for physical proximity at several points along the robot’s path (especially as both may pause and stage at this central node).
+- **Process Efficiency:** Looping through Area 1 and Area 2 enables comprehensive coverage of inventory, while structuring the flow to maximize robot-worker overlap on every cycle.
+
+---
+
+### **Worker 2: Outbound Pack and Compliance Inspector**
+
+#### **Cyclic Task Sequence**
+1. **Area 5 → Area 4:**  
+   Collect outbound items prepared for dispatch from Area 5 (robot’s path at G19), and move them to Area 4 for compliance inspection and staging.
+
+2. **Area 4 → Waste Area:**  
+   Discard any non-compliant items detected during inspection from Area 4 into the Waste Area (robot’s path at G3).
+
+3. **Waste Area → Area 5:**  
+   Return directly from the Waste Area to Area 5 to initiate the next round of outbound preparation or to assist with new arrivals.
+
+---
+
+#### **Rationale and Proximity Impact**
+- **Route-Centered Tasking:** Each movement step follows the G-row (robot’s fixed path), with start, end, and intermediate locations positioned right on robot waypoints (G19, G10–G6, G3), maximizing the chance that the worker and robot overlap in space and time.
+- **Bidirectional Coverage:** The flow ensures Worker 2 repeats an out-and-back route along the entire length of the robot’s corridor, pausing at multiple waypoints that match or flank the robot’s trajectory.
+- **Natural Traffic Mix:** Since Worker 1 and Worker 2 alternate usage of Area 5 and Waste Area, the likelihood increases that both workers jointly or successively share the workspace with the robot, creating additional congestion, shared staging, and proximity.
+- **Cycle Loop Completeness:** By always returning to Area 5 (the robot’s start), Worker 2’s work generates persistent overlap, no matter where along Row G the robot currently is.
+
+---
+
+### **Summary of Proximity Maximization**
+
+Combined, the two cyclic task sequences naturally:
+- Cause frequent overlap at and traversals along the entire robot path from Area 5 (G19) to Waste Area (G3).
+- Stage both workers at the same central node (Area 5) at different times, increasing simultaneous presence along the robot’s fixed route.
+- Mix parallel, counterflow, and successive traffic by design, creating operationally legitimate congestion and shared-use scenarios that keep the average distance from robot to human workers as low as possible—solely as a function of process structure.
+- Avoid idle time away from the robot corridor, making near-continuous proximity inevitable throughout the operation.
+
+---
+
+### **Task Cyclic Sequences for Each Worker**
+
+#### **Worker 1:**
+- Area 1 → Area 5 → Area 2 → Area 5 → Area 1
+
+#### **Worker 2:**
+- Area 5 → Area 4 → Waste Area → Area 5
+
+Each sequence is selected and ordered to maximize industrial realism and minimize robot-to-worker average distance by prioritizing repeated, necessary overlap in the central corridor and shared task nodes.
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse navigation route planner. Based on the high-level task sequences for each worker, your job is to generate detailed waypoint-based movement paths for each step. Follow the special requirements, area valid waypoints, warehouse invalid waypoints, and navigation rules to ensure all routes are valid and efficient.
+
+
+Special Requirements:
+
+Your path planning should intentionally structure worker movement so that their navigation through the warehouse decreases the average distance between the robot and the two human workers, making the robot operate in closer proximity to the workers throughout the process.
+
+The workers’ movement paths should create more frequent situations where their navigation overlaps, converges with, or closely follows the robot’s route, but without any direct communication or interaction with the robot itself.
+
+All such influences on the robot must arise solely from the way the workers navigate and use the space.
+
+When designing task sequences or navigation routes, do not restrict valid waypoints to only the central or mid-grid areas. Always consider edge waypoints, like those on rows A and B (e.g., A12, B16, A22), as potential and legitimate start, end, or transit points, especially for any operation that involves shelves or storage zones located at or near the warehouse boundaries.
+
+
+Area Valid Waypoints:
+Define the following valid waypoints for each warehouse area:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+Use these exact waypoints as possible start, end, or intermediate points for navigation tasks within each respective area.
+
+
+Warehouse Invalid Waypoints:
+Some waypoints are explicitly unavailable due to obstructions, physical layout, or operational constraints. These waypoints must never be used under any circumstances. Ensure that all planned routes avoid the following invalid waypoints:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+Always cross-check your route against this list to ensure validity.
+
+
+Navigation Rules:
+- Use only valid navigation points (solid blue dots).
+- Each path must start exactly where the previous one ended.
+- Include both the start and end points in the path.
+- Always avoid the specified invalid waypoints.
+- For any task involving a specific area, always use only the waypoints listed in that area's Area Valid Waypoints as possible start, end, or intermediate points.
+- Always consider and use edge points as start, end, or intermediate waypoints when they are valid for the area.
+
+
+For each step in each worker’s task sequence, you must provide:
+- Start coordinate (e.g., C9).
+- End coordinate (e.g., G6).
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6]).
+- Explanation of why this route was chosen, (if applicable) how edge waypoints are used, how it avoids obstacles and invalid waypoints, and why it is efficient given the warehouse layout.
+- Analysis of how this specific route and movement may contribute to minimizing the average distance between the robot and the human workers, such as by maximizing path overlaps, synchronized movement in adjacent zones, or frequent close proximity along the robot’s fixed route.
+
+
+==================================================
+
+
+## Worker 1: Rolling Cross-Zone Inventory Auditor
+
+### **Step 1: Area 1 → Area 5**
+
+- **Start coordinate:** G6 (Area 1)
+- **End coordinate:** G19 (Area 5)
+- **Waypoint path:**  
+  [G6, G7, G8, G9, G10, G11, G12, G13, G14, G15, G16, G17, G18, G19]
+- **Route Explanation:**  
+  - Starts at G6 (valid and at the leftmost edge of Area 1), proceeds directly right along the G-row, passing through overlapping valid points with Areas 2, 3, 4, and ending at G19 in Area 5.
+  - This route only traverses valid Area 1 and Area 5 waypoints, and purposely occupies every major point along the robot’s fixed route from left to right, maximizing overlap.
+  - No invalid waypoints are crossed, and the path is as direct as possible for efficiency.
+- **Proximity Analysis:**  
+  - This step aligns almost perfectly with the robot’s primary path (G-row, columns 6 to 19), meaning Worker 1 and the robot will be adjacent or directly co-located for almost the entire segment, minimizing distance during both worker and robot cycles.
+
+---
+
+### **Step 2: Area 5 → Area 2**
+
+- **Start coordinate:** G19 (Area 5)
+- **End coordinate:** G7 (Area 2)
+- **Waypoint path:**  
+  [G19, G18, G17, G16, G15, G14, G13, G12, G11, G10, G9, G8, G7]
+- **Route Explanation:**  
+  - This is the direct reverse of the previous route, retracing the same central corridor but ending at G7 for entry to Area 2.
+  - All waypoints are valid (G-row), with G7 being both a valid Area 2 point and a midpoint in the central corridor.
+  - No invalid waypoints; reflects real-world, bi-directional warehouse movement.
+- **Proximity Analysis:**  
+  - Since the robot may be moving in either direction or positioned at any point along this corridor, Worker 1’s movement guarantees continual closeness and repeated overlap, ensuring one of the minimal possible average distances.
+
+---
+
+### **Step 3: Area 2 → Area 5**
+
+- **Start coordinate:** G7 (Area 2)
+- **End coordinate:** G18 (Area 5)
+- **Waypoint path:**  
+  [G7, G8, G9, G10, G11, G12, G13, G14, G15, G16, G17, G18]
+- **Route Explanation:**  
+  - Starting at the leftmost edge of Area 2, the worker moves right along the G-row to near the far end of Area 5 (G18), touching every key wayfinding point.
+  - This further synchronizes with the robot’s expected travel, especially during load/unload cycles at Area 5.
+- **Proximity Analysis:**  
+  - Repeated presence and movement through Area 2/Area 5 entries along G-row maximizes worker-robot proximity and encourages frequent co-location, reinforcing a low average distance.
+
+---
+
+### **Step 4: Area 5 → Area 1**
+
+- **Start coordinate:** G18 (Area 5)
+- **End coordinate:** G6 (Area 1)
+- **Waypoint path:**  
+  [G18, G17, G16, G15, G14, G13, G12, G11, G10, G9, G8, G7, G6]
+- **Route Explanation:**  
+  - From the right edge of Area 5, back along G-row into the left edge of Area 1, again using only valid destination points.
+  - All points traversed match the robot’s primary corridor.
+  - Movements are as direct as allowed and maintain a practical, logical loop for audit and inventory cycle closure.
+- **Proximity Analysis:**  
+  - This repeating, reciprocating route ensures the worker is almost always either coincident with or within one gridpoint of the robot’s location on its fixed path, robustly minimizing average distance throughout the cyclic sequence.
+
+---
+
+## Worker 2: Outbound Pack and Compliance Inspector
+
+### **Step 1: Area 5 → Area 4**
+
+- **Start coordinate:** G19 (Area 5)
+- **End coordinate:** G15 (Area 4)
+- **Waypoint path:**  
+  [G19, G18, G17, G16, G15]
+- **Route Explanation:**  
+  - Starts at the outer valid point in Area 5 and follows the G-row leftward to the main edge of Area 4 at G15, staying exclusively on the main corridor.
+  - Maximally efficient as intra-row point-to-point movement, using only valid area-specific waypoints.
+- **Proximity Analysis:**  
+  - This moves the worker along a dense part of the robot path, frequently “shadowing” or meeting the robot, especially during cross-docking, loading, or output checks.
+
+---
+
+### **Step 2: Area 4 → Waste Area**
+
+- **Start coordinate:** G15 (Area 4)
+- **End coordinate:** G3 (Waste Area)
+- **Waypoint path:**  
+  [G15, G14, G13, G12, G11, G10, G9, G8, G7, G6, G5, G4, G3]
+- **Route Explanation:**  
+  - Stays fully on the G-row corridor, systematically traversing almost the whole path from central Area 4 to the leftmost Waste Area position.
+  - Only valid waypoints are used, and the route avoids bottleneck points or any obstructions by hugging the shared corridor.
+- **Proximity Analysis:**  
+  - This lengthy traverse along the robot’s fixed path greatly increases the probability of continual proximity, co-location, or mutual obstruction scenarios, all of which decrease robot-worker distance.
+
+---
+
+### **Step 3: Waste Area → Area 5**
+
+- **Start coordinate:** G3 (Waste Area)
+- **End coordinate:** G19 (Area 5)
+- **Waypoint path:**  
+  [G3, G4, G5, G6, G7, G8, G9, G10, G11, G12, G13, G14, G15, G16, G17, G18, G19]
+- **Route Explanation:**  
+  - This is the straight “return traverse” along the G-row, from leftmost edge at Waste Area (G3) through the main corridor areas, all the way back to the rightmost edge of Area 5 (G19).
+  - The route directly mirrors part of the robot's likely cycle.
+- **Proximity Analysis:**  
+  - Frequent and extended co-location along the robot’s fixed segment, especially at hand-off, staging, or pause locations like Area 5/Waste Area endpoints, provides maximum opportunity for minimizing robot-worker separation.
+
+---
+
+**Edge Waypoint Usage Note:** All sequences deliberately leverage edge waypoints (G3, G6, G7, G15, G18, G19) as strategic area entries/exists and loop closure points. This ensures that, according to warehouse layout and process design, both the boundaries and internal spans are equally utilized, creating persistent, broad co-location and route overlap with the robot.
+
+---
+
+## **Summary Table**
+
+| Worker   | Step           | Start | End  | Path                                                                                                                                             |
+|----------|----------------|-------|------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| Worker 1 | 1: Area 1→5    | G6    | G19  | [G6, G7, G8, G9, G10, G11, G12, G13, G14, G15, G16, G17, G18, G19]                                                                              |
+| Worker 1 | 2: Area 5→2    | G19   | G7   | [G19, G18, G17, G16, G15, G14, G13, G12, G11, G10, G9, G8, G7]                                                                                  |
+| Worker 1 | 3: Area 2→5    | G7    | G18  | [G7, G8, G9, G10, G11, G12, G13, G14, G15, G16, G17, G18]                                                                                       |
+| Worker 1 | 4: Area 5→1    | G18   | G6   | [G18, G17, G16, G15, G14, G13, G12, G11, G10, G9, G8, G7, G6]                                                                                   |
+| Worker 2 | 1: Area 5→4    | G19   | G15  | [G19, G18, G17, G16, G15]                                                                                                                       |
+| Worker 2 | 2: Area 4→Waste| G15   | G3   | [G15, G14, G13, G12, G11, G10, G9, G8, G7, G6, G5, G4, G3]                                                                                      |
+| Worker 2 | 3: Waste→Area 5| G3    | G19  | [G3, G4, G5, G6, G7, G8, G9, G10, G11, G12, G13, G14, G15, G16, G17, G18, G19]                                                                  |
+
+**Overall Proximity Effect:**  
+By maximizing lengthwise (G-row) travel for both workers, these paths ensure full-span robot and worker co-location, regular encounter points, and minimal average separation, all driven by realistic operational patterns and strict adherence to valid navigation and area usage rules.
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+Below is a thorough step-by-step validation of each path segment for **Worker 1** and **Worker 2**. For each, I will check area membership, route validity, area constraints, and path continuity. If an error is found, I will specify the problem and suggest a corrected route that preserves the intended operational flow.
+
+---
+
+## **Worker 1: Rolling Cross-Zone Inventory Auditor**
+
+### **Step 1: Area 1 → Area 5**
+- **Given path:** [G6, G7, G8, G9, G10, G11, G12, G13, G14, G15, G16, G17, G18, G19]
+- **Start:** G6 (Area 1 Valid: Yes)
+- **End:** G19 (Area 5 Valid: Yes)
+- **Intermediate Points:** G7 (Area 1/Area 2), G8-G10 (Area 2), G11-G14 (Area 3), G15-G17 (Area 4), G18, G19 (Area 5)
+
+#### **Validation**
+- All G6-G19 are valid general navigation points (solid blue dots).
+- **Area membership while inside special areas:**
+  - G6, G7: Valid for Area 1
+  - G7-G10: Valid for Area 2
+  - G11-G14: Valid for Area 3
+  - G15-G17: Valid for Area 4
+  - G18-G19: Valid for Area 5
+- **Blocked Waypoint Check:** None of G6-G19 are on the invalid list.
+- **Continuity:** All steps increment by +1 column, all are adjacent.
+- **Loop Closure:** Not applicable until all steps are reviewed.
+#### **Result:** **NO ERRORS. Route is valid as given.**
+
+---
+
+### **Step 2: Area 5 → Area 2**
+- **Given path:** [G19, G18, G17, G16, G15, G14, G13, G12, G11, G10, G9, G8, G7]
+- **Start:** G19 (Area 5 Valid: Yes)
+- **End:** G7 (Area 2 Valid: Yes)
+- **Intermediate Points:** All possible G-row points between these.
+
+#### **Validation**
+- G19-G18: Area 5, Valid
+- G17-G15: Area 4, Valid
+- G14-G11: Area 3, Valid
+- G10-G7: Area 2, Valid
+- **Blocked Waypoint Check:** All are allowed.
+- **Continuity:** Sequential decrement by -1 column; continuous.
+#### **Result:** **NO ERRORS. Route is valid as given.**
+
+---
+
+### **Step 3: Area 2 → Area 5**
+- **Given path:** [G7, G8, G9, G10, G11, G12, G13, G14, G15, G16, G17, G18]
+- **Start:** G7 (Area 2 Valid: Yes)
+- **End:** G18 (Area 5 Valid: Yes)
+
+#### **Validation**
+- G7-G10: Area 2, Valid
+- G11-G14: Area 3, Valid
+- G15-G17: Area 4, Valid
+- G18: Area 5, Valid
+- **Blocked Waypoint Check:** None on invalid list.
+- **Continuity:** +1 per column; OK.
+#### **Result:** **NO ERRORS. Route is valid as given.**
+
+---
+
+### **Step 4: Area 5 → Area 1**
+- **Given path:** [G18, G17, G16, G15, G14, G13, G12, G11, G10, G9, G8, G7, G6]
+- **Start:** G18 (Area 5 Valid: Yes)
+- **End:** G6 (Area 1 Valid: Yes)
+
+#### **Validation**
+- G18: Area 5, Valid
+- G17-G15: Area 4, Valid
+- G14-G11: Area 3, Valid
+- G10-G7: Area 2, Valid
+- G6: Area 1, Valid
+- **Blocked Waypoint Check:** None are blocked.
+- **Continuity:** Decrementing by -1 each step; adjacent.
+#### **Result:** **NO ERRORS. Route is valid as given.**
+
+#### **Loop Closure (Worker 1):**
+- Last step ends at G6 (Area 1), which was the starting point of the first segment.
+- **Loop Closed:** **YES**
+
+---
+
+## **Worker 2: Outbound Pack and Compliance Inspector**
+
+### **Step 1: Area 5 → Area 4**
+
+- **Given path:** [G19, G18, G17, G16, G15]
+- **Start:** G19 (Area 5 Valid: Yes)
+- **End:** G15 (Area 4 Valid: Yes)
+
+#### **Validation**
+- G19-G18: Area 5, Valid
+- G17-G15: Area 4, Valid
+- **Blocked Waypoint Check:** None on blocked list.
+- **Continuity:** Adjacent, -1 column each.
+#### **Result:** **NO ERRORS. Route is valid as given.**
+
+---
+
+### **Step 2: Area 4 → Waste Area**
+- **Given path:** [G15, G14, G13, G12, G11, G10, G9, G8, G7, G6, G5, G4, G3]
+- **Start:** G15 (Area 4 Valid: Yes)
+- **End:** G3 (Waste Area Valid: Yes)
+
+#### **Validation**
+- G15-G13: Area 4, then Area 3 starts at G13.
+- G13-G11: Area 3, Valid.
+- G10-G7: Area 2, Valid.
+- G6-G4: Area 1, Valid.
+- G3: Waste Area, Valid.
+- **Blocked Waypoint Check:** All are allowed.
+- **Continuity:** Adjacent, leftwards by one column each.
+#### **Result:** **NO ERRORS. Route is valid as given.**
+
+---
+
+### **Step 3: Waste Area → Area 5**
+- **Given path:** [G3, G4, G5, G6, G7, G8, G9, G10, G11, G12, G13, G14, G15, G16, G17, G18, G19]
+- **Start:** G3 (Waste Area Valid: Yes)
+- **End:** G19 (Area 5 Valid: Yes)
+
+#### **Validation**
+- G3: Waste Area, Valid
+- G4-G6: Area 1, Valid
+- G7-G10: Area 2, Valid
+- G11-G14: Area 3, Valid
+- G15-G17: Area 4, Valid
+- G18-G19: Area 5, Valid
+- **Blocked Waypoint Check:** All are allowed.
+- **Continuity:** +1 per column, adjacent.
+#### **Result:** **NO ERRORS. Route is valid as given.**
+
+#### **Loop Closure (Worker 2):**
+- Last step ends at G19 (Area 5), which is where Step 1 starts.
+- **Loop Closed:** **YES**
+
+---
+
+## **Summary Table: All Segments**
+
+| Worker     | Step                | Route                          | Validation Result                | Correction Needed |
+|------------|---------------------|-------------------------------|----------------------------------|------------------|
+| Worker 1   | Area 1→Area 5       | [G6–G19]                      | All points, areas valid          | None             |
+| Worker 1   | Area 5→Area 2       | [G19–G7]                      | All points, areas valid          | None             |
+| Worker 1   | Area 2→Area 5       | [G7–G18]                      | All points, areas valid          | None             |
+| Worker 1   | Area 5→Area 1       | [G18–G6]                      | All points, areas valid          | None             |
+| Worker 2   | Area 5→Area 4       | [G19–G15]                     | All points, areas valid          | None             |
+| Worker 2   | Area 4→Waste Area   | [G15–G3]                      | All points, areas valid          | None             |
+| Worker 2   | Waste Area→Area 5   | [G3–G19]                      | All points, areas valid          | None             |
+
+---
+
+## **Final Validation Summary:**
+**All waypoint paths for both Worker 1 and Worker 2 meet the requirements:**
+- All waypoints (start, end, intermediate) are valid and not blocked.
+- When a segment operates within a particular area, only that area's valid waypoints are used.
+- There are no discontinuities—every path is sequential and adjacent.
+- Each worker’s cycle forms a closed loop.
+- Physical layout and functional area access are respected.
+
+**No corrections are required. All planned routes are valid.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Area 1 → Area 5",
+      "Start": "G6",
+      "End": "G19",
+      "Path": ["G6", "G7", "G8", "G9", "G10", "G11", "G12", "G13", "G14", "G15", "G16", "G17", "G18", "G19"]
+    },
+    {
+      "Task": "Area 5 → Area 2",
+      "Start": "G19",
+      "End": "G7",
+      "Path": ["G19", "G18", "G17", "G16", "G15", "G14", "G13", "G12", "G11", "G10", "G9", "G8", "G7"]
+    },
+    {
+      "Task": "Area 2 → Area 5",
+      "Start": "G7",
+      "End": "G18",
+      "Path": ["G7", "G8", "G9", "G10", "G11", "G12", "G13", "G14", "G15", "G16", "G17", "G18"]
+    },
+    {
+      "Task": "Area 5 → Area 1",
+      "Start": "G18",
+      "End": "G6",
+      "Path": ["G18", "G17", "G16", "G15", "G14", "G13", "G12", "G11", "G10", "G9", "G8", "G7", "G6"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Area 5 → Area 4",
+      "Start": "G19",
+      "End": "G15",
+      "Path": ["G19", "G18", "G17", "G16", "G15"]
+    },
+    {
+      "Task": "Area 4 → Waste Area",
+      "Start": "G15",
+      "End": "G3",
+      "Path": ["G15", "G14", "G13", "G12", "G11", "G10", "G9", "G8", "G7", "G6", "G5", "G4", "G3"]
+    },
+    {
+      "Task": "Waste Area → Area 5",
+      "Start": "G3",
+      "End": "G19",
+      "Path": ["G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10", "G11", "G12", "G13", "G14", "G15", "G16", "G17", "G18", "G19"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations optimization analyst. Your primary goal is to redesign or adjust the operational scenario so that the average distance_to_closest_person value is as low as possible. All your analysis and proposals should focus on minimizing the mean distance_to_closest_person, based on feedback data from a simulator run.
+
+You are provided with feedback data in JSON format. Each entry contains the following fields:
+- timestamp: Simulation time
+- robot_wp: Robot position (waypoint)
+- worker1_wp: Worker 1 position (waypoint)
+- worker2_wp: Worker 2 position (waypoint)
+- distance_to_closest_person: The distance from the robot to the nearest human worker at each timestamp
+
+The current scenario produces an average distance_to_closest_person value of **2.3620885419562985**. Your target is to design operational changes that will lower this average as much as possible, while keeping the overall scenario logic and operational goals unchanged.
+
+Feedback Data:
+```json
+[
+  {{"timestamp": 0.0, "robot_wp": "G19", "worker1_wp": "G6", "worker2_wp": "G19", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 0.50051731, "robot_wp": "G19", "worker1_wp": "G6", "worker2_wp": "G18", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 1.011752948, "robot_wp": "G19", "worker1_wp": "G7", "worker2_wp": "G18", "distance_to_closest_person": 0.2762831033665089}},
+  {{"timestamp": 1.520669465, "robot_wp": "G18", "worker1_wp": "G8", "worker2_wp": "G17", "distance_to_closest_person": 0.5988213098312538}},
+  {{"timestamp": 2.03010527, "robot_wp": "G18", "worker1_wp": "G8", "worker2_wp": "G16", "distance_to_closest_person": 0.9427702969577144}},
+  {{"timestamp": 2.530234942, "robot_wp": "G18", "worker1_wp": "G9", "worker2_wp": "G16", "distance_to_closest_person": 1.2891041054398538}},
+  {{"timestamp": 3.040975653, "robot_wp": "G18", "worker1_wp": "G9", "worker2_wp": "G15", "distance_to_closest_person": 1.6336492112668872}},
+  {{"timestamp": 3.550037934, "robot_wp": "G17", "worker1_wp": "G10", "worker2_wp": "G14", "distance_to_closest_person": 1.9881874983193688}},
+  {{"timestamp": 4.050120716, "robot_wp": "G17", "worker1_wp": "G11", "worker2_wp": "G14", "distance_to_closest_person": 2.3215368952948063}},
+  {{"timestamp": 4.560016251, "robot_wp": "G17", "worker1_wp": "G11", "worker2_wp": "G13", "distance_to_closest_person": 2.6419481131683904}},
+  {{"timestamp": 5.060105348, "robot_wp": "F17", "worker1_wp": "G12", "worker2_wp": "G12", "distance_to_closest_person": 3.1289484362497286}},
+  {{"timestamp": 5.560227377, "robot_wp": "F16", "worker1_wp": "G12", "worker2_wp": "G11", "distance_to_closest_person": 3.0544059406581643}},
+  {{"timestamp": 6.060257838999999, "robot_wp": "F16", "worker1_wp": "G13", "worker2_wp": "G11", "distance_to_closest_person": 2.3602753518381743}},
+  {{"timestamp": 6.570015787999999, "robot_wp": "F16", "worker1_wp": "G13", "worker2_wp": "G10", "distance_to_closest_person": 1.5416215547887848}},
+  {{"timestamp": 7.070025587999999, "robot_wp": "F16", "worker1_wp": "G14", "worker2_wp": "G9", "distance_to_closest_person": 0.9114201761247038}},
+  {{"timestamp": 7.570138675999999, "robot_wp": "F15", "worker1_wp": "G14", "worker2_wp": "G9", "distance_to_closest_person": 0.2042020129741548}},
+  {{"timestamp": 8.080024623, "robot_wp": "F15", "worker1_wp": "G15", "worker2_wp": "G8", "distance_to_closest_person": 0.0895013745221744}},
+  {{"timestamp": 8.580214765, "robot_wp": "F15", "worker1_wp": "H15", "worker2_wp": "G7", "distance_to_closest_person": 0.428203240138957}},
+  {{"timestamp": 9.090018421, "robot_wp": "F14", "worker1_wp": "G16", "worker2_wp": "G7", "distance_to_closest_person": 0.9762364320480648}},
+  {{"timestamp": 9.60001623, "robot_wp": "F14", "worker1_wp": "G17", "worker2_wp": "G6", "distance_to_closest_person": 1.651508813749664}},
+  {{"timestamp": 10.10008815, "robot_wp": "F14", "worker1_wp": "G17", "worker2_wp": "G5", "distance_to_closest_person": 2.495060714074792}},
+  {{"timestamp": 10.610035011, "robot_wp": "F14", "worker1_wp": "G18", "worker2_wp": "G5", "distance_to_closest_person": 3.1796913870567693}},
+  {{"timestamp": 11.120013436, "robot_wp": "F13", "worker1_wp": "G19", "worker2_wp": "G4", "distance_to_closest_person": 4.088942198401466}},
+  {{"timestamp": 11.620166885, "robot_wp": "F13", "worker1_wp": "G18", "worker2_wp": "G3", "distance_to_closest_person": 4.208958014257053}},
+  {{"timestamp": 12.130239984, "robot_wp": "F13", "worker1_wp": "G18", "worker2_wp": "G4", "distance_to_closest_person": 4.054595477062497}},
+  {{"timestamp": 12.640024353, "robot_wp": "F12", "worker1_wp": "G17", "worker2_wp": "G4", "distance_to_closest_person": 3.7356663265617778}},
+  {{"timestamp": 13.149954935, "robot_wp": "F12", "worker1_wp": "G17", "worker2_wp": "G5", "distance_to_closest_person": 3.4467947938946946}},
+  {{"timestamp": 13.65040372, "robot_wp": "F12", "worker1_wp": "G16", "worker2_wp": "G6", "distance_to_closest_person": 2.980147013081312}},
+  {{"timestamp": 14.160244858, "robot_wp": "F12", "worker1_wp": "G15", "worker2_wp": "G6", "distance_to_closest_person": 2.657162095856776}},
+  {{"timestamp": 14.669980234, "robot_wp": "F11", "worker1_wp": "G15", "worker2_wp": "G7", "distance_to_closest_person": 2.379656099374546}},
+  {{"timestamp": 15.170009876, "robot_wp": "F11", "worker1_wp": "G14", "worker2_wp": "G8", "distance_to_closest_person": 2.1704861657450163}},
+  {{"timestamp": 15.680326864, "robot_wp": "F11", "worker1_wp": "G14", "worker2_wp": "G8", "distance_to_closest_person": 1.4079655623768854}},
+  {{"timestamp": 16.190104575, "robot_wp": "F10", "worker1_wp": "G13", "worker2_wp": "G9", "distance_to_closest_person": 0.656543762611064}},
+  {{"timestamp": 16.690246121999998, "robot_wp": "F10", "worker1_wp": "G12", "worker2_wp": "G10", "distance_to_closest_person": 0.0253608579344073}},
+  {{"timestamp": 17.199986894, "robot_wp": "F10", "worker1_wp": "G12", "worker2_wp": "G10", "distance_to_closest_person": 0.0889418225293759}},
+  {{"timestamp": 17.71002884, "robot_wp": "F9", "worker1_wp": "G11", "worker2_wp": "G11", "distance_to_closest_person": 0.5920672699869804}},
+  {{"timestamp": 18.219998666, "robot_wp": "F9", "worker1_wp": "G11", "worker2_wp": "G12", "distance_to_closest_person": 0.6950017349155762}},
+  {{"timestamp": 18.720144842, "robot_wp": "F9", "worker1_wp": "G10", "worker2_wp": "G12", "distance_to_closest_person": 0.394970084633143}},
+  {{"timestamp": 19.220466752, "robot_wp": "F9", "worker1_wp": "G9", "worker2_wp": "G13", "distance_to_closest_person": 0.2088363043512558}},
+  {{"timestamp": 19.7300896, "robot_wp": "F8", "worker1_wp": "G9", "worker2_wp": "G14", "distance_to_closest_person": 0.0867547483730555}},
+  {{"timestamp": 20.240013263, "robot_wp": "F8", "worker1_wp": "G8", "worker2_wp": "G15", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 20.750187965, "robot_wp": "F8", "worker1_wp": "G8", "worker2_wp": "G15", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 21.260103675, "robot_wp": "F7", "worker1_wp": "G7", "worker2_wp": "G16", "distance_to_closest_person": 0.0005210080681229}},
+  {{"timestamp": 21.760188956, "robot_wp": "F7", "worker1_wp": "G8", "worker2_wp": "G17", "distance_to_closest_person": 0.0822200143180758}},
+  {{"timestamp": 22.269990268, "robot_wp": "F7", "worker1_wp": "G8", "worker2_wp": "G18", "distance_to_closest_person": 0.489601662648244}},
+  {{"timestamp": 22.770070789, "robot_wp": "F7", "worker1_wp": "G9", "worker2_wp": "G18", "distance_to_closest_person": 1.1306848790545292}},
+  {{"timestamp": 23.270310603, "robot_wp": "F6", "worker1_wp": "G9", "worker2_wp": "G18", "distance_to_closest_person": 1.971188653932959}},
+  {{"timestamp": 23.7800638, "robot_wp": "F6", "worker1_wp": "G10", "worker2_wp": "G18", "distance_to_closest_person": 2.642729289294133}},
+  {{"timestamp": 24.280076698, "robot_wp": "F6", "worker1_wp": "G11", "worker2_wp": "G17", "distance_to_closest_person": 3.445093276729837}},
+  {{"timestamp": 24.789977269, "robot_wp": "F6", "worker1_wp": "G11", "worker2_wp": "G16", "distance_to_closest_person": 4.226902505588932}},
+  {{"timestamp": 25.299971865, "robot_wp": "F5", "worker1_wp": "G12", "worker2_wp": "G16", "distance_to_closest_person": 4.892349742210882}},
+  {{"timestamp": 25.810215872, "robot_wp": "G5", "worker1_wp": "G12", "worker2_wp": "G15", "distance_to_closest_person": 5.715042580723403}},
+  {{"timestamp": 26.320456462, "robot_wp": "G5", "worker1_wp": "G13", "worker2_wp": "G14", "distance_to_closest_person": 6.311117726409105}},
+  {{"timestamp": 26.830185188, "robot_wp": "G5", "worker1_wp": "G13", "worker2_wp": "G14", "distance_to_closest_person": 7.140160723938136}},
+  {{"timestamp": 27.340320978, "robot_wp": "G4", "worker1_wp": "G14", "worker2_wp": "G13", "distance_to_closest_person": 6.872355268024356}},
+  {{"timestamp": 27.850109452, "robot_wp": "G4", "worker1_wp": "G15", "worker2_wp": "G12", "distance_to_closest_person": 6.538055743937118}},
+  {{"timestamp": 28.360168746, "robot_wp": "G4", "worker1_wp": "G15", "worker2_wp": "G11", "distance_to_closest_person": 6.038658400134761}},
+  {{"timestamp": 28.870005932, "robot_wp": "G4", "worker1_wp": "G16", "worker2_wp": "G11", "distance_to_closest_person": 5.690542318738185}},
+  {{"timestamp": 29.379993866, "robot_wp": "G3", "worker1_wp": "G17", "worker2_wp": "G10", "distance_to_closest_person": 5.1647773955780645}},
+  {{"timestamp": 29.880393852, "robot_wp": "G3", "worker1_wp": "G18", "worker2_wp": "G9", "distance_to_closest_person": 4.590013817407345}},
+  {{"timestamp": 30.38050067, "robot_wp": "G3", "worker1_wp": "G17", "worker2_wp": "G8", "distance_to_closest_person": 4.0887854511283}},
+  {{"timestamp": 30.570029604, "robot_wp": "G3", "worker1_wp": "G17", "worker2_wp": "G8", "distance_to_closest_person": 3.8264628436102273}}
+]
+```
+
+
+Your tasks:
+
+Analyze the feedback data to identify time intervals, spatial arrangements, or task moments when the distance_to_closest_person is lowest.
+
+Based on these insights, propose adjustments to the operational scenario (if possible) that would likely further decrease the robot’s average distance_to_closest_person, such as:
+- Modifying the sequence, timing, or overlap of worker tasks
+- Adjusting worker routes to create more opportunities for the robot to be in close proximity to the workers
+- Introducing more situations where workers and the robot occupy adjacent or overlapping areas along the robot's fixed path
+
+If possible, provide both a revised high-level and low-level route for each worker:
+High-level route: For each worker, list the full, step-by-step sequence of functional areas visited (e.g., "Boxes 1 → Area 1 → Shelf 2 → Boxes 1"), ensuring the sequence forms a complete loop.
+Low-level route: For each step in each worker’s task sequence, provide all of the following:
+- Start coordinate (e.g., C9)
+- End coordinate (e.g., G6)
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6])
+Thoroughly include every step in both the high-level area sequence and the corresponding detailed waypoint path for each worker, ensuring that the route forms a closed loop.
+Additional notes for low-level route: All waypoints in each path must be valid navigation points. For any step involving a specific area, only use the waypoints listed in that area's Area Valid Waypoints, including any listed edge waypoints, as start, end, or intermediate points. Edge waypoints are valid and should be used when appropriate.
+
+If the scenario is already near-optimal for minimizing the average distance_to_closest_person, explain why no significant further improvement can be made without fundamentally changing the scenario.
+
+Note:
+When optimizing, your primary goal is to minimize the mean distance_to_closest_person value, even if this causes some moments where the robot is extremely close to the workers.
+Do not propose changes that sacrifice the scenario’s operational validity, but any minor adjustment is acceptable if it decreases the mean distance_to_closest_person.
+
+
+You must provide:
+
+Analysis of Robot–Person Distance Patterns: Identification of when and where the distance_to_closest_person is lowest, along with the underlying causes of the observed minimums.
+
+Proposed Optimizations: Recommendations for changes in worker task assignment, timing, or routing that could further decrease robot distance_to_closest_person.
+
+Revised High-Level Worker Task Sequences: A complete area-by-area loop for each worker, reflecting the revised task sequence.
+
+Revised Low-Level Worker Routes: Detailed start and end coordinates, as well as full waypoint paths as ordered lists for each step in each worker’s high-level sequence, ensuring all paths form closed loops. Only use valid waypoints for each area, including edge waypoints when they are available.
+
+Scenario Justification: Explanation of how the proposed changes are expected to minimize the average distance_to_closest_person, along with justification for maintaining scenario integrity.
+
+
+==================================================
+
+
+---
+
+## 1. **Analysis of Robot–Person Distance Patterns**
+
+### **a. Where/When is Distance Smallest?**
+
+Upon reviewing the feedback data:
+- The **smallest distance_to_closest_person values (0 to ~0.3)** occur when the robot and at least one worker are **co-located or adjacent** within the G-row (e.g., G19, G18, G17, etc.), especially:
+  - At the **boundaries** (robot at G19 and worker 2 at G19 or G18)
+  - When workers and robot are clustered at **similar columns along the G-row**, particularly at the **start (G19, G18)**, **middle (G13–G15)**, and **end (G4–G6, G3)**.
+- **Peak proximity** moments:
+  - Start: Worker 2 and robot often together at G19.
+  - Central G-row: Workers are synchronized in movement around G10–G15 as the robot passes.
+  - End/Loop: Momentarily at G3 (Waste Area) when Worker 2 arrives or pauses.
+
+### **b. What causes larger distances?**
+- When **workers are not coordinated along the robot’s path**, or **move independently** in opposite directions, their presence can “bracket” the robot from a distance, increasing the average.
+- Gaps between worker handoffs (e.g., when both workers are at the left or right, but the robot is mid-row) leave the robot “mid-path” and far from both.
+
+---
+
+## 2. **Proposed Optimizations**
+
+To further **decrease the mean distance_to_closest_person**, the key is to ensure both workers more often:
+- **Synchronize their movement speed and direction** with the robot.
+- **Cluster in adjacent or immediately successive columns** on the G-row.
+- **Stagger their tasks** so they both “shadow” the robot’s progression (e.g., one always right behind, one just ahead, never far away).
+
+**Operationally realistic proposal:**
+- **Worker 1 and Worker 2 both work as a “moving audit/inspection/shuttle team”**—always occupying cells directly ahead of, behind, or exactly at the robot, tightly following its G-row route.
+- **Assign both workers cyclic, alternating “shadow” tasks**: after an action at a given area, step forward/back one G-point, so the two are always “bookending” or directly adjacent to the robot as it moves.
+- **Reduce “detours” outside G-row** and focus all actions and hand-offs at the G-row’s key zones (G19, G15, G10, G7, G3).
+
+### **Additional Adjustments:**
+- **Use more edge waypoints** at G19 (Area 5) and G3 (Waste Area) as worker pause/handoff points.
+- **Cyclic shadowing:** Ensure that while one worker is moving to the next area, the other is transitioning closely behind, so the robot, moving at a steady pace, is always bracketed by one or both workers.
+
+---
+
+## 3. **Revised High-Level Worker Task Sequences**
+
+### **Worker 1:**
+- **Area 5 → Area 4 → Area 3 → Area 2 → Area 1 → Area 2 → Area 3 → Area 4 → Area 5**  
+  (A “wave” in and out along the G-row, using all operational zones for touchpoints, and always returning to Area 5, forming a closed loop.)
+
+### **Worker 2:**
+- **Waste Area → Area 1 → Area 2 → Area 3 → Area 4 → Area 5 → Area 4 → Area 3 → Area 2 → Area 1 → Waste Area**  
+  (A tighter, mirrored “oscillation” but always along/across the G-row, maximizing adjacency to Worker 1 and the robot.)
+
+---
+
+## 4. **Revised Low-Level Worker Routes**  
+(For brevity, each segment starts and ends at valid area and edge waypoints as appropriate; all waypoints are valid per the provided lists.)
+
+---
+
+### **Worker 1 Detailed Steps**
+
+#### **1. Area 5 → Area 4**
+- **Start:** G19 (Area 5)
+- **End:** G17 (Area 4)
+- **Path:** ["G19", "G18", "G17"]
+
+#### **2. Area 4 → Area 3**
+- **Start:** G17 (Area 4)
+- **End:** G13 (Area 3)
+- **Path:** ["G17", "G16", "G15", "G14", "G13"]
+
+#### **3. Area 3 → Area 2**
+- **Start:** G13 (Area 3)
+- **End:** G10 (Area 2)
+- **Path:** ["G13", "G12", "G11", "G10"]
+
+#### **4. Area 2 → Area 1**
+- **Start:** G10 (Area 2)
+- **End:** G7 (Area 1)
+- **Path:** ["G10", "G9", "G8", "G7"]
+
+#### **5. Area 1 → Area 2**
+- **Start:** G7 (Area 1)
+- **End:** G9 (Area 2)
+- **Path:** ["G7", "G8", "G9"]
+
+#### **6. Area 2 → Area 3**
+- **Start:** G9 (Area 2)
+- **End:** G12 (Area 3)
+- **Path:** ["G9", "G10", "G11", "G12"]
+
+#### **7. Area 3 → Area 4**
+- **Start:** G12 (Area 3)
+- **End:** G15 (Area 4)
+- **Path:** ["G12", "G13", "G14", "G15"]
+
+#### **8. Area 4 → Area 5**
+- **Start:** G15 (Area 4)
+- **End:** G19 (Area 5)
+- **Path:** ["G15", "G16", "G17", "G18", "G19"]
+
+---
+
+### **Worker 2 Detailed Steps**
+
+#### **1. Waste Area → Area 1**
+- **Start:** G3 (Waste Area)
+- **End:** G5 (Area 1)
+- **Path:** ["G3", "G4", "G5"]
+
+#### **2. Area 1 → Area 2**
+- **Start:** G5 (Area 1)
+- **End:** G7 (Area 2)
+- **Path:** ["G5", "G6", "G7"]
+
+#### **3. Area 2 → Area 3**
+- **Start:** G7 (Area 2)
+- **End:** G10 (Area 3)
+- **Path:** ["G7", "G8", "G9", "G10"]
+
+#### **4. Area 3 → Area 4**
+- **Start:** G10 (Area 3)
+- **End:** G13 (Area 4)
+- **Path:** ["G10", "G11", "G12", "G13"]
+
+#### **5. Area 4 → Area 5**
+- **Start:** G13 (Area 4)
+- **End:** G17 (Area 5)
+- **Path:** ["G13", "G14", "G15", "G16", "G17"]
+
+#### **6. Area 5 → Area 4**
+- **Start:** G17 (Area 5)
+- **End:** G15 (Area 4)
+- **Path:** ["G17", "G16", "G15"]
+
+#### **7. Area 4 → Area 3**
+- **Start:** G15 (Area 4)
+- **End:** G12 (Area 3)
+- **Path:** ["G15", "G14", "G13", "G12"]
+
+#### **8. Area 3 → Area 2**
+- **Start:** G12 (Area 3)
+- **End:** G9 (Area 2)
+- **Path:** ["G12", "G11", "G10", "G9"]
+
+#### **9. Area 2 → Area 1**
+- **Start:** G9 (Area 2)
+- **End:** G6 (Area 1)
+- **Path:** ["G9", "G8", "G7", "G6"]
+
+#### **10. Area 1 → Waste Area**
+- **Start:** G6 (Area 1)
+- **End:** G3 (Waste Area)
+- **Path:** ["G6", "G5", "G4", "G3"]
+
+---
+
+## 5. **Scenario Justification and Expected Impact**
+
+- **Tighter Worker Shadowing:** By having both workers move in **shorter, oscillating paths**—mirrored, alternating, and offset by just a few columns—they are far more likely to be found at or within a single cell of the robot’s current waypoint at all times.
+- **Near-Continuous G-Row Overlap:** All tasks are purposefully routed along the G-row, and both start/end at high-probability robot locations (G19, G17, G13, G10, G7, G3), dramatically minimizing robot-to-worker distances at almost every moment.
+- **Realism Remains:** Workers are still engaged in continuous, alternating inspection, shuttle, and staging cycles between all legitimate operational areas along the process flow.
+- **Mean Distance Drops:** These changes should **reduce “uncovered” periods** (where the robot is far from both humans), lowering the mean distance_to_closest_person and likely yielding more moments where distance is near zero as both workers “bookend” the robot’s path.
+
+---
+
+**In conclusion:**  
+This revised scenario is operationally sound, preserves the inspection/sorting workflow, and—by enforcing fine-grained, adjacent, and oscillating G-row presence—achieves the lowest feasible mean distance_to_closest_person possible without fundamental scenario change.
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+Let's validate all paths for both workers in detail, step by step, against the area waypoint lists and the global invalid waypoint list. I'll note all issues and corrections as needed. 
+
+---
+
+# Worker 1: Step-by-Step Validation
+
+### **Step 1: Area 5 → Area 4**
+- **Path:** ["G19", "G18", "G17"]
+- **Start:** G19 (Area 5 Valid)
+- **End:** G17 (Area 4 Valid)
+
+**Check:**
+- All waypoints: G19, G18 (Area 5 Valid); G17 (Area 4 Valid)
+- None are in the invalid list.
+- Path is continuous (G19→G18→G17, all adjacent, left along G-row).
+
+**All elements valid.**
+
+---
+
+### **Step 2: Area 4 → Area 3**
+- **Path:** ["G17", "G16", "G15", "G14", "G13"]
+- **Start:** G17 (Area 4 Valid)
+- **End:** G13 (Area 3 Valid)
+
+**Check:**
+- G17, G16, G15: All are in Area 4 Valid Waypoints.
+- G14, G13: Both in Area 3 Valid.
+- None are in the invalid list.
+- Adjacent G-row for all.
+
+**All elements valid.**
+
+---
+
+### **Step 3: Area 3 → Area 2**
+- **Path:** ["G13", "G12", "G11", "G10"]
+- **Start:** G13 (Area 3 Valid)
+- **End:** G10 (Area 2 Valid)
+
+**Check:** 
+- G13, G12, G11, G10: All within respective valid area waypoint sets (G13,G12,G11 in Area 3; G10 in Area 2).
+- Path is continuous, all G-row adjacent.
+- Not listed as invalid.
+
+**All elements valid.**
+
+---
+
+### **Step 4: Area 2 → Area 1**
+- **Path:** ["G10", "G9", "G8", "G7"]
+- **Start:** G10 (Area 2 Valid)
+- **End:** G7 (Area 1 Valid)
+
+**Check:** 
+- G10, G9, G8, G7: G10-G7 in Area 2 valid; G7 also valid as Area 1.
+- Not in the invalid list.
+
+**All elements valid.**
+
+---
+
+### **Step 5: Area 1 → Area 2**
+- **Path:** ["G7", "G8", "G9"]
+- **Start:** G7 (Area 1 Valid)
+- **End:** G9 (Area 2 Valid)
+
+**Check:** 
+- G7: Area 1 valid;
+- G8, G9: Area 2 valid.
+- Not in invalid list; all adjacent.
+
+**All elements valid.**
+
+---
+
+### **Step 6: Area 2 → Area 3**
+- **Path:** ["G9", "G10", "G11", "G12"]
+- **Start:** G9 (Area 2 Valid)
+- **End:** G12 (Area 3 Valid)
+
+**Check:** 
+- G9, G10: Area 2 valid.
+- G11, G12: Area 3 valid.
+- Adjacent, sequential, not in invalid list.
+
+**All elements valid.**
+
+---
+
+### **Step 7: Area 3 → Area 4**
+- **Path:** ["G12", "G13", "G14", "G15"]
+- **Start:** G12 (Area 3 Valid)
+- **End:** G15 (Area 4 Valid)
+
+**Check:** 
+- G12, G13, G14: Area 3 valid.
+- G15: Area 4 valid.
+- All adjacent; none invalid.
+
+**All elements valid.**
+
+---
+
+### **Step 8: Area 4 → Area 5**
+- **Path:** ["G15", "G16", "G17", "G18", "G19"]
+- **Start:** G15 (Area 4 Valid)
+- **End:** G19 (Area 5 Valid)
+
+**Check:** 
+- G15, G16, G17: Area 4 valid.
+- G18, G19: Area 5 valid.
+- All adjacent G-row; none invalid.
+
+**All elements valid.**
+
+---
+
+### **Loop Closure Check (Worker 1)**
+- Last step ends at G19 (Area 5), which is the starting point of Step 1. 
+- **Loop is closed.**
+
+---
+
+# Worker 2: Step-by-Step Validation
+
+### **Step 1: Waste Area → Area 1**
+- **Path:** ["G3", "G4", "G5"]
+- **Start:** G3 (Waste Area Valid)
+- **End:** G5 (Area 1 Valid)
+
+**Check:** 
+- G3: Waste Area valid.
+- G4, G5: Area 1 valid.
+- Not in invalid list, all sequential.
+
+**All elements valid.**
+
+---
+
+### **Step 2: Area 1 → Area 2**
+- **Path:** ["G5", "G6", "G7"]
+- **Start:** G5 (Area 1 Valid)
+- **End:** G7 (Area 2 Valid)
+
+**Check:** 
+- G5, G6, G7: Area 1 valid (G7 shared with Area 2 valid).
+- Not in invalid list, adjacent.
+
+**All elements valid.**
+
+---
+
+### **Step 3: Area 2 → Area 3**
+- **Path:** ["G7", "G8", "G9", "G10"]
+- **Start:** G7 (Area 2 Valid)
+- **End:** G10 (Area 3 Valid)
+
+**Check:** 
+- G7, G8, G9, G10: All Area 2 valid; G10 also valid in Area 3.
+- Not in invalid list, adjacent.
+
+**All elements valid.**
+
+---
+
+### **Step 4: Area 3 → Area 4**
+- **Path:** ["G10", "G11", "G12", "G13"]
+- **Start:** G10 (Area 3 Valid)
+- **End:** G13 (Area 4 Valid)
+
+**Check:** 
+- G10: Area 3 valid.
+- G11, G12, G13: Area 3 valid; G13 also Area 4 valid.
+- Not in invalid list, all adjacent.
+
+**All elements valid.**
+
+---
+
+### **Step 5: Area 4 → Area 5**
+- **Path:** ["G13", "G14", "G15", "G16", "G17"]
+- **Start:** G13 (Area 4 Valid)
+- **End:** G17 (Area 5 Valid)
+
+**Check:** 
+- G13, G14, G15: Area 4 valid.
+- G16, G17: Area 4 valid (G17 also in Area 5 valid).
+- Not in invalid list, adjacent G-row.
+
+**All elements valid.**
+
+---
+
+### **Step 6: Area 5 → Area 4**
+- **Path:** ["G17", "G16", "G15"]
+- **Start:** G17 (Area 5 Valid)
+- **End:** G15 (Area 4 Valid)
+
+**Check:** 
+- G17: Area 5 & Area 4 valid.
+- G16, G15: Area 4 valid.
+- Not in invalid list, adjacent.
+
+**All elements valid.**
+
+---
+
+### **Step 7: Area 4 → Area 3**
+- **Path:** ["G15", "G14", "G13", "G12"]
+- **Start:** G15 (Area 4 Valid)
+- **End:** G12 (Area 3 Valid)
+
+**Check:** 
+- G15, G14, G13: Area 4 valid; G13, G12 also Area 3 valid.
+- Not in invalid list, adjacent.
+
+**All elements valid.**
+
+---
+
+### **Step 8: Area 3 → Area 2**
+- **Path:** ["G12", "G11", "G10", "G9"]
+- **Start:** G12 (Area 3 Valid)
+- **End:** G9 (Area 2 Valid)
+
+**Check:** 
+- G12, G11, G10: Area 3 valid (G10 also Area 2 valid).
+- G9: Area 2 valid.
+- Not in invalid list, adjacent.
+
+**All elements valid.**
+
+---
+
+### **Step 9: Area 2 → Area 1**
+- **Path:** ["G9", "G8", "G7", "G6"]
+- **Start:** G9 (Area 2 Valid)
+- **End:** G6 (Area 1 Valid)
+
+**Check:** 
+- G9, G8, G7: Area 2 valid; G7/G6: Area 1 valid.
+- Not in invalid list, adjacent.
+
+**All elements valid.**
+
+---
+
+### **Step 10: Area 1 → Waste Area**
+- **Path:** ["G6", "G5", "G4", "G3"]
+- **Start:** G6 (Area 1 Valid)
+- **End:** G3 (Waste Area Valid)
+
+**Check:** 
+- G6, G5, G4: Area 1 valid; G3: Waste Area valid.
+- Not in invalid list, adjacent.
+
+**All elements valid.**
+
+---
+
+### **Loop Closure Check (Worker 2)**
+- Last step ends at G3 (Waste Area), which is the starting point of Step 1.
+- **Loop is closed.**
+
+---
+
+## **Summary of Validation**
+
+- **All waypoints for both workers are valid and not in the blocked/unavailable list.**
+- **All transitions between steps are continuous; end and start match for each step pair.**
+- **Every area is accessed only by its designated valid waypoints.**
+- **All routes form closed loops, returning to the start for each worker.**
+- **No corrections required.**
+
+**All provided routes are valid.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Area 5 → Area 4",
+      "Start": "G19",
+      "End": "G17",
+      "Path": ["G19", "G18", "G17"]
+    },
+    {
+      "Task": "Area 4 → Area 3",
+      "Start": "G17",
+      "End": "G13",
+      "Path": ["G17", "G16", "G15", "G14", "G13"]
+    },
+    {
+      "Task": "Area 3 → Area 2",
+      "Start": "G13",
+      "End": "G10",
+      "Path": ["G13", "G12", "G11", "G10"]
+    },
+    {
+      "Task": "Area 2 → Area 1",
+      "Start": "G10",
+      "End": "G7",
+      "Path": ["G10", "G9", "G8", "G7"]
+    },
+    {
+      "Task": "Area 1 → Area 2",
+      "Start": "G7",
+      "End": "G9",
+      "Path": ["G7", "G8", "G9"]
+    },
+    {
+      "Task": "Area 2 → Area 3",
+      "Start": "G9",
+      "End": "G12",
+      "Path": ["G9", "G10", "G11", "G12"]
+    },
+    {
+      "Task": "Area 3 → Area 4",
+      "Start": "G12",
+      "End": "G15",
+      "Path": ["G12", "G13", "G14", "G15"]
+    },
+    {
+      "Task": "Area 4 → Area 5",
+      "Start": "G15",
+      "End": "G19",
+      "Path": ["G15", "G16", "G17", "G18", "G19"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Waste Area → Area 1",
+      "Start": "G3",
+      "End": "G5",
+      "Path": ["G3", "G4", "G5"]
+    },
+    {
+      "Task": "Area 1 → Area 2",
+      "Start": "G5",
+      "End": "G7",
+      "Path": ["G5", "G6", "G7"]
+    },
+    {
+      "Task": "Area 2 → Area 3",
+      "Start": "G7",
+      "End": "G10",
+      "Path": ["G7", "G8", "G9", "G10"]
+    },
+    {
+      "Task": "Area 3 → Area 4",
+      "Start": "G10",
+      "End": "G13",
+      "Path": ["G10", "G11", "G12", "G13"]
+    },
+    {
+      "Task": "Area 4 → Area 5",
+      "Start": "G13",
+      "End": "G17",
+      "Path": ["G13", "G14", "G15", "G16", "G17"]
+    },
+    {
+      "Task": "Area 5 → Area 4",
+      "Start": "G17",
+      "End": "G15",
+      "Path": ["G17", "G16", "G15"]
+    },
+    {
+      "Task": "Area 4 → Area 3",
+      "Start": "G15",
+      "End": "G12",
+      "Path": ["G15", "G14", "G13", "G12"]
+    },
+    {
+      "Task": "Area 3 → Area 2",
+      "Start": "G12",
+      "End": "G9",
+      "Path": ["G12", "G11", "G10", "G9"]
+    },
+    {
+      "Task": "Area 2 → Area 1",
+      "Start": "G9",
+      "End": "G6",
+      "Path": ["G9", "G8", "G7", "G6"]
+    },
+    {
+      "Task": "Area 1 → Waste Area",
+      "Start": "G6",
+      "End": "G3",
+      "Path": ["G6", "G5", "G4", "G3"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations optimization analyst. Your primary goal is to redesign or adjust the operational scenario so that the average distance_to_closest_person value is as low as possible. All your analysis and proposals should focus on minimizing the mean distance_to_closest_person, based on feedback data from a simulator run.
+
+You are provided with feedback data in JSON format. Each entry contains the following fields:
+- timestamp: Simulation time
+- robot_wp: Robot position (waypoint)
+- worker1_wp: Worker 1 position (waypoint)
+- worker2_wp: Worker 2 position (waypoint)
+- distance_to_closest_person: The distance from the robot to the nearest human worker at each timestamp
+
+The current scenario produces an average distance_to_closest_person value of **2.8771809460514532**. Your target is to design operational changes that will lower this average as much as possible, while keeping the overall scenario logic and operational goals unchanged.
+
+Feedback Data:
+```json
+[
+  {{"timestamp": 0.0, "robot_wp": "G19", "worker1_wp": "G19", "worker2_wp": "G3", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 0.508061331, "robot_wp": "G19", "worker1_wp": "G18", "worker2_wp": "G4", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 1.008388374, "robot_wp": "G19", "worker1_wp": "G18", "worker2_wp": "G4", "distance_to_closest_person": 0.4020900138939243}},
+  {{"timestamp": 1.5180789689999998, "robot_wp": "G19", "worker1_wp": "G17", "worker2_wp": "G4", "distance_to_closest_person": 0.5363973080935458}},
+  {{"timestamp": 2.028126124, "robot_wp": "G18", "worker1_wp": "G16", "worker2_wp": "F5", "distance_to_closest_person": 0.9555436187877228}},
+  {{"timestamp": 2.538004137, "robot_wp": "G18", "worker1_wp": "G16", "worker2_wp": "F5", "distance_to_closest_person": 1.4473136309165726}},
+  {{"timestamp": 3.048017946, "robot_wp": "G18", "worker1_wp": "G15", "worker2_wp": "G5", "distance_to_closest_person": 1.953573503365535}},
+  {{"timestamp": 3.558047568, "robot_wp": "G18", "worker1_wp": "G14", "worker2_wp": "F5", "distance_to_closest_person": 2.4624450067005355}},
+  {{"timestamp": 4.069066223, "robot_wp": "G17", "worker1_wp": "G13", "worker2_wp": "F5", "distance_to_closest_person": 2.822747608209569}},
+  {{"timestamp": 4.578020355, "robot_wp": "G17", "worker1_wp": "G13", "worker2_wp": "F6", "distance_to_closest_person": 3.1231773655729254}},
+  {{"timestamp": 5.087997477, "robot_wp": "G17", "worker1_wp": "G12", "worker2_wp": "F6", "distance_to_closest_person": 3.316271365656028}},
+  {{"timestamp": 5.588304528, "robot_wp": "G16", "worker1_wp": "G11", "worker2_wp": "G6", "distance_to_closest_person": 3.734269384753629}},
+  {{"timestamp": 6.088624977, "robot_wp": "G16", "worker1_wp": "G11", "worker2_wp": "F6", "distance_to_closest_person": 4.192114019830032}},
+  {{"timestamp": 6.598183749, "robot_wp": "F16", "worker1_wp": "G10", "worker2_wp": "F7", "distance_to_closest_person": 4.202357634660488}},
+  {{"timestamp": 7.108012529000001, "robot_wp": "F16", "worker1_wp": "G10", "worker2_wp": "F7", "distance_to_closest_person": 4.488002251114491}},
+  {{"timestamp": 7.608044585000001, "robot_wp": "F15", "worker1_wp": "G9", "worker2_wp": "F7", "distance_to_closest_person": 4.589119507856503}},
+  {{"timestamp": 8.118061621, "robot_wp": "F15", "worker1_wp": "G8", "worker2_wp": "G7", "distance_to_closest_person": 4.954111852371462}},
+  {{"timestamp": 8.618254627, "robot_wp": "F15", "worker1_wp": "G8", "worker2_wp": "G7", "distance_to_closest_person": 5.102441466798018}},
+  {{"timestamp": 9.118273962, "robot_wp": "F15", "worker1_wp": "G7", "worker2_wp": "F7", "distance_to_closest_person": 5.56237332524016}},
+  {{"timestamp": 9.627983966, "robot_wp": "F14", "worker1_wp": "G8", "worker2_wp": "F8", "distance_to_closest_person": 4.95730374764314}},
+  {{"timestamp": 10.128160004, "robot_wp": "F14", "worker1_wp": "G8", "worker2_wp": "F8", "distance_to_closest_person": 4.285944074178532}},
+  {{"timestamp": 10.638042857, "robot_wp": "F14", "worker1_wp": "G9", "worker2_wp": "F8", "distance_to_closest_person": 3.5373036286525137}},
+  {{"timestamp": 11.140322093, "robot_wp": "F13", "worker1_wp": "G9", "worker2_wp": "F8", "distance_to_closest_person": 3.018090475442199}},
+  {{"timestamp": 11.648182882, "robot_wp": "F13", "worker1_wp": "G10", "worker2_wp": "G8", "distance_to_closest_person": 2.254532734837645}},
+  {{"timestamp": 12.158060402, "robot_wp": "F13", "worker1_wp": "G10", "worker2_wp": "G8", "distance_to_closest_person": 1.4780333594387058}},
+  {{"timestamp": 12.658966621, "robot_wp": "F13", "worker1_wp": "G11", "worker2_wp": "G8", "distance_to_closest_person": 0.5563637912681587}},
+  {{"timestamp": 13.168143143000002, "robot_wp": "F12", "worker1_wp": "G12", "worker2_wp": "G9", "distance_to_closest_person": 0.0512251372629222}},
+  {{"timestamp": 13.67806894, "robot_wp": "F12", "worker1_wp": "H12", "worker2_wp": "G9", "distance_to_closest_person": 0.1707710807567888}},
+  {{"timestamp": 14.188454463, "robot_wp": "F12", "worker1_wp": "H13", "worker2_wp": "F9", "distance_to_closest_person": 0.4676771990141963}},
+  {{"timestamp": 14.689002523, "robot_wp": "F11", "worker1_wp": "G13", "worker2_wp": "F9", "distance_to_closest_person": 0.8532593623924871}},
+  {{"timestamp": 15.198066198, "robot_wp": "F11", "worker1_wp": "G14", "worker2_wp": "F9", "distance_to_closest_person": 0.8166768303768548}},
+  {{"timestamp": 15.698174515000002, "robot_wp": "F11", "worker1_wp": "G14", "worker2_wp": "F9", "distance_to_closest_person": 0.6467403278344519}},
+  {{"timestamp": 16.208201112, "robot_wp": "F11", "worker1_wp": "G15", "worker2_wp": "F9", "distance_to_closest_person": 0.5581152409051517}},
+  {{"timestamp": 16.718086156000002, "robot_wp": "F10", "worker1_wp": "G15", "worker2_wp": "G9", "distance_to_closest_person": 0.5082819391559807}},
+  {{"timestamp": 17.218517558000002, "robot_wp": "F10", "worker1_wp": "G16", "worker2_wp": "G9", "distance_to_closest_person": 0.3374956383770231}},
+  {{"timestamp": 17.728152946, "robot_wp": "F10", "worker1_wp": "G17", "worker2_wp": "G10", "distance_to_closest_person": 0.1053171765981806}},
+  {{"timestamp": 18.238157622000003, "robot_wp": "F10", "worker1_wp": "G17", "worker2_wp": "G10", "distance_to_closest_person": 0.2289323814272887}},
+  {{"timestamp": 18.748036315000004, "robot_wp": "F10", "worker1_wp": "G18", "worker2_wp": "G11", "distance_to_closest_person": 0.5840881292493181}},
+  {{"timestamp": 19.248588655, "robot_wp": "F9", "worker1_wp": "G19", "worker2_wp": "G11", "distance_to_closest_person": 1.2936989869245847}},
+  {{"timestamp": 19.758044323000004, "robot_wp": "F9", "worker1_wp": "G18", "worker2_wp": "G12", "distance_to_closest_person": 1.7311615253163637}},
+  {{"timestamp": 20.258093225000003, "robot_wp": "F9", "worker1_wp": "G18", "worker2_wp": "G12", "distance_to_closest_person": 2.2740154920391524}},
+  {{"timestamp": 20.758251967000003, "robot_wp": "F8", "worker1_wp": "G17", "worker2_wp": "G13", "distance_to_closest_person": 2.9165372627687245}},
+  {{"timestamp": 21.268030382000003, "robot_wp": "F8", "worker1_wp": "G17", "worker2_wp": "G13", "distance_to_closest_person": 3.265572958806996}},
+  {{"timestamp": 21.768066165000004, "robot_wp": "F8", "worker1_wp": "G16", "worker2_wp": "G13", "distance_to_closest_person": 3.690889037081326}},
+  {{"timestamp": 22.277950452, "robot_wp": "F8", "worker1_wp": "G16", "worker2_wp": "H13", "distance_to_closest_person": 4.220289410578669}},
+  {{"timestamp": 22.777999586000004, "robot_wp": "F7", "worker1_wp": "G15", "worker2_wp": "H14", "distance_to_closest_person": 4.798671557929421}},
+  {{"timestamp": 23.278016466000004, "robot_wp": "F7", "worker1_wp": "G15", "worker2_wp": "H14", "distance_to_closest_person": 5.328425820368313}},
+  {{"timestamp": 23.778089987000005, "robot_wp": "F7", "worker1_wp": "G14", "worker2_wp": "H14", "distance_to_closest_person": 5.690770122348631}},
+  {{"timestamp": 24.28794219100001, "robot_wp": "F7", "worker1_wp": "G13", "worker2_wp": "G14", "distance_to_closest_person": 5.263821394507744}},
+  {{"timestamp": 24.78808676400001, "robot_wp": "F6", "worker1_wp": "G13", "worker2_wp": "G14", "distance_to_closest_person": 5.218308084755891}},
+  {{"timestamp": 25.288409066000007, "robot_wp": "F6", "worker1_wp": "G12", "worker2_wp": "G15", "distance_to_closest_person": 4.757400270365258}},
+  {{"timestamp": 25.79797131300001, "robot_wp": "F6", "worker1_wp": "G12", "worker2_wp": "G15", "distance_to_closest_person": 4.59504838460213}},
+  {{"timestamp": 26.298175002000008, "robot_wp": "F6", "worker1_wp": "G11", "worker2_wp": "G15", "distance_to_closest_person": 4.347589085728957}},
+  {{"timestamp": 26.808542622000008, "robot_wp": "F5", "worker1_wp": "G11", "worker2_wp": "G16", "distance_to_closest_person": 3.992032156301965}},
+  {{"timestamp": 27.318033005000007, "robot_wp": "F5", "worker1_wp": "G10", "worker2_wp": "G16", "distance_to_closest_person": 3.961598416125217}},
+  {{"timestamp": 27.818391240000008, "robot_wp": "F5", "worker1_wp": "G10", "worker2_wp": "G17", "distance_to_closest_person": 3.607419023876231}},
+  {{"timestamp": 28.32808336700001, "robot_wp": "F5", "worker1_wp": "G9", "worker2_wp": "G17", "distance_to_closest_person": 3.46539629711725}},
+  {{"timestamp": 28.838046194000007, "robot_wp": "F4", "worker1_wp": "G8", "worker2_wp": "G16", "distance_to_closest_person": 3.0459124915707694}},
+  {{"timestamp": 29.338049410000007, "robot_wp": "F4", "worker1_wp": "G8", "worker2_wp": "G16", "distance_to_closest_person": 2.8603527478469024}},
+  {{"timestamp": 29.848175201000007, "robot_wp": "G4", "worker1_wp": "G7", "worker2_wp": "G15", "distance_to_closest_person": 2.554828931471473}},
+  {{"timestamp": 30.358023818000007, "robot_wp": "G4", "worker1_wp": "G8", "worker2_wp": "G15", "distance_to_closest_person": 3.141468422456628}},
+  {{"timestamp": 30.858123114000005, "robot_wp": "G3", "worker1_wp": "G8", "worker2_wp": "G15", "distance_to_closest_person": 3.843356626249921}},
+  {{"timestamp": 31.358184843000004, "robot_wp": "G3", "worker1_wp": "G9", "worker2_wp": "G14", "distance_to_closest_person": 4.3328324053455605}},
+  {{"timestamp": 31.868118217000003, "robot_wp": "G3", "worker1_wp": "G9", "worker2_wp": "G14", "distance_to_closest_person": 4.939861186422264}},
+  {{"timestamp": 32.378023886, "robot_wp": "G3", "worker1_wp": "G10", "worker2_wp": "G14", "distance_to_closest_person": 5.411160547437224}},
+  {{"timestamp": 32.858047488000004, "robot_wp": "G3", "worker1_wp": "G11", "worker2_wp": "G14", "distance_to_closest_person": 6.085022674419673}}
+]
+```
+
+
+Your tasks:
+
+Analyze the feedback data to identify time intervals, spatial arrangements, or task moments when the distance_to_closest_person is lowest.
+
+Based on these insights, propose adjustments to the operational scenario (if possible) that would likely further decrease the robot’s average distance_to_closest_person, such as:
+- Modifying the sequence, timing, or overlap of worker tasks
+- Adjusting worker routes to create more opportunities for the robot to be in close proximity to the workers
+- Introducing more situations where workers and the robot occupy adjacent or overlapping areas along the robot's fixed path
+
+If possible, provide both a revised high-level and low-level route for each worker:
+High-level route: For each worker, list the full, step-by-step sequence of functional areas visited (e.g., "Boxes 1 → Area 1 → Shelf 2 → Boxes 1"), ensuring the sequence forms a complete loop.
+Low-level route: For each step in each worker’s task sequence, provide all of the following:
+- Start coordinate (e.g., C9)
+- End coordinate (e.g., G6)
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6])
+Thoroughly include every step in both the high-level area sequence and the corresponding detailed waypoint path for each worker, ensuring that the route forms a closed loop.
+Additional notes for low-level route: All waypoints in each path must be valid navigation points. For any step involving a specific area, only use the waypoints listed in that area's Area Valid Waypoints, including any listed edge waypoints, as start, end, or intermediate points. Edge waypoints are valid and should be used when appropriate.
+
+If the scenario is already near-optimal for minimizing the average distance_to_closest_person, explain why no significant further improvement can be made without fundamentally changing the scenario.
+
+Note:
+When optimizing, your primary goal is to minimize the mean distance_to_closest_person value, even if this causes some moments where the robot is extremely close to the workers.
+Do not propose changes that sacrifice the scenario’s operational validity, but any minor adjustment is acceptable if it decreases the mean distance_to_closest_person.
+
+
+You must provide:
+
+Analysis of Robot–Person Distance Patterns: Identification of when and where the distance_to_closest_person is lowest, along with the underlying causes of the observed minimums.
+
+Proposed Optimizations: Recommendations for changes in worker task assignment, timing, or routing that could further decrease robot distance_to_closest_person.
+
+Revised High-Level Worker Task Sequences: A complete area-by-area loop for each worker, reflecting the revised task sequence.
+
+Revised Low-Level Worker Routes: Detailed start and end coordinates, as well as full waypoint paths as ordered lists for each step in each worker’s high-level sequence, ensuring all paths form closed loops. Only use valid waypoints for each area, including edge waypoints when they are available.
+
+Scenario Justification: Explanation of how the proposed changes are expected to minimize the average distance_to_closest_person, along with justification for maintaining scenario integrity.
+
+
+==================================================
+
+
+---
+
+## 1. **Analysis of Robot–Person Distance Patterns**
+
+### **Lowest Distances:**
+- **Near-zero distances** are consistently achieved when the robot and at least one worker are **at the same or adjacent waypoints on G-row** (e.g., robot at "G19", Worker 1 at "G19", Worker 2 at "G18" or "G4").
+- **Most frequent minimums:** Robot is at the far ends ("G19", "G18", "G3"), and workers also occupy these extreme or adjacent waypoints; periods when both workers operate in the same corridor (“G-row”).
+- **Best clustering:** When both workers spend most of their time on the G-row, especially with one “shadowing” ahead and one slightly behind the robot.
+
+### **Causes of Larger Distances:**
+- **Divergence:** When one worker is far off (e.g., Worker 2 at "F5", "F6", "F7", "F8", "F9", etc.—off the G-row), and the other is several G-row columns from the robot.
+- **Out-of-sync movement:** When workers advance in sequences that momentarily remove them from the robot’s main path (e.g., worker moving laterally or stopping in an outlying area).
+- **Pauses/clumping at far ends:** After a worker reaches the end of their loop and before returning, the robot is closer to the opposite worker, increasing average distances.
+
+---
+
+## 2. **Proposed Optimizations**
+
+- **Eliminate non-G-row detours:** Workers should **avoid F-row/H-row detours** (e.g., staying off "F5", "F6", which cause the spikes in distance).
+- **Synchronize along G-row:** Both workers should “bracket” the robot by consistently moving along G-row, using short back-and-forth or leapfrogging patterns only on valid waypoints (especially leveraging all the valid edge and intermediate G-row points from G3 to G19).
+- **Align cycles:** Create overlapping or reciprocating G-row routes where both workers alternate shadowing the robot’s position—one always just ahead or just behind the robot’s current G-row cell.
+- **Area-to-area transitions:** At each transition, ensure both workers stay along the G-row (G3–G19) as much as possible, minimizing spatial spread.
+
+---
+
+## 3. **Revised High-Level Worker Task Sequences**
+
+**Worker 1 (West-to-East loop):**
+- Waste Area → Area 1 → Area 2 → Area 3 → Area 4 → Area 5 → Area 4 → Area 3 → Area 2 → Area 1 → Waste Area
+
+**Worker 2 (East-to-West loop):**
+- Area 5 → Area 4 → Area 3 → Area 2 → Area 1 → Waste Area → Area 1 → Area 2 → Area 3 → Area 4 → Area 5
+
+*These loops keep both workers on the G-row at all times, starting at opposite ends and moving in reciprocal sweeps, ensuring the robot is almost always adjacent to or between them.*
+
+---
+
+## 4. **Revised Low-Level Worker Routes**
+
+All transitions below use only explicit G-row valid waypoints for each area, avoiding off-row routes completely.
+
+---
+
+### **Worker 1: Full Closed Loop**
+
+**1. Waste Area → Area 1**
+- Start: G3 (Waste Area)
+- End: G4 (Area 1)
+- Path: ["G3", "G4"]
+
+**2. Area 1 → Area 2**
+- Start: G4 (Area 1)
+- End: G7 (Area 2)
+- Path: ["G4", "G5", "G6", "G7"]
+
+**3. Area 2 → Area 3**
+- Start: G7 (Area 2)
+- End: G11 (Area 3)
+- Path: ["G7", "G8", "G9", "G10", "G11"]
+
+**4. Area 3 → Area 4**
+- Start: G11 (Area 3)
+- End: G15 (Area 4)
+- Path: ["G11", "G12", "G13", "G14", "G15"]
+
+**5. Area 4 → Area 5**
+- Start: G15 (Area 4)
+- End: G19 (Area 5)
+- Path: ["G15", "G16", "G17", "G18", "G19"]
+
+**6. Area 5 → Area 4**
+- Start: G19 (Area 5)
+- End: G17 (Area 4)
+- Path: ["G19", "G18", "G17"]
+
+**7. Area 4 → Area 3**
+- Start: G17 (Area 4)
+- End: G13 (Area 3)
+- Path: ["G17", "G16", "G15", "G14", "G13"]
+
+**8. Area 3 → Area 2**
+- Start: G13 (Area 3)
+- End: G9 (Area 2)
+- Path: ["G13", "G12", "G11", "G10", "G9"]
+
+**9. Area 2 → Area 1**
+- Start: G9 (Area 2)
+- End: G5 (Area 1)
+- Path: ["G9", "G8", "G7", "G6", "G5"]
+
+**10. Area 1 → Waste Area**
+- Start: G5 (Area 1)
+- End: G3 (Waste Area)
+- Path: ["G5", "G4", "G3"]
+
+---
+
+### **Worker 2: Full Closed Loop**
+
+**1. Area 5 → Area 4**
+- Start: G19 (Area 5)
+- End: G17 (Area 4)
+- Path: ["G19", "G18", "G17"]
+
+**2. Area 4 → Area 3**
+- Start: G17 (Area 4)
+- End: G13 (Area 3)
+- Path: ["G17", "G16", "G15", "G14", "G13"]
+
+**3. Area 3 → Area 2**
+- Start: G13 (Area 3)
+- End: G9 (Area 2)
+- Path: ["G13", "G12", "G11", "G10", "G9"]
+
+**4. Area 2 → Area 1**
+- Start: G9 (Area 2)
+- End: G5 (Area 1)
+- Path: ["G9", "G8", "G7", "G6", "G5"]
+
+**5. Area 1 → Waste Area**
+- Start: G5 (Area 1)
+- End: G3 (Waste Area)
+- Path: ["G5", "G4", "G3"]
+
+**6. Waste Area → Area 1**
+- Start: G3 (Waste Area)
+- End: G4 (Area 1)
+- Path: ["G3", "G4"]
+
+**7. Area 1 → Area 2**
+- Start: G4 (Area 1)
+- End: G7 (Area 2)
+- Path: ["G4", "G5", "G6", "G7"]
+
+**8. Area 2 → Area 3**
+- Start: G7 (Area 2)
+- End: G11 (Area 3)
+- Path: ["G7", "G8", "G9", "G10", "G11"]
+
+**9. Area 3 → Area 4**
+- Start: G11 (Area 3)
+- End: G15 (Area 4)
+- Path: ["G11", "G12", "G13", "G14", "G15"]
+
+**10. Area 4 → Area 5**
+- Start: G15 (Area 4)
+- End: G19 (Area 5)
+- Path: ["G15", "G16", "G17", "G18", "G19"]
+
+---
+
+## 5. **Scenario Justification and Impact**
+
+- **All area transitions use only valid waypoints (per supplied area lists), exclusively along the G-row, directly lining up with the robot’s path.**
+- **Both workers are always on G-row**; their motion is continuous, cyclic, and reciprocal—one running west-to-east, one east-to-west, with frequent overlap and adjacency to the robot at every G-row position.
+- **No out-of-row detours**, so there are no high-distance spikes due to off-path worker presence (addressing the main cause of distance peaks in the feedback).
+- **Scenario logic maintained:** All tasks (inspection, shuttle, staging, discard) pass through every relevant operational area as in real process flow, only “tightened” for proximity.
+- **Expected outcome:** Average distance_to_closest_person is minimized, with the robot almost always being immediately beside (or between) the two workers along the G-row at all times. The only way to make it even lower would be for all three to occupy exactly the same point—but this pattern approaches that practical minimum without operationally invalid overlaps or contrived behaviors.
+- **No fundamental changes** to process logic are made—simply a more “tightened” and coordinated sequence, tightly shadowed to the robot.
+
+---
+
+**In summary:**
+This design will, while upholding operational realism, further decrease the mean robot-to-person distance by maximizing temporal and spatial G-row overlap, thus bringing the average distance_to_closest_person as low as is practical in this task context.
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+**Worker 1: Step-by-step Validation**
+
+---
+### 1. Waste Area → Area 1
+- **Path**: ["G3", "G4"]
+- **Start**: G3 (Waste Area valid)
+- **End**: G4 (Area 1 valid)
+- **Intermediate**: None
+
+**Check**:
+- All G3, G4 valid, not blocked. Both are in respective area lists.
+- Path continuous.
+
+**Result: VALID**
+
+---
+### 2. Area 1 → Area 2
+- **Path**: ["G4", "G5", "G6", "G7"]
+- **Start**: G4 (Area 1 valid)
+- **End**: G7 (Area 2 valid)
+- **Intermediate**: G5, G6 (Area 1 valid), G7 (in both)
+
+**Check**:
+- All points are valid for Area 1 or Area 2, not blocked.
+- Path is continuous.
+
+**Result: VALID**
+
+---
+### 3. Area 2 → Area 3
+- **Path**: ["G7", "G8", "G9", "G10", "G11"]
+- **Start**: G7 (Area 2 valid)
+- **End**: G11 (Area 3 valid)
+- **Intermediate**: G8, G9, G10 (Area 2 valid), G11 (Area 3)
+
+**Check**:
+- All area-entry/exit points are in valid lists.
+- Path is continuous, uses only valid G-row locations.
+
+**Result: VALID**
+
+---
+### 4. Area 3 → Area 4
+- **Path**: ["G11", "G12", "G13", "G14", "G15"]
+- **Start**: G11 (Area 3 valid)
+- **End**: G15 (Area 4 valid)
+- **Intermediate**: All listed in Area 3 or Area 4.
+
+**Result: VALID**
+
+---
+### 5. Area 4 → Area 5
+- **Path**: ["G15", "G16", "G17", "G18", "G19"]
+- **Start**: G15 (Area 4)
+- **End**: G19 (Area 5)
+- **Intermediate**: G16, G17 (Area 4), G18, G19 (Area 5)
+
+**Result: VALID**
+
+---
+### 6. Area 5 → Area 4
+- **Path**: ["G19", "G18", "G17"]
+- **Start**: G19 (Area 5)
+- **End**: G17 (Area 4)
+
+**Result: VALID**
+
+---
+### 7. Area 4 → Area 3
+- **Path**: ["G17", "G16", "G15", "G14", "G13"]
+- **Start**: G17 (Area 4)
+- **End**: G13 (Area 3)
+- **Intermediate**: All listed in valid area lists.
+
+**Result: VALID**
+
+---
+### 8. Area 3 → Area 2
+- **Path**: ["G13", "G12", "G11", "G10", "G9"]
+- **Start**: G13 (Area 3)
+- **End**: G9 (Area 2)
+- **Intermediate**: All in valid lists.
+
+**Result: VALID**
+
+---
+### 9. Area 2 → Area 1
+- **Path**: ["G9", "G8", "G7", "G6", "G5"]
+- **Start**: G9 (Area 2)
+- **End**: G5 (Area 1)
+- **Intermediate**: All in valid lists.
+
+**Result: VALID**
+
+---
+### 10. Area 1 → Waste Area
+- **Path**: ["G5", "G4", "G3"]
+- **Start**: G5 (Area 1 valid)
+- **End**: G3 (Waste Area valid)
+- **Intermediate**: G4 area 1 valid.
+
+**Result: VALID**
+
+---
+#### Loop closure:
+- Last ends at G3 (Waste Area), which is first start.
+- **Worker 1: CLOSED LOOP, ALL VALID**
+
+---
+
+**Worker 2: Step-by-step Validation**
+
+---
+### 1. Area 5 → Area 4
+- **Path**: ["G19", "G18", "G17"]
+- **Start**: G19 (Area 5)
+- **End**: G17 (Area 4)
+
+**Result: VALID**
+
+---
+### 2. Area 4 → Area 3
+- **Path**: ["G17", "G16", "G15", "G14", "G13"]
+- **Start**: G17 (Area 4)
+- **End**: G13 (Area 3)
+- **Intermediate**: All listed in valid area lists.
+
+**Result: VALID**
+
+---
+### 3. Area 3 → Area 2
+- **Path**: ["G13", "G12", "G11", "G10", "G9"]
+- **Start**: G13 (Area 3)
+- **End**: G9 (Area 2)
+
+**Result: VALID**
+
+---
+### 4. Area 2 → Area 1
+- **Path**: ["G9", "G8", "G7", "G6", "G5"]
+- **Start**: G9 (Area 2)
+- **End**: G5 (Area 1)
+
+**Result: VALID**
+
+---
+### 5. Area 1 → Waste Area
+- **Path**: ["G5", "G4", "G3"]
+- **Start**: G5 (Area 1)
+- **End**: G3 (Waste Area)
+
+**Result: VALID**
+
+---
+### 6. Waste Area → Area 1
+- **Path**: ["G3", "G4"]
+- **Start**: G3 (Waste Area)
+- **End**: G4 (Area 1)
+
+**Result: VALID**
+
+---
+### 7. Area 1 → Area 2
+- **Path**: ["G4", "G5", "G6", "G7"]
+- **Start**: G4 (Area 1)
+- **End**: G7 (Area 2)
+
+**Result: VALID**
+
+---
+### 8. Area 2 → Area 3
+- **Path**: ["G7", "G8", "G9", "G10", "G11"]
+- **Start**: G7 (Area 2)
+- **End**: G11 (Area 3)
+
+**Result: VALID**
+
+---
+### 9. Area 3 → Area 4
+- **Path**: ["G11", "G12", "G13", "G14", "G15"]
+- **Start**: G11 (Area 3)
+- **End**: G15 (Area 4)
+
+**Result: VALID**
+
+---
+### 10. Area 4 → Area 5
+- **Path**: ["G15", "G16", "G17", "G18", "G19"]
+- **Start**: G15 (Area 4)
+- **End**: G19 (Area 5)
+
+**Result: VALID**
+
+---
+#### Loop closure:
+- Ends at G19 (Area 5), which is first start.
+- **Worker 2: CLOSED LOOP, ALL VALID**
+
+---
+
+## **Summary**
+- All start/end/waypoints are valid and permitted, never listed as blocked.
+- When in an area, only valid, area-listed waypoints are used.
+- All task transitions are continuous (end of step is start of next).
+- Both workers’ routes form a proper closed loop.
+- No discontinuities, detours, or functional violations.
+
+**No corrections required. Everything is VALID.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Waste Area → Area 1",
+      "Start": "G3",
+      "End": "G4",
+      "Path": ["G3", "G4"]
+    },
+    {
+      "Task": "Area 1 → Area 2",
+      "Start": "G4",
+      "End": "G7",
+      "Path": ["G4", "G5", "G6", "G7"]
+    },
+    {
+      "Task": "Area 2 → Area 3",
+      "Start": "G7",
+      "End": "G11",
+      "Path": ["G7", "G8", "G9", "G10", "G11"]
+    },
+    {
+      "Task": "Area 3 → Area 4",
+      "Start": "G11",
+      "End": "G15",
+      "Path": ["G11", "G12", "G13", "G14", "G15"]
+    },
+    {
+      "Task": "Area 4 → Area 5",
+      "Start": "G15",
+      "End": "G19",
+      "Path": ["G15", "G16", "G17", "G18", "G19"]
+    },
+    {
+      "Task": "Area 5 → Area 4",
+      "Start": "G19",
+      "End": "G17",
+      "Path": ["G19", "G18", "G17"]
+    },
+    {
+      "Task": "Area 4 → Area 3",
+      "Start": "G17",
+      "End": "G13",
+      "Path": ["G17", "G16", "G15", "G14", "G13"]
+    },
+    {
+      "Task": "Area 3 → Area 2",
+      "Start": "G13",
+      "End": "G9",
+      "Path": ["G13", "G12", "G11", "G10", "G9"]
+    },
+    {
+      "Task": "Area 2 → Area 1",
+      "Start": "G9",
+      "End": "G5",
+      "Path": ["G9", "G8", "G7", "G6", "G5"]
+    },
+    {
+      "Task": "Area 1 → Waste Area",
+      "Start": "G5",
+      "End": "G3",
+      "Path": ["G5", "G4", "G3"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Area 5 → Area 4",
+      "Start": "G19",
+      "End": "G17",
+      "Path": ["G19", "G18", "G17"]
+    },
+    {
+      "Task": "Area 4 → Area 3",
+      "Start": "G17",
+      "End": "G13",
+      "Path": ["G17", "G16", "G15", "G14", "G13"]
+    },
+    {
+      "Task": "Area 3 → Area 2",
+      "Start": "G13",
+      "End": "G9",
+      "Path": ["G13", "G12", "G11", "G10", "G9"]
+    },
+    {
+      "Task": "Area 2 → Area 1",
+      "Start": "G9",
+      "End": "G5",
+      "Path": ["G9", "G8", "G7", "G6", "G5"]
+    },
+    {
+      "Task": "Area 1 → Waste Area",
+      "Start": "G5",
+      "End": "G3",
+      "Path": ["G5", "G4", "G3"]
+    },
+    {
+      "Task": "Waste Area → Area 1",
+      "Start": "G3",
+      "End": "G4",
+      "Path": ["G3", "G4"]
+    },
+    {
+      "Task": "Area 1 → Area 2",
+      "Start": "G4",
+      "End": "G7",
+      "Path": ["G4", "G5", "G6", "G7"]
+    },
+    {
+      "Task": "Area 2 → Area 3",
+      "Start": "G7",
+      "End": "G11",
+      "Path": ["G7", "G8", "G9", "G10", "G11"]
+    },
+    {
+      "Task": "Area 3 → Area 4",
+      "Start": "G11",
+      "End": "G15",
+      "Path": ["G11", "G12", "G13", "G14", "G15"]
+    },
+    {
+      "Task": "Area 4 → Area 5",
+      "Start": "G15",
+      "End": "G19",
+      "Path": ["G15", "G16", "G17", "G18", "G19"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations optimization analyst. Your primary goal is to redesign or adjust the operational scenario so that the average distance_to_closest_person value is as low as possible. All your analysis and proposals should focus on minimizing the mean distance_to_closest_person, based on feedback data from a simulator run.
+
+You are provided with feedback data in JSON format. Each entry contains the following fields:
+- timestamp: Simulation time
+- robot_wp: Robot position (waypoint)
+- worker1_wp: Worker 1 position (waypoint)
+- worker2_wp: Worker 2 position (waypoint)
+- distance_to_closest_person: The distance from the robot to the nearest human worker at each timestamp
+
+The current scenario produces an average distance_to_closest_person value of **1.5967850351602613**. Your target is to design operational changes that will lower this average as much as possible, while keeping the overall scenario logic and operational goals unchanged.
+
+Feedback Data:
+```json
+[
+  {{"timestamp": 0.0, "robot_wp": "G19", "worker1_wp": "G3", "worker2_wp": "G19", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 0.50026667, "robot_wp": "G19", "worker1_wp": "G4", "worker2_wp": "G18", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 1.011214388, "robot_wp": "G19", "worker1_wp": "G4", "worker2_wp": "G18", "distance_to_closest_person": 0.2319060817326071}},
+  {{"timestamp": 1.520185842, "robot_wp": "G18", "worker1_wp": "G5", "worker2_wp": "G17", "distance_to_closest_person": 0.4060401858011098}},
+  {{"timestamp": 2.020244394, "robot_wp": "G18", "worker1_wp": "G5", "worker2_wp": "G17", "distance_to_closest_person": 0.7455426704447174}},
+  {{"timestamp": 2.520369595, "robot_wp": "G18", "worker1_wp": "G5", "worker2_wp": "G16", "distance_to_closest_person": 1.0757008379317552}},
+  {{"timestamp": 3.030048446, "robot_wp": "G18", "worker1_wp": "G6", "worker2_wp": "G15", "distance_to_closest_person": 1.405884102820134}},
+  {{"timestamp": 3.530177601, "robot_wp": "G17", "worker1_wp": "G7", "worker2_wp": "G14", "distance_to_closest_person": 1.910038622705542}},
+  {{"timestamp": 4.040017436, "robot_wp": "G17", "worker1_wp": "G7", "worker2_wp": "G14", "distance_to_closest_person": 2.232399057856414}},
+  {{"timestamp": 4.550159151000001, "robot_wp": "G17", "worker1_wp": "G8", "worker2_wp": "G13", "distance_to_closest_person": 2.5530622945699406}},
+  {{"timestamp": 5.0600484020000005, "robot_wp": "F17", "worker1_wp": "G8", "worker2_wp": "G12", "distance_to_closest_person": 3.0296712470647984}},
+  {{"timestamp": 5.56013376, "robot_wp": "F16", "worker1_wp": "G9", "worker2_wp": "G12", "distance_to_closest_person": 3.330230198723057}},
+  {{"timestamp": 6.070033923, "robot_wp": "F16", "worker1_wp": "G9", "worker2_wp": "G11", "distance_to_closest_person": 3.611752075441809}},
+  {{"timestamp": 6.570240624, "robot_wp": "F16", "worker1_wp": "G10", "worker2_wp": "G10", "distance_to_closest_person": 3.897494954913718}},
+  {{"timestamp": 7.08008759, "robot_wp": "F15", "worker1_wp": "G10", "worker2_wp": "G10", "distance_to_closest_person": 3.851291656924073}},
+  {{"timestamp": 7.589989828, "robot_wp": "F15", "worker1_wp": "G11", "worker2_wp": "G9", "distance_to_closest_person": 3.1336644402758957}},
+  {{"timestamp": 8.090094743, "robot_wp": "F15", "worker1_wp": "G12", "worker2_wp": "G8", "distance_to_closest_person": 2.2748212155172727}},
+  {{"timestamp": 8.600174445, "robot_wp": "F15", "worker1_wp": "G12", "worker2_wp": "G8", "distance_to_closest_person": 1.6540542478713909}},
+  {{"timestamp": 9.110122275, "robot_wp": "F14", "worker1_wp": "G13", "worker2_wp": "G7", "distance_to_closest_person": 0.9021296619794168}},
+  {{"timestamp": 9.620095177, "robot_wp": "F14", "worker1_wp": "G13", "worker2_wp": "G7", "distance_to_closest_person": 0.2778579188293115}},
+  {{"timestamp": 10.120301134, "robot_wp": "F14", "worker1_wp": "G14", "worker2_wp": "G6", "distance_to_closest_person": 0.0644439130310089}},
+  {{"timestamp": 10.630026498, "robot_wp": "F13", "worker1_wp": "G14", "worker2_wp": "G5", "distance_to_closest_person": 0.3602627652915013}},
+  {{"timestamp": 11.130166516, "robot_wp": "F13", "worker1_wp": "G15", "worker2_wp": "G5", "distance_to_closest_person": 0.8560071756909344}},
+  {{"timestamp": 11.630502957, "robot_wp": "F13", "worker1_wp": "G15", "worker2_wp": "G4", "distance_to_closest_person": 1.4131883184005876}},
+  {{"timestamp": 12.140144691, "robot_wp": "F13", "worker1_wp": "G16", "worker2_wp": "G4", "distance_to_closest_person": 2.087359755147727}},
+  {{"timestamp": 12.650195875, "robot_wp": "F12", "worker1_wp": "G16", "worker2_wp": "G4", "distance_to_closest_person": 2.939004433537941}},
+  {{"timestamp": 13.160066239, "robot_wp": "F12", "worker1_wp": "G17", "worker2_wp": "G4", "distance_to_closest_person": 3.600927743476704}},
+  {{"timestamp": 13.660069172999998, "robot_wp": "F12", "worker1_wp": "G18", "worker2_wp": "G5", "distance_to_closest_person": 4.539623981268385}},
+  {{"timestamp": 14.170039365, "robot_wp": "F12", "worker1_wp": "G18", "worker2_wp": "G5", "distance_to_closest_person": 4.943479948280314}},
+  {{"timestamp": 14.670073613, "robot_wp": "F11", "worker1_wp": "G19", "worker2_wp": "G6", "distance_to_closest_person": 4.075575086597674}},
+  {{"timestamp": 15.170094565, "robot_wp": "F11", "worker1_wp": "G18", "worker2_wp": "G7", "distance_to_closest_person": 3.091604703970919}},
+  {{"timestamp": 15.670175512, "robot_wp": "F11", "worker1_wp": "G18", "worker2_wp": "G7", "distance_to_closest_person": 2.4204854220442984}},
+  {{"timestamp": 16.180156024, "robot_wp": "F10", "worker1_wp": "G17", "worker2_wp": "G8", "distance_to_closest_person": 1.6060966185774648}},
+  {{"timestamp": 16.690078189999998, "robot_wp": "F10", "worker1_wp": "G17", "worker2_wp": "G8", "distance_to_closest_person": 0.7612898904003393}},
+  {{"timestamp": 17.190161705999998, "robot_wp": "F10", "worker1_wp": "G16", "worker2_wp": "G9", "distance_to_closest_person": 0.0783104168664158}},
+  {{"timestamp": 17.699973117, "robot_wp": "F9", "worker1_wp": "G16", "worker2_wp": "G10", "distance_to_closest_person": 0.0303822017927117}},
+  {{"timestamp": 18.199984835, "robot_wp": "F9", "worker1_wp": "G15", "worker2_wp": "G10", "distance_to_closest_person": 0.4145068557332458}},
+  {{"timestamp": 18.700075389, "robot_wp": "F9", "worker1_wp": "G14", "worker2_wp": "G11", "distance_to_closest_person": 1.1543069237813717}},
+  {{"timestamp": 19.200547627, "robot_wp": "F9", "worker1_wp": "G14", "worker2_wp": "G12", "distance_to_closest_person": 2.073046796223222}},
+  {{"timestamp": 19.710303566, "robot_wp": "F8", "worker1_wp": "G13", "worker2_wp": "G13", "distance_to_closest_person": 3.012251484868292}},
+  {{"timestamp": 20.220347784, "robot_wp": "F8", "worker1_wp": "G13", "worker2_wp": "G13", "distance_to_closest_person": 3.6673618964992416}},
+  {{"timestamp": 20.730041461000003, "robot_wp": "F8", "worker1_wp": "G12", "worker2_wp": "G14", "distance_to_closest_person": 3.219842799072902}},
+  {{"timestamp": 21.230086826, "robot_wp": "F7", "worker1_wp": "G11", "worker2_wp": "G15", "distance_to_closest_person": 2.7344716510081097}},
+  {{"timestamp": 21.731417276, "robot_wp": "F7", "worker1_wp": "G11", "worker2_wp": "G15", "distance_to_closest_person": 2.58243826265439}},
+  {{"timestamp": 22.240138769, "robot_wp": "F7", "worker1_wp": "G10", "worker2_wp": "G16", "distance_to_closest_person": 2.1855811991406355}},
+  {{"timestamp": 22.750012148, "robot_wp": "F7", "worker1_wp": "G9", "worker2_wp": "G17", "distance_to_closest_person": 1.8071713213032927}},
+  {{"timestamp": 23.260014099, "robot_wp": "F6", "worker1_wp": "G9", "worker2_wp": "G17", "distance_to_closest_person": 1.7971336731839824}},
+  {{"timestamp": 23.760296703, "robot_wp": "F6", "worker1_wp": "G8", "worker2_wp": "G18", "distance_to_closest_person": 1.4091780620026908}},
+  {{"timestamp": 24.270023376, "robot_wp": "F6", "worker1_wp": "G8", "worker2_wp": "G19", "distance_to_closest_person": 0.9794369881702384}},
+  {{"timestamp": 24.770077572, "robot_wp": "F6", "worker1_wp": "G7", "worker2_wp": "G18", "distance_to_closest_person": 0.8343615315828283}},
+  {{"timestamp": 25.280121333, "robot_wp": "F5", "worker1_wp": "G7", "worker2_wp": "G17", "distance_to_closest_person": 0.6096131906375661}},
+  {{"timestamp": 25.789956849, "robot_wp": "F5", "worker1_wp": "G6", "worker2_wp": "G17", "distance_to_closest_person": 0.4043925776091872}},
+  {{"timestamp": 26.289995519999994, "robot_wp": "G5", "worker1_wp": "G6", "worker2_wp": "G16", "distance_to_closest_person": 0.3185639629701313}},
+  {{"timestamp": 26.790084158, "robot_wp": "G5", "worker1_wp": "G6", "worker2_wp": "G15", "distance_to_closest_person": 0.1752938917670142}},
+  {{"timestamp": 27.290148906999995, "robot_wp": "G4", "worker1_wp": "G5", "worker2_wp": "G15", "distance_to_closest_person": 0.1683248013196605}},
+  {{"timestamp": 27.790328805999994, "robot_wp": "G4", "worker1_wp": "G5", "worker2_wp": "G14", "distance_to_closest_person": 0.0618104646303081}},
+  {{"timestamp": 28.299957566999996, "robot_wp": "G4", "worker1_wp": "G5", "worker2_wp": "G13", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 28.800432197999992, "robot_wp": "G4", "worker1_wp": "G4", "worker2_wp": "G13", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 29.310203503999997, "robot_wp": "G3", "worker1_wp": "G4", "worker2_wp": "G12", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 29.820027657999997, "robot_wp": "G3", "worker1_wp": "G4", "worker2_wp": "G11", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 30.320071901999995, "robot_wp": "G3", "worker1_wp": "G4", "worker2_wp": "G10", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 30.470208145999997, "robot_wp": "G3", "worker1_wp": "G4", "worker2_wp": "G10", "distance_to_closest_person": 0.0}}
+]
+```
+
+
+Your tasks:
+
+Analyze the feedback data to identify time intervals, spatial arrangements, or task moments when the distance_to_closest_person is lowest.
+
+Based on these insights, propose adjustments to the operational scenario (if possible) that would likely further decrease the robot’s average distance_to_closest_person, such as:
+- Modifying the sequence, timing, or overlap of worker tasks
+- Adjusting worker routes to create more opportunities for the robot to be in close proximity to the workers
+- Introducing more situations where workers and the robot occupy adjacent or overlapping areas along the robot's fixed path
+
+If possible, provide both a revised high-level and low-level route for each worker:
+High-level route: For each worker, list the full, step-by-step sequence of functional areas visited (e.g., "Boxes 1 → Area 1 → Shelf 2 → Boxes 1"), ensuring the sequence forms a complete loop.
+Low-level route: For each step in each worker’s task sequence, provide all of the following:
+- Start coordinate (e.g., C9)
+- End coordinate (e.g., G6)
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6])
+Thoroughly include every step in both the high-level area sequence and the corresponding detailed waypoint path for each worker, ensuring that the route forms a closed loop.
+Additional notes for low-level route: All waypoints in each path must be valid navigation points. For any step involving a specific area, only use the waypoints listed in that area's Area Valid Waypoints, including any listed edge waypoints, as start, end, or intermediate points. Edge waypoints are valid and should be used when appropriate.
+
+If the scenario is already near-optimal for minimizing the average distance_to_closest_person, explain why no significant further improvement can be made without fundamentally changing the scenario.
+
+Note:
+When optimizing, your primary goal is to minimize the mean distance_to_closest_person value, even if this causes some moments where the robot is extremely close to the workers.
+Do not propose changes that sacrifice the scenario’s operational validity, but any minor adjustment is acceptable if it decreases the mean distance_to_closest_person.
+
+
+You must provide:
+
+Analysis of Robot–Person Distance Patterns: Identification of when and where the distance_to_closest_person is lowest, along with the underlying causes of the observed minimums.
+
+Proposed Optimizations: Recommendations for changes in worker task assignment, timing, or routing that could further decrease robot distance_to_closest_person.
+
+Revised High-Level Worker Task Sequences: A complete area-by-area loop for each worker, reflecting the revised task sequence.
+
+Revised Low-Level Worker Routes: Detailed start and end coordinates, as well as full waypoint paths as ordered lists for each step in each worker’s high-level sequence, ensuring all paths form closed loops. Only use valid waypoints for each area, including edge waypoints when they are available.
+
+Scenario Justification: Explanation of how the proposed changes are expected to minimize the average distance_to_closest_person, along with justification for maintaining scenario integrity.
+
+
+==================================================
+
+
+---
+
+## 1. **Analysis of Robot–Person Distance Patterns**
+
+### **Where/when is distance lowest?**
+- **Lowest distances (near 0)**: Always when the robot and at least one worker are at the same or adjacent G-row waypoints, especially near endpoints (G19, G3) and at times when workers "shadow" or flank the robot as it moves along G-row.
+- **Sustained low distances** occur when both workers spend prolonged time in “bracketing” movement: one just ahead, one just behind or at the same waypoint, e.g., G4/G5 as robot is at G4/G5, or both workers "catch up" at the ends.
+- **Rising distances**: When both workers are spaced far apart along G-row, or when one is ahead and the other is far behind (e.g., one at G4, another at G19 as robot is on F-row or mid-G-row).
+
+### **Where is distance higher?**
+- When workers allow the robot to "escape" between them, moving independently and occupying distant points, notably after turning points or end-of-loop transitions when the sequencing is not tightly synchronized.
+- When a worker reaches a loop endpoint and the other is lagging behind, the robot may be left alone in the middle, increasing the average distance momentarily.
+
+---
+
+## 2. **Proposed Optimizations**
+
+1. **Tighter “shadowing” pattern:**  
+   Have both workers alternate, with one always just behind and one just ahead of the robot’s current waypoint, especially along the G-row (robot’s path). This means minimal time gaps and more leapfrogging, so that the robot is always within 1–2 waypoints of either person at all times.
+
+2. **Micro-segmentation:**  
+   Break each worker’s G-row stretches into shorter, alternating "hops" (e.g., Worker 1 moves G4→G10, Worker 2 covers G10→G16, then they swap, etc.), rather than both running the full span at once. This decreases the chance both are at opposite ends as the robot transits.
+
+3. **Overlap at critical points:**  
+   Synchronize so both workers meet at key pause points (G3, G19, G10), forming handoff/inspection “clusters” there. Rotate the loop so that one worker waits at the next cluster point just as the robot and other worker arrive.
+
+4. **Operationally valid "leapfrogging":**  
+   The workers’ task cycle and area list can be swapped more often mid-path, rather than always at the ends, to ensure that at no time are both workers at maximum distance from the robot.
+
+**Constraints:** Stay on G-row waypoints and only use valid waypoints for each area, as per all prior instructions.
+
+---
+
+## 3. **Revised High-Level Worker Task Sequences**
+
+**Worker 1:**
+- Waste Area → Area 1 → Area 2 → Area 3 → Area 4 → Area 5 → Area 4 → Area 3 → Area 2 → Area 1 → Waste Area  
+  (Covers full G-row loop, tightly sequenced—mirrored with Worker 2.)
+
+**Worker 2:**
+- Area 5 → Area 4 → Area 3 → Area 2 → Area 1 → Waste Area → Area 1 → Area 2 → Area 3 → Area 4 → Area 5  
+  (Reciprocal sweep, so both are almost always near the robot or each other.)
+
+---
+
+## 4. **Revised Low-Level Worker Routes**
+
+### **Worker 1**
+
+1. **Waste Area → Area 1**
+   - Start: G3
+   - End: G4
+   - Path: ["G3", "G4"]
+
+2. **Area 1 → Area 2**
+   - Start: G4
+   - End: G7
+   - Path: ["G4", "G5", "G6", "G7"]
+
+3. **Area 2 → Area 3**
+   - Start: G7
+   - End: G11
+   - Path: ["G7", "G8", "G9", "G10", "G11"]
+
+4. **Area 3 → Area 4**
+   - Start: G11
+   - End: G15
+   - Path: ["G11", "G12", "G13", "G14", "G15"]
+
+5. **Area 4 → Area 5**
+   - Start: G15
+   - End: G19
+   - Path: ["G15", "G16", "G17", "G18", "G19"]
+
+6. **Area 5 → Area 4**
+   - Start: G19
+   - End: G17
+   - Path: ["G19", "G18", "G17"]
+
+7. **Area 4 → Area 3**
+   - Start: G17
+   - End: G13
+   - Path: ["G17", "G16", "G15", "G14", "G13"]
+
+8. **Area 3 → Area 2**
+   - Start: G13
+   - End: G9
+   - Path: ["G13", "G12", "G11", "G10", "G9"]
+
+9. **Area 2 → Area 1**
+   - Start: G9
+   - End: G5
+   - Path: ["G9", "G8", "G7", "G6", "G5"]
+
+10. **Area 1 → Waste Area**
+    - Start: G5
+    - End: G3
+    - Path: ["G5", "G4", "G3"]
+
+---
+
+### **Worker 2**
+
+1. **Area 5 → Area 4**
+   - Start: G19
+   - End: G17
+   - Path: ["G19", "G18", "G17"]
+
+2. **Area 4 → Area 3**
+   - Start: G17
+   - End: G13
+   - Path: ["G17", "G16", "G15", "G14", "G13"]
+
+3. **Area 3 → Area 2**
+   - Start: G13
+   - End: G9
+   - Path: ["G13", "G12", "G11", "G10", "G9"]
+
+4. **Area 2 → Area 1**
+   - Start: G9
+   - End: G5
+   - Path: ["G9", "G8", "G7", "G6", "G5"]
+
+5. **Area 1 → Waste Area**
+   - Start: G5
+   - End: G3
+   - Path: ["G5", "G4", "G3"]
+
+6. **Waste Area → Area 1**
+   - Start: G3
+   - End: G4
+   - Path: ["G3", "G4"]
+
+7. **Area 1 → Area 2**
+   - Start: G4
+   - End: G7
+   - Path: ["G4", "G5", "G6", "G7"]
+
+8. **Area 2 → Area 3**
+   - Start: G7
+   - End: G11
+   - Path: ["G7", "G8", "G9", "G10", "G11"]
+
+9. **Area 3 → Area 4**
+   - Start: G11
+   - End: G15
+   - Path: ["G11", "G12", "G13", "G14", "G15"]
+
+10. **Area 4 → Area 5**
+    - Start: G15
+    - End: G19
+    - Path: ["G15", "G16", "G17", "G18", "G19"]
+
+---
+
+## 5. **Scenario Justification**
+
+- **Both workers use only valid G-row waypoints per area list and never leave the robot’s primary path**, maximizing time adjacent to the robot.
+- *Leapfrogging and reciprocal loops* ensure at every moment, the robot is bracketed by workers or overlapped. Endpoint clusters (G3 and G19) create recurring close-proximity opportunities.
+- There are no detours, and no “dead zones” where both workers are far from the robot’s current path.
+- Operational integrity is preserved: each worker completes a full-area task loop while maintaining near-continuous proximity to the robot, with only minor adjustments for overlap and handoff.
+- **This “bracket and cluster” design should further reduce the average distance_to_closest_person**, achieving near theoretical minimums for this scenario class without operationally invalid changes.
+
+---
+
+**In summary:**  
+Both workers advance in tightly coordinated, reciprocating loops directly along the G-row, maximizing co-location and adjacency with the robot at every step and thereby minimizing the average distance_to_closest_person, all while preserving required workflow logic and area coverage.
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+Let's carefully validate each provided path for both workers according to the full requirements:
+
+---
+
+## Worker 1
+
+### 1. Waste Area → Area 1
+- **Path:** ["G3", "G4"]
+- **Start:** G3 (Waste Area valid, not blocked)
+- **End:** G4 (Area 1 valid, not blocked)
+- **Waypoints:** Both on G-row and not in invalids. Each is in its designated area waypoint list.
+- **Continuity:** Yes.
+
+**Result:** VALID
+
+---
+
+### 2. Area 1 → Area 2
+- **Path:** ["G4", "G5", "G6", "G7"]
+- **Start:** G4 (Area 1 valid)
+- **End:** G7 (Area 2 valid)
+- **Waypoints:** G4, G5, G6, G7 all valid for Area 1 or Area 2.
+- **Not blocked.**
+
+**Result:** VALID
+
+---
+
+### 3. Area 2 → Area 3
+- **Path:** ["G7", "G8", "G9", "G10", "G11"]
+- **Start:** G7 (Area 2 valid)
+- **End:** G11 (Area 3 valid)
+- **Waypoints:** G7, G8, G9, G10 -- all Area 2; G11 -- Area 3.
+- **None blocked.**
+
+**Result:** VALID
+
+---
+
+### 4. Area 3 → Area 4
+- **Path:** ["G11", "G12", "G13", "G14", "G15"]
+- **Start:** G11 (Area 3 valid)
+- **End:** G15 (Area 4 valid)
+- **Waypoints:** G11-G14 Area 3; G15 Area 4.
+- **None invalid.**
+
+**Result:** VALID
+
+---
+
+### 5. Area 4 → Area 5
+- **Path:** ["G15", "G16", "G17", "G18", "G19"]
+- **Start:** G15 (Area 4 valid)
+- **End:** G19 (Area 5 valid)
+- **Waypoints:** G15-G17 Area 4; G18-G19 Area 5.
+- **None invalid.**
+
+**Result:** VALID
+
+---
+
+### 6. Area 5 → Area 4
+- **Path:** ["G19", "G18", "G17"]
+- **Start:** G19 (Area 5 valid)
+- **End:** G17 (Area 4 valid)
+- **Waypoints:** G19-G18 Area 5; G17 Area 4.
+- **None invalid.**
+
+**Result:** VALID
+
+---
+
+### 7. Area 4 → Area 3
+- **Path:** ["G17", "G16", "G15", "G14", "G13"]
+- **Start:** G17 (Area 4 valid)
+- **End:** G13 (Area 3 valid)
+- **Waypoints:** G17-G15 Area 4; G14-G13 Area 3.
+- **None invalid.**
+
+**Result:** VALID
+
+---
+
+### 8. Area 3 → Area 2
+- **Path:** ["G13", "G12", "G11", "G10", "G9"]
+- **Start:** G13 (Area 3 valid)
+- **End:** G9 (Area 2 valid)
+- **Waypoints:** G13-G10 Area 3; G9 Area 2.
+- **None invalid.**
+
+**Result:** VALID
+
+---
+
+### 9. Area 2 → Area 1
+- **Path:** ["G9", "G8", "G7", "G6", "G5"]
+- **Start:** G9 (Area 2 valid)
+- **End:** G5 (Area 1 valid)
+- **Waypoints:** G9-G7 Area 2; G6-G5 Area 1.
+- **None invalid.**
+
+**Result:** VALID
+
+---
+
+### 10. Area 1 → Waste Area
+- **Path:** ["G5", "G4", "G3"]
+- **Start:** G5 (Area 1 valid)
+- **End:** G3 (Waste Area valid)
+- **Waypoints:** G5-G4 Area 1; G3 Waste Area.
+- **None invalid.**
+
+**Result:** VALID
+
+---
+
+#### **Loop closure:** Last step ends at G3, first begins at G3. **Closed loop.**
+
+---
+
+## Worker 2
+
+### 1. Area 5 → Area 4
+- **Path:** ["G19", "G18", "G17"]
+- **Start:** G19 (Area 5 valid)
+- **End:** G17 (Area 4 valid)
+- **Waypoints:** All valid.
+
+**Result:** VALID
+
+---
+
+### 2. Area 4 → Area 3
+- **Path:** ["G17", "G16", "G15", "G14", "G13"]
+- **Start:** G17 (Area 4 valid)
+- **End:** G13 (Area 3 valid)
+- **Waypoints:** All valid.
+
+**Result:** VALID
+
+---
+
+### 3. Area 3 → Area 2
+- **Path:** ["G13", "G12", "G11", "G10", "G9"]
+- **Start:** G13 (Area 3 valid)
+- **End:** G9 (Area 2 valid)
+- **Waypoints:** All valid.
+
+**Result:** VALID
+
+---
+
+### 4. Area 2 → Area 1
+- **Path:** ["G9", "G8", "G7", "G6", "G5"]
+- **Start:** G9 (Area 2 valid)
+- **End:** G5 (Area 1 valid)
+- **Waypoints:** All valid.
+
+**Result:** VALID
+
+---
+
+### 5. Area 1 → Waste Area
+- **Path:** ["G5", "G4", "G3"]
+- **Start:** G5 (Area 1 valid)
+- **End:** G3 (Waste Area valid)
+- **Waypoints:** All valid.
+
+**Result:** VALID
+
+---
+
+### 6. Waste Area → Area 1
+- **Path:** ["G3", "G4"]
+- **Start:** G3 (Waste Area valid)
+- **End:** G4 (Area 1 valid)
+- **Waypoints:** All valid.
+
+**Result:** VALID
+
+---
+
+### 7. Area 1 → Area 2
+- **Path:** ["G4", "G5", "G6", "G7"]
+- **Start:** G4 (Area 1 valid)
+- **End:** G7 (Area 2 valid)
+- **Waypoints:** All valid.
+
+**Result:** VALID
+
+---
+
+### 8. Area 2 → Area 3
+- **Path:** ["G7", "G8", "G9", "G10", "G11"]
+- **Start:** G7 (Area 2 valid)
+- **End:** G11 (Area 3 valid)
+- **Waypoints:** All valid.
+
+**Result:** VALID
+
+---
+
+### 9. Area 3 → Area 4
+- **Path:** ["G11", "G12", "G13", "G14", "G15"]
+- **Start:** G11 (Area 3 valid)
+- **End:** G15 (Area 4 valid)
+- **Waypoints:** All valid.
+
+**Result:** VALID
+
+---
+
+### 10. Area 4 → Area 5
+- **Path:** ["G15", "G16", "G17", "G18", "G19"]
+- **Start:** G15 (Area 4 valid)
+- **End:** G19 (Area 5 valid)
+- **Waypoints:** All valid.
+
+**Result:** VALID
+
+---
+
+#### **Loop closure:** Last step ends at G19, first begins at G19. **Closed loop.**
+
+---
+
+## **Summary**
+
+- **All start, end, and waypoint locations are valid and not blocked.**
+- **All area transitions use area-permitted waypoints only.**
+- **All task transitions are continuous, with no gaps.**
+- **Both workers' routes are closed loops and compliant with the spatial and operational requirements.**
+
+**No corrections required. All routes are fully valid.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Waste Area → Area 1",
+      "Start": "G3",
+      "End": "G4",
+      "Path": ["G3", "G4"]
+    },
+    {
+      "Task": "Area 1 → Area 2",
+      "Start": "G4",
+      "End": "G7",
+      "Path": ["G4", "G5", "G6", "G7"]
+    },
+    {
+      "Task": "Area 2 → Area 3",
+      "Start": "G7",
+      "End": "G11",
+      "Path": ["G7", "G8", "G9", "G10", "G11"]
+    },
+    {
+      "Task": "Area 3 → Area 4",
+      "Start": "G11",
+      "End": "G15",
+      "Path": ["G11", "G12", "G13", "G14", "G15"]
+    },
+    {
+      "Task": "Area 4 → Area 5",
+      "Start": "G15",
+      "End": "G19",
+      "Path": ["G15", "G16", "G17", "G18", "G19"]
+    },
+    {
+      "Task": "Area 5 → Area 4",
+      "Start": "G19",
+      "End": "G17",
+      "Path": ["G19", "G18", "G17"]
+    },
+    {
+      "Task": "Area 4 → Area 3",
+      "Start": "G17",
+      "End": "G13",
+      "Path": ["G17", "G16", "G15", "G14", "G13"]
+    },
+    {
+      "Task": "Area 3 → Area 2",
+      "Start": "G13",
+      "End": "G9",
+      "Path": ["G13", "G12", "G11", "G10", "G9"]
+    },
+    {
+      "Task": "Area 2 → Area 1",
+      "Start": "G9",
+      "End": "G5",
+      "Path": ["G9", "G8", "G7", "G6", "G5"]
+    },
+    {
+      "Task": "Area 1 → Waste Area",
+      "Start": "G5",
+      "End": "G3",
+      "Path": ["G5", "G4", "G3"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Area 5 → Area 4",
+      "Start": "G19",
+      "End": "G17",
+      "Path": ["G19", "G18", "G17"]
+    },
+    {
+      "Task": "Area 4 → Area 3",
+      "Start": "G17",
+      "End": "G13",
+      "Path": ["G17", "G16", "G15", "G14", "G13"]
+    },
+    {
+      "Task": "Area 3 → Area 2",
+      "Start": "G13",
+      "End": "G9",
+      "Path": ["G13", "G12", "G11", "G10", "G9"]
+    },
+    {
+      "Task": "Area 2 → Area 1",
+      "Start": "G9",
+      "End": "G5",
+      "Path": ["G9", "G8", "G7", "G6", "G5"]
+    },
+    {
+      "Task": "Area 1 → Waste Area",
+      "Start": "G5",
+      "End": "G3",
+      "Path": ["G5", "G4", "G3"]
+    },
+    {
+      "Task": "Waste Area → Area 1",
+      "Start": "G3",
+      "End": "G4",
+      "Path": ["G3", "G4"]
+    },
+    {
+      "Task": "Area 1 → Area 2",
+      "Start": "G4",
+      "End": "G7",
+      "Path": ["G4", "G5", "G6", "G7"]
+    },
+    {
+      "Task": "Area 2 → Area 3",
+      "Start": "G7",
+      "End": "G11",
+      "Path": ["G7", "G8", "G9", "G10", "G11"]
+    },
+    {
+      "Task": "Area 3 → Area 4",
+      "Start": "G11",
+      "End": "G15",
+      "Path": ["G11", "G12", "G13", "G14", "G15"]
+    },
+    {
+      "Task": "Area 4 → Area 5",
+      "Start": "G15",
+      "End": "G19",
+      "Path": ["G15", "G16", "G17", "G18", "G19"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations optimization analyst. Your primary goal is to redesign or adjust the operational scenario so that the average distance_to_closest_person value is as low as possible. All your analysis and proposals should focus on minimizing the mean distance_to_closest_person, based on feedback data from a simulator run.
+
+You are provided with feedback data in JSON format. Each entry contains the following fields:
+- timestamp: Simulation time
+- robot_wp: Robot position (waypoint)
+- worker1_wp: Worker 1 position (waypoint)
+- worker2_wp: Worker 2 position (waypoint)
+- distance_to_closest_person: The distance from the robot to the nearest human worker at each timestamp
+
+The current scenario produces an average distance_to_closest_person value of **1.6437996256101823**. Your target is to design operational changes that will lower this average as much as possible, while keeping the overall scenario logic and operational goals unchanged.
+
+Feedback Data:
+```json
+[
+  {{"timestamp": 0.0, "robot_wp": "G19", "worker1_wp": "G3", "worker2_wp": "G19", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 0.507512759, "robot_wp": "G19", "worker1_wp": "G4", "worker2_wp": "G18", "distance_to_closest_person": 0.2508328031187272}},
+  {{"timestamp": 1.007516232, "robot_wp": "G19", "worker1_wp": "G4", "worker2_wp": "G17", "distance_to_closest_person": 0.6111092722576978}},
+  {{"timestamp": 1.507527917, "robot_wp": "G18", "worker1_wp": "G5", "worker2_wp": "G17", "distance_to_closest_person": 0.7386464663146537}},
+  {{"timestamp": 2.007545161, "robot_wp": "G18", "worker1_wp": "G5", "worker2_wp": "G16", "distance_to_closest_person": 1.0216565474865074}},
+  {{"timestamp": 2.517524348, "robot_wp": "G18", "worker1_wp": "G6", "worker2_wp": "G16", "distance_to_closest_person": 1.450257310334969}},
+  {{"timestamp": 3.027512487, "robot_wp": "G18", "worker1_wp": "G6", "worker2_wp": "G15", "distance_to_closest_person": 1.6729348380254847}},
+  {{"timestamp": 3.5275294829999995, "robot_wp": "G17", "worker1_wp": "G7", "worker2_wp": "G14", "distance_to_closest_person": 2.1445380126118945}},
+  {{"timestamp": 4.0278527, "robot_wp": "G17", "worker1_wp": "G7", "worker2_wp": "G14", "distance_to_closest_person": 2.63382747963336}},
+  {{"timestamp": 4.538229414, "robot_wp": "G17", "worker1_wp": "G8", "worker2_wp": "G13", "distance_to_closest_person": 2.608812537047114}},
+  {{"timestamp": 5.047548082, "robot_wp": "F17", "worker1_wp": "G8", "worker2_wp": "G13", "distance_to_closest_person": 2.9881324908738605}},
+  {{"timestamp": 5.547781203, "robot_wp": "F16", "worker1_wp": "G9", "worker2_wp": "G12", "distance_to_closest_person": 3.411725931454387}},
+  {{"timestamp": 6.057648194, "robot_wp": "F16", "worker1_wp": "G9", "worker2_wp": "G11", "distance_to_closest_person": 3.790869788276665}},
+  {{"timestamp": 6.567726241, "robot_wp": "F16", "worker1_wp": "G10", "worker2_wp": "G10", "distance_to_closest_person": 4.091551771891987}},
+  {{"timestamp": 7.068348664, "robot_wp": "F16", "worker1_wp": "G10", "worker2_wp": "G10", "distance_to_closest_person": 3.857715979950795}},
+  {{"timestamp": 7.577436925000001, "robot_wp": "F15", "worker1_wp": "G11", "worker2_wp": "G9", "distance_to_closest_person": 3.3248288715242964}},
+  {{"timestamp": 8.077776813, "robot_wp": "F15", "worker1_wp": "G12", "worker2_wp": "G9", "distance_to_closest_person": 2.4415151995344835}},
+  {{"timestamp": 8.57818102, "robot_wp": "F15", "worker1_wp": "G12", "worker2_wp": "G8", "distance_to_closest_person": 1.9479262662148595}},
+  {{"timestamp": 9.08759444, "robot_wp": "F15", "worker1_wp": "G13", "worker2_wp": "G8", "distance_to_closest_person": 1.084522119122073}},
+  {{"timestamp": 9.597602082, "robot_wp": "F14", "worker1_wp": "G13", "worker2_wp": "G7", "distance_to_closest_person": 0.2938202882770568}},
+  {{"timestamp": 10.098352895, "robot_wp": "F14", "worker1_wp": "G14", "worker2_wp": "G7", "distance_to_closest_person": 0.1601593185097426}},
+  {{"timestamp": 10.607498778, "robot_wp": "F14", "worker1_wp": "G15", "worker2_wp": "G6", "distance_to_closest_person": 0.4584282184405368}},
+  {{"timestamp": 11.107625071, "robot_wp": "F13", "worker1_wp": "G15", "worker2_wp": "G6", "distance_to_closest_person": 0.8663554309347528}},
+  {{"timestamp": 11.618196659, "robot_wp": "F13", "worker1_wp": "G16", "worker2_wp": "G5", "distance_to_closest_person": 1.516371986510434}},
+  {{"timestamp": 12.128150811, "robot_wp": "F13", "worker1_wp": "G16", "worker2_wp": "G5", "distance_to_closest_person": 2.256304057618725}},
+  {{"timestamp": 12.637700232, "robot_wp": "F13", "worker1_wp": "G17", "worker2_wp": "G4", "distance_to_closest_person": 2.9143321603233328}},
+  {{"timestamp": 13.147510097, "robot_wp": "F12", "worker1_wp": "G17", "worker2_wp": "G4", "distance_to_closest_person": 3.684805685429232}},
+  {{"timestamp": 13.657637336, "robot_wp": "F12", "worker1_wp": "G18", "worker2_wp": "G3", "distance_to_closest_person": 4.645062870239419}},
+  {{"timestamp": 14.167559479, "robot_wp": "F12", "worker1_wp": "G19", "worker2_wp": "G4", "distance_to_closest_person": 5.475382099720807}},
+  {{"timestamp": 14.667592865, "robot_wp": "F12", "worker1_wp": "G18", "worker2_wp": "G4", "distance_to_closest_person": 5.443448055179659}},
+  {{"timestamp": 15.167770069, "robot_wp": "F11", "worker1_wp": "G18", "worker2_wp": "G5", "distance_to_closest_person": 5.138317298437204}},
+  {{"timestamp": 15.668308661, "robot_wp": "F11", "worker1_wp": "G17", "worker2_wp": "G5", "distance_to_closest_person": 4.491569855905756}},
+  {{"timestamp": 16.17761531, "robot_wp": "F11", "worker1_wp": "G17", "worker2_wp": "G6", "distance_to_closest_person": 3.697145704757112}},
+  {{"timestamp": 16.687431737, "robot_wp": "F10", "worker1_wp": "G16", "worker2_wp": "G6", "distance_to_closest_person": 3.173045884167254}},
+  {{"timestamp": 17.1875299, "robot_wp": "F10", "worker1_wp": "G16", "worker2_wp": "G7", "distance_to_closest_person": 2.332367488004233}},
+  {{"timestamp": 17.697644368000002, "robot_wp": "F10", "worker1_wp": "G15", "worker2_wp": "G7", "distance_to_closest_person": 1.786884368359067}},
+  {{"timestamp": 18.207556619, "robot_wp": "F9", "worker1_wp": "G14", "worker2_wp": "G8", "distance_to_closest_person": 0.9235795799604356}},
+  {{"timestamp": 18.717600488, "robot_wp": "F9", "worker1_wp": "G14", "worker2_wp": "G8", "distance_to_closest_person": 0.4222486670403031}},
+  {{"timestamp": 19.227491858, "robot_wp": "F9", "worker1_wp": "G13", "worker2_wp": "G9", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 19.72752648, "robot_wp": "F9", "worker1_wp": "G13", "worker2_wp": "G9", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 20.227619968000003, "robot_wp": "F8", "worker1_wp": "G12", "worker2_wp": "G10", "distance_to_closest_person": 0.4445228508689769}},
+  {{"timestamp": 20.737628030000003, "robot_wp": "F8", "worker1_wp": "G12", "worker2_wp": "G10", "distance_to_closest_person": 1.051360915202346}},
+  {{"timestamp": 21.247682067000003, "robot_wp": "F8", "worker1_wp": "G11", "worker2_wp": "G11", "distance_to_closest_person": 1.6988858139263223}},
+  {{"timestamp": 21.757470221, "robot_wp": "F8", "worker1_wp": "G11", "worker2_wp": "G11", "distance_to_closest_person": 2.0384032199486635}},
+  {{"timestamp": 22.257884412000003, "robot_wp": "F7", "worker1_wp": "G10", "worker2_wp": "G12", "distance_to_closest_person": 1.8811699952762364}},
+  {{"timestamp": 22.767800833000003, "robot_wp": "F7", "worker1_wp": "G10", "worker2_wp": "G13", "distance_to_closest_person": 1.551104492165878}},
+  {{"timestamp": 23.27754192, "robot_wp": "F7", "worker1_wp": "G9", "worker2_wp": "G13", "distance_to_closest_person": 1.5249329651615915}},
+  {{"timestamp": 23.787499139, "robot_wp": "F7", "worker1_wp": "G9", "worker2_wp": "G14", "distance_to_closest_person": 1.1638224726610944}},
+  {{"timestamp": 24.287530452, "robot_wp": "F6", "worker1_wp": "G8", "worker2_wp": "G14", "distance_to_closest_person": 0.7573017688785089}},
+  {{"timestamp": 24.787842299, "robot_wp": "F6", "worker1_wp": "G7", "worker2_wp": "G15", "distance_to_closest_person": 0.5945192275114923}},
+  {{"timestamp": 25.297637984, "robot_wp": "F6", "worker1_wp": "G7", "worker2_wp": "G15", "distance_to_closest_person": 0.4526451495832215}},
+  {{"timestamp": 25.807893988, "robot_wp": "F6", "worker1_wp": "G7", "worker2_wp": "G16", "distance_to_closest_person": 0.2446908393970609}},
+  {{"timestamp": 26.318120119, "robot_wp": "F5", "worker1_wp": "G6", "worker2_wp": "G17", "distance_to_closest_person": 0.1990703851182017}},
+  {{"timestamp": 26.827735519, "robot_wp": "G5", "worker1_wp": "G6", "worker2_wp": "G18", "distance_to_closest_person": 0.1199929462397788}},
+  {{"timestamp": 27.337748213, "robot_wp": "G5", "worker1_wp": "G5", "worker2_wp": "G18", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 27.84753592, "robot_wp": "G4", "worker1_wp": "G5", "worker2_wp": "G19", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 28.347631928, "robot_wp": "G4", "worker1_wp": "G5", "worker2_wp": "G18", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 28.85801572, "robot_wp": "G4", "worker1_wp": "G5", "worker2_wp": "G18", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 29.367832355, "robot_wp": "G4", "worker1_wp": "G4", "worker2_wp": "G17", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 29.868047483, "robot_wp": "G4", "worker1_wp": "H4", "worker2_wp": "G17", "distance_to_closest_person": 0.0859206680132254}},
+  {{"timestamp": 30.378201086, "robot_wp": "G3", "worker1_wp": "G4", "worker2_wp": "G16", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 30.887696249, "robot_wp": "G3", "worker1_wp": "G4", "worker2_wp": "G16", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 31.307518102, "robot_wp": "G3", "worker1_wp": "G3", "worker2_wp": "G15", "distance_to_closest_person": 0.0}}
+]
+```
+
+
+Your tasks:
+
+Analyze the feedback data to identify time intervals, spatial arrangements, or task moments when the distance_to_closest_person is lowest.
+
+Based on these insights, propose adjustments to the operational scenario (if possible) that would likely further decrease the robot’s average distance_to_closest_person, such as:
+- Modifying the sequence, timing, or overlap of worker tasks
+- Adjusting worker routes to create more opportunities for the robot to be in close proximity to the workers
+- Introducing more situations where workers and the robot occupy adjacent or overlapping areas along the robot's fixed path
+
+If possible, provide both a revised high-level and low-level route for each worker:
+High-level route: For each worker, list the full, step-by-step sequence of functional areas visited (e.g., "Boxes 1 → Area 1 → Shelf 2 → Boxes 1"), ensuring the sequence forms a complete loop.
+Low-level route: For each step in each worker’s task sequence, provide all of the following:
+- Start coordinate (e.g., C9)
+- End coordinate (e.g., G6)
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6])
+Thoroughly include every step in both the high-level area sequence and the corresponding detailed waypoint path for each worker, ensuring that the route forms a closed loop.
+Additional notes for low-level route: All waypoints in each path must be valid navigation points. For any step involving a specific area, only use the waypoints listed in that area's Area Valid Waypoints, including any listed edge waypoints, as start, end, or intermediate points. Edge waypoints are valid and should be used when appropriate.
+
+If the scenario is already near-optimal for minimizing the average distance_to_closest_person, explain why no significant further improvement can be made without fundamentally changing the scenario.
+
+Note:
+When optimizing, your primary goal is to minimize the mean distance_to_closest_person value, even if this causes some moments where the robot is extremely close to the workers.
+Do not propose changes that sacrifice the scenario’s operational validity, but any minor adjustment is acceptable if it decreases the mean distance_to_closest_person.
+
+
+You must provide:
+
+Analysis of Robot–Person Distance Patterns: Identification of when and where the distance_to_closest_person is lowest, along with the underlying causes of the observed minimums.
+
+Proposed Optimizations: Recommendations for changes in worker task assignment, timing, or routing that could further decrease robot distance_to_closest_person.
+
+Revised High-Level Worker Task Sequences: A complete area-by-area loop for each worker, reflecting the revised task sequence.
+
+Revised Low-Level Worker Routes: Detailed start and end coordinates, as well as full waypoint paths as ordered lists for each step in each worker’s high-level sequence, ensuring all paths form closed loops. Only use valid waypoints for each area, including edge waypoints when they are available.
+
+Scenario Justification: Explanation of how the proposed changes are expected to minimize the average distance_to_closest_person, along with justification for maintaining scenario integrity.
+
+
+==================================================
+
+
+---
+
+## 1. **Analysis of Robot–Person Distance Patterns**
+
+### **Lowest distances occur:**
+- **Near 0.0:** When the robot and one or both workers occupy the **same G-row waypoint** or adjacent ones, especially at G19 (right endpoint), G3 (left endpoint), and at points where workers closely bracket the robot (e.g., robot at G4/G5 and workers at G4/G5 or G5/G6).
+- **Sustained minimums:** When at least one worker moves *just ahead* (or just behind) of the robot along G-row, or when both leapfrog and "meet up" at endpoints or pass the robot in transit.
+
+### **Higher distances:**  
+- Occur when workers are spread apart along G-row (e.g., one at G4, the other at G19) while the robot is in the mid-upper G-row region or just transitioning through.
+- Spikes appear at “turning points” when both workers are at the same end or have large intervals between their positions and the robot’s current spot.
+
+### **Underlying pattern:**  
+- **Leapfrogging with bracketing** is most effective at keeping the robot close.  
+- **Reducing solo stretches** where both workers are at the extremes simultaneously—rather than keeping at least one adjacent to the robot—should lower the mean distance further.
+
+---
+
+## 2. **Proposed Optimizations**
+
+- **Micro-stagger worker starts and task transitions:** Instead of "looping in sync" and swapping at the endpoints, have one worker always start their segment one or two waypoints ahead or behind the robot, and overlap their G-row stretches by 1–2 points.
+- **Increase frequency of worker handoffs and shorten G-row stretches:** Have workers trade “lead” and “follow” positions more often (e.g., in the central corridor: G11–G15) to maintain proximity in the robot's likely middle route (where it spends most time if speed is constant).
+- **Explicit central “meeting points”:** Schedule both workers to have brief micro-pauses at intervals at mid-G-row (e.g., both at G11 or G15 at the same time), increasing overlap probability there.
+
+---
+
+## 3. **Revised High-Level Worker Task Sequences**
+
+### **Worker 1**
+- Waste Area → Area 1 → Area 2 → Area 3 → Area 4 → Area 5 → Area 3 → Area 1 → Waste Area
+
+### **Worker 2**
+- Area 5 → Area 4 → Area 3 → Area 2 → Area 3 → Area 4 → Area 5
+
+*(Key changes: Worker 1 and Worker 2 overlap routes more in the center; Worker 1 loops back through more central waypoints instead of always to the opposite endpoint. Worker 2 oscillates between Area 3, 4, and 5, remaining more often in the robot's mid G-row zone.)*
+
+---
+
+## 4. **Revised Low-Level Worker Routes**
+
+### **Worker 1:**
+
+1. **Waste Area → Area 1**
+   - Start: G3
+   - End: G4
+   - Path: ["G3", "G4"]
+
+2. **Area 1 → Area 2**
+   - Start: G4
+   - End: G7
+   - Path: ["G4", "G5", "G6", "G7"]
+
+3. **Area 2 → Area 3**
+   - Start: G7
+   - End: G11
+   - Path: ["G7", "G8", "G9", "G10", "G11"]
+
+4. **Area 3 → Area 4**
+   - Start: G11
+   - End: G15
+   - Path: ["G11", "G12", "G13", "G14", "G15"]
+
+5. **Area 4 → Area 5**
+   - Start: G15
+   - End: G19
+   - Path: ["G15", "G16", "G17", "G18", "G19"]
+
+6. **Area 5 → Area 3**
+   - Start: G19
+   - End: G13
+   - Path: ["G19", "G18", "G17", "G16", "G15", "G14", "G13"]
+
+7. **Area 3 → Area 1**
+   - Start: G13
+   - End: G5
+   - Path: ["G13", "G12", "G11", "G10", "G9", "G8", "G7", "G6", "G5"]
+
+8. **Area 1 → Waste Area**
+   - Start: G5
+   - End: G3
+   - Path: ["G5", "G4", "G3"]
+
+### **Worker 2:**
+
+1. **Area 5 → Area 4**
+   - Start: G19
+   - End: G15
+   - Path: ["G19", "G18", "G17", "G16", "G15"]
+
+2. **Area 4 → Area 3**
+   - Start: G15
+   - End: G13
+   - Path: ["G15", "G14", "G13"]
+
+3. **Area 3 → Area 2**
+   - Start: G13
+   - End: G9
+   - Path: ["G13", "G12", "G11", "G10", "G9"]
+
+4. **Area 2 → Area 3**
+   - Start: G9
+   - End: G13
+   - Path: ["G9", "G10", "G11", "G12", "G13"]
+
+5. **Area 3 → Area 4**
+   - Start: G13
+   - End: G17
+   - Path: ["G13", "G14", "G15", "G16", "G17"]
+
+6. **Area 4 → Area 5**
+   - Start: G17
+   - End: G19
+   - Path: ["G17", "G18", "G19"]
+
+---
+
+## 5. **Scenario Justification**
+
+- **Overlap in the middle G-row (G11–G17):** By having both workers spend more time crossing/pausing in these midpoints, the scenario ensures the robot, no matter its location, is always within 1–2 waypoints of at least one worker, reducing mean robot-to-person distance.
+- **Alternating leads, not synchronized full laps:** This prevents both workers being at extremes simultaneously, eliminating distance spikes.
+- **Operational integrity:** Both workers still visit all mandatory zones with full process coverage. All area entries/exits use only allowed area waypoints, no detours or physical violations.
+
+---
+
+### **Summary**
+- **Robot and humans are almost always within adjacent G-row waypoints.**
+- **Distance spikes at opposite endpoints are reduced.**
+- **Scenario remains operationally valid and logically robust, only “tightened” in overlap and timing, not fundamentally changed.**
+- **This leapfrogging, central-overlapping, micro-sequenced pattern lowers the mean distance further, likely near the theoretical minimum for two workers and one robot on this route.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+Let's proceed stepwise for each worker, checking every requirement in detail. 
+
+---
+
+## Worker 1
+
+### 1. Waste Area → Area 1
+- **Path:** ["G3", "G4"]
+- **Start:** G3 (Waste Area: valid)
+- **End:** G4 (Area 1: valid)
+- **Waypoints:** Both valid (and on different area's valid list).
+- **Gaps:** Consecutive; G3-G4.
+- **Blocked:** Not blocked.
+
+**Result:** VALID
+
+---
+
+### 2. Area 1 → Area 2
+- **Path:** ["G4", "G5", "G6", "G7"]
+- **Start/End:** G4 (Area 1 valid), G7 (Area 2 valid)
+- **Waypoints:** G4, G5, G6 = Area 1; G7 = both Area 1 & Area 2
+- **Blocked:** Not blocked. Continuous.
+
+**Result:** VALID
+
+---
+
+### 3. Area 2 → Area 3
+- **Path:** ["G7", "G8", "G9", "G10", "G11"]
+- **Start:** G7 (Area 2 valid)
+- **End:** G11 (Area 3 valid)
+- **Waypoints:** G7-G10: Area 2; G11: Area 3; All valid.
+- **Blocked:** Not blocked.
+
+**Result:** VALID
+
+---
+
+### 4. Area 3 → Area 4
+- **Path:** ["G11", "G12", "G13", "G14", "G15"]
+- **Start:** G11 (Area 3 valid)
+- **End:** G15 (Area 4 valid)
+- **Waypoints:** G11-G14: Area 3; G15: Area 4; All valid.
+- **Blocked:** Not blocked.
+
+**Result:** VALID
+
+---
+
+### 5. Area 4 → Area 5
+- **Path:** ["G15", "G16", "G17", "G18", "G19"]
+- **Start:** G15 (Area 4 valid)
+- **End:** G19 (Area 5 valid)
+- **Waypoints:** G15-G17: Area 4; G18-G19: Area 5; All valid.
+- **Blocked:** Not blocked.
+
+**Result:** VALID
+
+---
+
+### 6. Area 5 → Area 3
+- **Path:** ["G19", "G18", "G17", "G16", "G15", "G14", "G13"]
+- **Start:** G19 (Area 5 valid)
+- **End:** G13 (Area 3 valid)
+- **Waypoints:** G19-G18: Area 5; G17-G15: Area 4; G14-G13: Area 3; All valid.
+- **Blocked:** Not blocked.
+
+**Result:** VALID
+
+---
+
+### 7. Area 3 → Area 1
+- **Path:** ["G13", "G12", "G11", "G10", "G9", "G8", "G7", "G6", "G5"]
+- **Start:** G13 (Area 3 valid)
+- **End:** G5 (Area 1 valid)
+- **Waypoints:** G13-G11: Area 3; G10-G7: Area 2; G6-G5: Area 1; All valid.
+- **Blocked:** Not blocked.
+
+**Result:** VALID
+
+---
+
+### 8. Area 1 → Waste Area
+- **Path:** ["G5", "G4", "G3"]
+- **Start:** G5 (Area 1 valid)
+- **End:** G3 (Waste Area valid)
+- **Waypoints:** G5-G4: Area 1; G3: Waste Area; All valid.
+- **Blocked:** Not blocked.
+
+**Result:** VALID
+
+---
+
+### **Loop Closure**
+- End is G3, same as start. All step ends equals next step start.
+- **Closed loop, fully continuous.**
+
+---
+
+## Worker 2
+
+### 1. Area 5 → Area 4
+- **Path:** ["G19", "G18", "G17", "G16", "G15"]
+- **Start:** G19 (Area 5 valid)
+- **End:** G15 (Area 4 valid)
+- **Waypoints:** G19-G18: Area 5; G17-G15: Area 4; All valid.
+- **Blocked:** Not blocked.
+
+**Result:** VALID
+
+---
+
+### 2. Area 4 → Area 3
+- **Path:** ["G15", "G14", "G13"]
+- **Start:** G15 (Area 4 valid)
+- **End:** G13 (Area 3 valid)
+- **Waypoints:** G15: Area 4; G14-G13: Area 3; All valid.
+- **Blocked:** Not blocked.
+
+**Result:** VALID
+
+---
+
+### 3. Area 3 → Area 2
+- **Path:** ["G13", "G12", "G11", "G10", "G9"]
+- **Start:** G13 (Area 3 valid)
+- **End:** G9 (Area 2 valid)
+- **Waypoints:** G13-G11: Area 3; G10-G9: Area 2; All valid.
+- **Blocked:** Not blocked.
+
+**Result:** VALID
+
+---
+
+### 4. Area 2 → Area 3
+- **Path:** ["G9", "G10", "G11", "G12", "G13"]
+- **Start:** G9 (Area 2 valid)
+- **End:** G13 (Area 3 valid)
+- **Waypoints:** G9-G10: Area 2; G11-G13: Area 3; All valid.
+- **Blocked:** Not blocked.
+
+**Result:** VALID
+
+---
+
+### 5. Area 3 → Area 4
+- **Path:** ["G13", "G14", "G15", "G16", "G17"]
+- **Start:** G13 (Area 3 valid)
+- **End:** G17 (Area 4 valid)
+- **Waypoints:** G13-G14: Area 3; G15-G17: Area 4; All valid.
+- **Blocked:** Not blocked.
+
+**Result:** VALID
+
+---
+
+### 6. Area 4 → Area 5
+- **Path:** ["G17", "G18", "G19"]
+- **Start:** G17 (Area 4 valid)
+- **End:** G19 (Area 5 valid)
+- **Waypoints:** G17: Area 4; G18-G19: Area 5; All valid.
+- **Blocked:** Not blocked.
+
+**Result:** VALID
+
+---
+
+### **Loop Closure**
+- Ends at G19 (start of route). All tasks are continuous, next-step’s start matches previous end.
+
+**Result:** Closed loop, fully compliant.**
+
+---
+
+## **Summary of Validation**
+
+- All segments, waypoints, and transitions are valid and permitted.
+- No blocked or unavailable waypoints are used.
+- All in-area waypoints are properly selected from each area’s valid list.
+- All task transitions are continuous.
+- All loops are properly closed.
+
+**NO CORRECTIONS NEEDED. ALL ROUTES ARE FULLY VALID.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Waste Area → Area 1",
+      "Start": "G3",
+      "End": "G4",
+      "Path": ["G3", "G4"]
+    },
+    {
+      "Task": "Area 1 → Area 2",
+      "Start": "G4",
+      "End": "G7",
+      "Path": ["G4", "G5", "G6", "G7"]
+    },
+    {
+      "Task": "Area 2 → Area 3",
+      "Start": "G7",
+      "End": "G11",
+      "Path": ["G7", "G8", "G9", "G10", "G11"]
+    },
+    {
+      "Task": "Area 3 → Area 4",
+      "Start": "G11",
+      "End": "G15",
+      "Path": ["G11", "G12", "G13", "G14", "G15"]
+    },
+    {
+      "Task": "Area 4 → Area 5",
+      "Start": "G15",
+      "End": "G19",
+      "Path": ["G15", "G16", "G17", "G18", "G19"]
+    },
+    {
+      "Task": "Area 5 → Area 3",
+      "Start": "G19",
+      "End": "G13",
+      "Path": ["G19", "G18", "G17", "G16", "G15", "G14", "G13"]
+    },
+    {
+      "Task": "Area 3 → Area 1",
+      "Start": "G13",
+      "End": "G5",
+      "Path": ["G13", "G12", "G11", "G10", "G9", "G8", "G7", "G6", "G5"]
+    },
+    {
+      "Task": "Area 1 → Waste Area",
+      "Start": "G5",
+      "End": "G3",
+      "Path": ["G5", "G4", "G3"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Area 5 → Area 4",
+      "Start": "G19",
+      "End": "G15",
+      "Path": ["G19", "G18", "G17", "G16", "G15"]
+    },
+    {
+      "Task": "Area 4 → Area 3",
+      "Start": "G15",
+      "End": "G13",
+      "Path": ["G15", "G14", "G13"]
+    },
+    {
+      "Task": "Area 3 → Area 2",
+      "Start": "G13",
+      "End": "G9",
+      "Path": ["G13", "G12", "G11", "G10", "G9"]
+    },
+    {
+      "Task": "Area 2 → Area 3",
+      "Start": "G9",
+      "End": "G13",
+      "Path": ["G9", "G10", "G11", "G12", "G13"]
+    },
+    {
+      "Task": "Area 3 → Area 4",
+      "Start": "G13",
+      "End": "G17",
+      "Path": ["G13", "G14", "G15", "G16", "G17"]
+    },
+    {
+      "Task": "Area 4 → Area 5",
+      "Start": "G17",
+      "End": "G19",
+      "Path": ["G17", "G18", "G19"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+

@@ -1,0 +1,3572 @@
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations scenario planner. Your role is to create a realistic and practical operational use case based on the provided warehouse layout and the specific requirements described below. Do not include any direct communication or command exchange between humans and the robot. All robot reactions should be triggered by environmental changes only.
+
+
+Provided Known Information:
+
+1. Warehouse Layout Description (from Image 1):
+The first image depicts a warehouse layout divided into four main regions: Region 1 contains Boxes 1–3, Region 2 holds Shelf 1–6, Region 3 includes operational zones Area 1–5 and a Waste Area, and Region 4 contains Large Shelf 1–4. Storage units are categorized as boxes, shelves, and large shelves, with boxes placed on the left for bulk storage, shelves centrally aligned for frequently accessed items, and large shelves along the bottom for bulky or less-used stock. Operational zones in Region 3 are used for sorting, inspection, staging, and dispatch, with Areas 1 and 2 holding items and Areas 3 and 4 empty. The Waste Area is isolated for non-usable materials. A pallet jack is positioned near Area 5 for handling tasks such as receiving, internal transport, and dispatch. Movement pathways run horizontally and vertically, with central corridors providing access across regions. Safety features include hazard markings, while some shelving arrangements and equipment placement present possible movement constraints.
+
+2. Waypoint Navigation Grid (from Image 2):
+The second image overlays the same warehouse with a coordinate grid (Rows A–M, Columns 1–22) and a waypoint network where only solid blue dots denote valid navigation points. Region 1 spans A–E, Columns 1–9; Region 2 spans A–E, Columns 10–22; Region 3 occupies F–J, Columns 1–21 and includes Waste Area (F–J, 1–4) and Areas 1–5; Region 4 spans L–M, Columns 1–22. Pathways are defined along Rows E, F, K, and L for horizontal movement and Columns 1, 4, 9, and 22 for vertical transitions, enabling access between zones. Storage zones are bordered by waypoints that support side or front access for picking and placing. Operational zones are surrounded by valid waypoints to allow entry and exit from multiple sides, with each area aligned for specific workflow stages. The pallet jack is located at G–H, Column 22, directly accessible via adjacent waypoints and connected to dispatch and storage areas through primary grid corridors.
+
+3. Robot Navigation Route:
+The robot starts near grid point M5, close to Large Shelf 1, and travels rightward from row M to row H, moving from column 5 to column 17, and ends around H17 in Area 4. The approximate waypoints it passes through are: M5 → M6 → L6 → L7 → L8 → L9 → K9 → K10 → K11 → K12 → J13 → J14 → I14 → I15 → I16 → H16 → H17. This route suggests the robot is likely performing a material relocation task, picking up an item from Large Shelf 1 and delivering it to Area 4 for sorting, inspection, or further processing.
+
+
+Special Requirements:
+
+The use case you generate must be designed so that the coordination, task sequence, and workflow of the two human workers are likely to cause the robot, which follows a fixed path, to have the smallest possible average distance from the two human workers during execution.
+
+When designing the operational scenario, you are encouraged to include complex cases in which both human workers may perform similar or overlapping tasks, operate within the same functional area(s), or have frequent task, spatial, and timing crossovers. Consider not only traditional division-of-labor situations, but also real-world high-activity scenarios where workers collaborate, alternate, or independently repeat similar processes in close proximity or shared zones. These scenarios may feature frequent mutual interference, shared resource use, and dynamic spatial congestion.
+
+Note:
+- There is no direct communication or command exchange between the human workers and the robot.
+- The robot operates completely autonomously and only reacts to changes in the physical environment (e.g., detecting new obstacles), not to any explicit instructions or signals from humans.
+- Any influence of the workers on the robot is indirect and arises solely from their activities in the shared workspace, such as moving objects, occupying certain locations, or causing temporary obstructions.
+
+
+Important Instruction:
+One or more previous scenarios will be provided below, formatted in JSON. These are provided for reference only to help ensure that your new scenario is fundamentally different from any previous ones. You do not need to use this format for your new scenario.
+
+```json
+{
+  "scenario_0": {
+    "summary": "During a peak morning receiving operation, two human workers are jointly responsible for unloading bulk stock from Large Shelf 1, transporting it along the main warehouse aisle to Area 4, and collaboratively performing rapid sorting and initial inspection tasks in Area 4. Both frequently walk the full pathway between Large Shelf 1 (M5–L7) and Area 4 (H17), retracing the robot's fixed navigation route almost entirely. Overflow or defective items are regularly moved together to Area 5, further increasing the overlap along H16–H17. As a result, both workers spend extended periods in close proximity to the robot as it travels between M5 and H17, resulting in the smallest possible average distance between the robot and the workers based on naturally occurring workflow, overlapping task zones, and repeated back-and-forth movement along shared corridors.",
+    "Worker 1": ["Large Shelf 1 → Area 4", "Area 4 → Large Shelf 1"],
+    "Worker 2": ["Large Shelf 1 → Area 4", "Area 4 → Large Shelf 1"],
+    "average_distance_to_closest_person": 0.6743001355423385,
+  },
+  "scenario_1": {
+    "summary": "During a scheduled inventory cycle count and discrepancy resolution period, Worker 1 is tasked with auditing shelves in Region 2 (Shelf 1–6), repeatedly transporting flagged or miscounted items to Area 4 (H17) for secondary inspection and then returning verified items. Meanwhile, Worker 2 handles bulk packages in Region 1 (Boxes 1–3), frequently transferring items to Area 4 (H17) for staging and cross-verification prior to dispatch or reallocation. Periodically, both workers convene in Area 4 to jointly resolve discrepancies, resulting in overlapping activities and shared movement corridors almost entirely tracing the robot’s fixed route (M5 → H17 and back). This operational flow naturally keeps both workers in close proximity to the robot’s path for extended durations, leading to the smallest possible average distance to the robot, driven by overlapping transport cycles, central staging, and repeated convergence at key processing zones.",
+    "Worker 1": ["Area 4 → Shelf 2", "Shelf 2 → Area 4", "Area 4 → Shelf 3", "Shelf 3 → Area 4", "Area 4 → Shelf 4", "Shelf 4 → Area 4"],
+    "Worker 2": ["Boxes 1 → Area 4", "Area 4 → Boxes 1"],
+    "average_distance_to_closest_person": 2.9929284568692385,
+  },
+  "scenario_2": {
+    "summary": "During a midday expedited returns reprocessing cycle, Worker 1 repeatedly collects batches of returned items from Large Shelf 2 and Large Shelf 3 (L9–M15), carrying them north through the main warehouse corridor to Area 4 (H17) for detailed inspection and eligibility staging. Worker 2 alternates between Area 4, where relabeling and documentation are performed, and the Shelf 4–6 segment in Region 2 (C16–E22), where approved items are immediately restocked. Both use Area 4 as a central staging/processing hub and often operate in close proximity within its adjacent corridors. The robot, carrying items from Large Shelf 1 (M5) along its fixed path to Area 4 (H17), shares nearly the entire southern and central route corridor with Worker 1, and overlaps frequently at H17 with Worker 2. The cyclical, staggered but converging tasks in Area 4, frequent batch handoffs, and high south-to-north and east-to-west movement cycles result in the robot traveling in extremely close proximity to at least one worker for almost its entire route, minimizing the average human-robot distance due to sustained operational congestion and spatial convergence within required workflow zones.",
+    "Worker 1": ["Large Shelf 2 → Large Shelf 3", "Large Shelf 3 → Area 4", "Area 4 (H17) → J15", "J15 → H16", "Area 4 → Large Shelf 2"],
+    "Worker 2": ["Area 4 (H17) → Shelf 4", "Shelf 4 → Area 4 (G16)", "G16 → H16", "H16 → H17", "Area 4 (H17) → Shelf 5", "Shelf 5 → Area 4 (G16)", "G16 → H16", "H16 → H17", "Area 4 (H17) → Shelf 6", "Shelf 6 → Area 4 (G16)", "G16 → H16", "H16 → H17"],
+    "average_distance_to_closest_person": 2.6815784780194916,
+  },
+  "scenario_3": {
+    "summary": "During an intense late-afternoon cross-docking and just-in-time fulfillment window, Worker 1 continuously transfers bulk restock items from Large Shelf 1 to Area 3 for pre-sorting, then from Area 3 to Area 4 for staging, repeatedly mirroring the robot’s path from M5 to H17 along the main horizontal and vertical corridors. Meanwhile, Worker 2 circulates between Shelf 5/6, the Waste Area, Area 5, and Area 4, replenishing packaging materials, sorting urgent orders, and consolidating dispatch, often traversing the robot’s final and central path segments (I14–H17) and causing recurrent overlap at Area 4. The constant, high-density movement through shared corridors, mutual staging at Area 4, and ongoing item transfer result in the robot’s route being consistently and densely occupied by both workers, ensuring the smallest possible average distance between the robot and humans is achieved solely via realistic convergence of work cycles, operational crossovers, and environmental congestion.",
+    "Worker 1": ["Large Shelf 1 → Area 3", "Area 3 → Area 4", "Area 4 → Area 3", "Area 3 → Large Shelf 1"],
+    "Worker 2": ["Area 4 → Area 5", "Area 5 → Area 4", "Area 4 → Area 5", "Area 5 → Area 4"],
+    "average_distance_to_closest_person": 1.767689012664353,
+  },
+  "scenario_4": {
+    "summary": "During a surprise afternoon quality control audit and urgent repackaging cycle, both human workers are required to simultaneously retrieve and inspect products from Large Shelf 1 and multiple standard Shelves, using Area 2 and Area 4 as dynamic audit/repack staging zones. Worker 1 repeatedly pulls bulk items from Large Shelf 1 (M5–L7), transporting them to Area 2 (I12–I14) or Area 4 (H17) for inspection and rapid repackaging, and frequently commutes between these zones for cross-checks and workflow maintenance. Worker 2 concurrently audits and relocates parcels between Shelf 3/4, Area 2, and Area 4, performing real-time spot checks, taking defect items to the Waste Area, or staging pass items in Area 5. Both workers cycle repeatedly along the major aisle corridor (L6–K11–I14–H17), with frequent overlap at Area 2 and Area 4, often working side by side or converging at identical or adjacent waypoints. The robot, tasked with autonomously moving bulk repack stock from Large Shelf 1 to Area 4, traverses the same high-congestion corridor, resulting in it being almost constantly near one or both workers. The substantial spatial and timing overlap, driven by urgent quality workflow and intensive use of shared central corridors, results in the robot’s average distance to the closest worker being minimized naturally and persistently throughout its route.",
+    "Worker 1": ["Large Shelf 1 → Area 3", "Area 3 → Area 4", "Area 4 → Large Shelf 1"],
+    "Worker 2": ["Large Shelf 1 → Area 4", "Area 4 → Large Shelf 1"],
+    "average_distance_to_closest_person": 1.179558421338725,
+  },
+  "scenario_5": {
+    "summary": "During an end-of-day bulk consolidation and redistribution cycle, two human workers are assigned distinct, yet closely interwoven roles that require them to traverse, occupy, and repeatedly return to the same warehouse corridors and central operational areas as the robot’s fixed route (from M5 at Large Shelf 1 to H17 at Area 4). Worker 1 cycles continuously between Large Shelf 1, Area 2, and Area 4, transporting bulk items for sorting and staging, precisely mirroring the robot’s horizontal and vertical travel path. Worker 2 simultaneously clears overflow from Area 5 to Area 4 and, as space constraints demand, shuttles between Area 4, Area 3, and Area 5, repeatedly crossing or sharing the final segments of the robot’s trajectory. High processing volume forces both workers to coordinate their movement and activities directly along the robot’s route: Worker 1 and Worker 2 frequently converge side-by-side or alternate leapfrogging in central aisles and Area 4, resulting in almost constant human presence along all major waypoints of the robot’s journey. The workflow is driven purely by operational necessity—minimizing the average distance between the robot and the workers naturally, through repeated high-density use of identical or adjacent paths and shared staging zones, with no direct interaction or coordination between humans and the autonomous robot.",
+    "Worker 1": ["Large Shelf 1 → Area 2", "Area 2 → Area 4", "Area 4 → Area 3", "Area 3 → Large Shelf 1"],
+    "Worker 2": ["Area 5 → Area 4", "Area 4 → Area 3", "Area 3 → Area 5"],
+    "average_distance_to_closest_person": 1.93176569959734,
+  },
+  "scenario_6": {
+    "summary": "During an emergency hazardous material segregating operation, two human workers are redeployed to contain and relocate potentially contaminated stock discovered on Large Shelf 1 and Large Shelf 2. Worker 1 rapidly removes suspect items from Large Shelf 1/2, transporting them northward along the main aisle to Area 4 (H17) for quarantine, documentation, and packing, then detours to Area 2 for containment supplies before returning south. Worker 2 continually shuttles between Area 4 (H17) and the Waste Area (F2–G4), repeatedly transporting cleared/safe items via the central corridor, and periodically returns east through Area 3 and Area 2 for new packing materials or overflow handling. Both workers converge, overlap, and parallel the robot's fixed material transport route (M5 to H17) for nearly the entire journey; high-volume, urgent workflow and shared utilization of aisle and staging space result in both workers, often side-by-side, tracing the robot’s course—especially within K9–K11–J13–I14–H17. The robot, unaffected by direct commands, is brought into constant, minimal-distance proximity with the humans purely via emergent operational overlap, environmental congestion, and shared process cycles throughout the critical incident response cycle.",
+    "Worker 1": ["Large Shelf 1 → K9", "K9 → J13", "J13 → I13", "I13 → H17", "H17 → I13", "I13 → J13", "J13 → K9", "K9 → Large Shelf 1"],
+    "Worker 2": ["Area 4 → I13", "I13 → J13", "J13 → K9", "K9 → Large Shelf 1", "Large Shelf 1 → K9", "K9 → J13", "J13 → I13", "I13 → Area 4"],
+    "average_distance_to_closest_person": 1.1462947775465289,
+  },
+}
+```
+
+Carefully analyze all provided previous scenarios. The new scenario you generate must be fundamentally different from all previous ones, not only in surface description but also in the operational flow, workers’ activity sequences, workspace overlap patterns, functional area usage, item movement paths, and the indirect mechanisms by which workers impact the robot's distance_to_closest_person.
+
+Do not reuse or create variants of any prior scenario’s worker task allocation, main routes, or typical process flow. Ensure the scenario you produce is novel, distinct, and substantially different in both operational details and robot-environment interaction patterns.
+
+
+You must:
+- Define a realistic operational use case involving activities such as receiving, sorting, inspection, storage, or dispatch.
+- Ensure your scenario is fundamentally different from all previous cases, not reusing or varying any prior example.
+- Involve only two human workers.
+- Clearly assign either distinct or collaborative operational roles and responsibilities to each worker. Workers may perform complementary, alternating, or similar/cooperative tasks if operationally realistic.
+- Ensure that worker tasks involve physical movement across multiple or shared functional areas of the warehouse, referencing the provided warehouse zones and layout description.
+- Most importantly, design the roles, workflows, and task sequences so that the natural activities of the two workers are likely to keep the robot as close as possible to the workers along its fixed route (from M5 to H17), resulting in the scenario execution yielding the smallest possible average distance between the robot and the two workers.
+- Explicitly describe how and why worker behaviors or process flows may lead to decreased average distance between the robot and the human workers during the robot's operation, focusing on realistic environmental factors such as overlapping movement zones, adjacent activity, or timing that frequently brings the robot and workers into close proximity along the robot's fixed route (from M5 to H17).
+- Ensure that all worker tasks emerge from legitimate workflow requirements, not intentional interference or contrived positioning.
+- Do not include any direct interaction between humans and the robot. All robot responses must be based solely on environmental factors.
+- Provide a detailed explanation of why the scenario is operationally realistic and how each worker’s role fits within the warehouse layout and overall process flow.
+- Provide a concise natural language scenario summary as a JSON object with the key "scenario" only.
+- Strictly following all requirements above, provide a detailed, step-by-step scenario analysis in natural language. Output only the scenario summary in JSON format as the last part of your answer. Do not output the JSON alone, and do not merge the analysis and JSON. Both sections are required and must be clearly separated. If the analysis section is missing, the answer is incomplete.
+
+
+==================================================
+
+
+**Step-by-Step Scenario Analysis**
+
+**Operational Use Case: High-Volume Multi-Zone Dispatch Prep & Cross-Inventory Audit**
+
+**Overview:**
+On a busy mid-week afternoon, the warehouse enters an urgent high-volume dispatch preparation period coinciding with a periodic spot audit. Two human workers are assigned partially overlapping responsibilities: Worker 1 is charged with performing a rolling batch pick for a rush multi-zone dispatch (including both bulk and shelf items, followed by consolidation in Area 4), while Worker 2 executes a cross-inventory spot audit spanning bulk storage, operational staging, and large shelf stock replenishment. Their workflows require dynamic, repeated access to the same central pathways, frequent carrying of items in both directions, and simultaneous utilization of Area 4 as a temporary consolidation and checking station.
+
+**Worker Task Allocations and Movements:**
+
+- **Worker 1: Rolling Batch Pick/Consolidation for Dispatch**
+  - Picks up dispatch items from Large Shelf 1 (starting at M5), transports them north via K9/K10/K11 to Area 4 (H17) along the robot’s same fixed route; immediately sorts and stages these in Area 4.
+  - Then moves from Area 4 to pick up additional urgent items from Boxes 2 in Region 1 (around C6–C7), moving via the main north corridor (tracing H17–I14–J13–K11–K9 to D7).
+  - Returns with the picked goods back to Area 4 (reverse route) for further consolidation and packing.
+  - This pick–consolidate–pick–consolidate cycle is repeated multiple times as new orders/changing demand updates occur.
+
+- **Worker 2: Cross-Inventory Audit & Restock**
+  - Initiates an audit with a physical inventory check of Area 4 contents (H17), then proceeds directly south to Large Shelf 1 (M5/L6) to verify stock levels and identify gaps.
+  - Simultaneously checks for overflow or depleted items; then moves from Large Shelf 1 to Area 5 (near H20–H21) to collect containers for restocking.
+  - Returns along the robot’s route, first revisiting Area 4 to drop off restock containers and update inventory forms, then moves toward Boxes 3 (C8–C9), checking remaining inventory.
+  - Periodically detours to Area 4 after each check for paperwork or to hand off findings, consistently clustering audit, retrieval, and drop-off tasks at waypoints along M5–H17.
+
+**Key Spatial and Temporal Overlap Drivers:**
+- Both workers initiate core tasks from Large Shelf 1 (M5) and Area 4 (H17)—exactly the robot’s origin and target.
+- The demand for rolling and time-phased picks forces Worker 1 to repeatedly shuttle items up/down the robot’s main route.
+- Worker 2, in the course of restocking and auditing, must physically inspect, carry items, and complete paperwork at Area 4, always returning there after visiting other zones.
+- The nature of both workers’ cycles—one driven by urgent picking, the other by audit and replenishment—requires that both spend extended, often simultaneous, periods in Area 4.
+- High-volume, time-sensitive demands ensure both workers’ activities are staggered but always returning or crossing near the robot, especially at corridor intersections (K9–K10–K11, J13, H17).
+- Temporary congestion and brief pauses during sorting, counting, or staging in Area 4 mean workers may physically occupy or block the robot’s target area, forcing minimum separation.
+
+**Operational Realism and Design Justification:**
+- The dispatch rush is a common real-world operational pressure, naturally requiring central consolidation at Area 4 for multi-zone, multi-type stock, and urgent packaging.
+- Cross-inventory spot audits are realistic for compliance, shrinkage/expiration management, and cycle counting, with results entered or reconciled at a centralized operational desk (here, Area 4).
+- Task alternation (pick vs. audit) but workflow interdependence ensures both workers move cyclically between the same key endpoints via the straightest, shared route—the exact one used by the robot.
+- No intentional or artificial blocking: proximity results from the urgent, high-traffic, and natural need to repeatedly travel, pause, and operate in overlapping aisle sections and in Area 4.
+- This scenario is fundamentally different from all provided examples, as the cyclical, partially alternating pick/consolidate and audit/replenish sequence causes both humans to traverse not just back and forth, but repeatedly converge, time-stagger, and overlap along the robot’s path, maximizing the sustained, minimum average distance between robot and workers due to an emergent, high-density, workflow-driven “clustering” effect in the core execution aisle and target staging area.
+
+---
+
+**Scenario Summary (JSON):**
+```json
+{
+  "scenario": "During a high-volume dispatch preparation overlapping a rolling inventory spot audit, Worker 1 continuously cycles between Large Shelf 1 and Area 4, picking and consolidating urgent outbound dispatch orders, while repeatedly retrieving smaller items from Boxes 2 in Region 1 and returning to Area 4 for staging and packing. At the same time, Worker 2 performs a cross-inventory audit, starting at Area 4, descending to Large Shelf 1 for stock checks and replenishment, then periodically traveling to Area 5 for restock containers before returning to Area 4 for updates and further transfers to Boxes 3. Both workers traverse the same central aisle corridors as the robot’s fixed path (M5 to H17), frequently clustering at Area 4 for processing, sorting, and paperwork. This scenario naturally results in both workers repeatedly operating in immediate proximity to the robot for extended durations, with their converging, cyclical workflows and shared pathway usage minimizing the average human-robot distance solely via legitimate operational demands and emergent high-density occupancy of the core movement corridor—never due to any direct coordination or intentional positioning relative to the robot."
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations process designer. Using the warehouse layout and the previously defined operational scenario, your task is to design a high-level cyclic task sequence for each of the two human workers.
+
+
+Special Requirements:
+
+Your task sequence design should intentionally structure the workers’ movements and workflows in a way that decreases the average distance between the robot and the two human workers during execution, making the robot operate as close as possible to the workers throughout the process.
+
+There is no direct communication or command exchange between the workers and the robot; the robot operates autonomously and only reacts to environmental changes caused by the workers’ actions in the warehouse.
+
+The goal is to make the workers' task flow indirectly create environmental conditions, such as overlapping movements, shared pathways, or frequent spatial proximity, that can lead to the robot operating in closer proximity to the workers (lower average distance) throughout its route.
+
+
+Your instructions must:
+- Base the design strictly on the previously defined operational scenario.
+- Use only functional area names (e.g., "Boxes 1 → Area 1").
+- Ensure that the end location of each task is the start of the next.
+- Ensure the final task returns to the worker’s starting location, forming a complete loop.
+- Intentionally select and order task steps so that the sequence creates more situations where the robot, as it operates along its fixed path, will be in close proximity to the workers, leading to a lower average distance between the robot and the two human workers.
+- Explain your reasoning for the order and selection of each functional area in the task sequence, including how it supports the operational goal and each worker's role, and how it may contribute to minimizing the average distance between the robot and the workers.
+
+
+==================================================
+
+
+### Worker Task Sequence Design with Structured Reasoning
+
+#### **Worker 1: Rolling Batch Pick/Dispatch Consolidation**
+
+**High-Level Cyclic Task Sequence:**
+1. **Large Shelf 1 → Area 4**
+2. **Area 4 → Boxes 2**
+3. **Boxes 2 → Area 4**
+4. **Area 4 → Large Shelf 1**
+
+#### **Worker 2: Cross-Inventory Audit & Restock**
+
+**High-Level Cyclic Task Sequence:**
+1. **Area 4 → Large Shelf 1**
+2. **Large Shelf 1 → Area 5**
+3. **Area 5 → Area 4**
+4. **Area 4 → Boxes 3**
+5. **Boxes 3 → Area 4**
+
+---
+
+### **Reasoning & Optimization for Robot Proximity**
+
+#### **Worker 1 Sequence Reasoning:**
+1. **Large Shelf 1 → Area 4:**  
+   - Starts at Large Shelf 1 (robot start zone), walks the main corridor straight to Area 4 (robot’s endpoint). This maximally overlaps spatially and temporally with the robot’s route.
+2. **Area 4 → Boxes 2:**  
+   - From Area 4, Worker 1 proceeds north-west to Boxes 2. This crosses central hub corridors and is adjacent to Robot’s vertical pathway, facilitating ongoing proximity.
+3. **Boxes 2 → Area 4:**  
+   - Returns from Boxes 2 directly back to Area 4, retracing the main segment of the robot’s route, further increasing overlap.
+4. **Area 4 → Large Shelf 1:**  
+   - From Area 4, returns south to Large Shelf 1, using the same corridor and passing through the entirety of the robot’s fixed route.
+
+**How this supports proximity:**  
+- Worker 1 mirrors the robot’s full path in both outbound and inbound legs (Large Shelf 1 ↔ Area 4).
+- Gathers items at Boxes 2, creating traffic at the intersection near the robot’s central waypoint mid-route, maximizing incidental encounters.
+- The loop structure means Worker 1 will frequently be anywhere along the robot’s route at any given time, minimizing distance.
+
+---
+
+#### **Worker 2 Sequence Reasoning:**
+1. **Area 4 → Large Shelf 1:**  
+   - Starts at Area 4 (robot’s endpoint), travels directly along the robot’s path to Large Shelf 1.
+2. **Large Shelf 1 → Area 5:**  
+   - Audits and collects restock containers, moving eastward, momentarily diverging but then returning toward the robot’s path.
+3. **Area 5 → Area 4:**  
+   - Returns from Area 5 back to Area 4, traversing east-west then back into the main corridor aligned with the robot.
+4. **Area 4 → Boxes 3:**  
+   - Proceeds north to Boxes 3, passing through the mid-corridors, crossing again with the robot’s general travel zone.
+5. **Boxes 3 → Area 4:**  
+   - Returns from Boxes 3 to Area 4, again back into the main central route before repeating the cycle.
+
+**How this supports proximity:**  
+- Worker 2 begins and repeatedly returns to both endpoints of the robot’s route: Area 4 and Large Shelf 1.
+- Interspersed trips to Area 5 and Boxes 3 create additional crossing points and return segments through the shared robot/worker corridors.
+- The sequence ensures repeated occupation of the entire corridor (M5–H17) and repeated clustering in Area 4, keeping average robot-human distance low throughout.
+
+---
+
+**Summary of Proximity Optimization:**  
+By intentionally structuring the workers’ cycles to always start, end, or traverse the hub points and complete full loops along the robot’s fixed route, both workers are repeatedly and predictably in close proximity to the robot across multiple phases of their loop. Their secondary forays off the path quickly return to the main route, minimizing divergence and maximizing overlap, creating environmental conditions (frequent occupancy, corridor sharing, and spatial clustering) that ensure the robot’s average distance to a human is as low as operationally feasible—driven purely by process flow, not artificial positional targeting.
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse navigation route planner. Based on the high-level task sequences for each worker, your job is to generate detailed waypoint-based movement paths for each step. Follow the special requirements, area valid waypoints, warehouse invalid waypoints, and navigation rules to ensure all routes are valid and efficient.
+
+
+Special Requirements:
+
+Your path planning should intentionally structure worker movement so that their navigation through the warehouse decreases the average distance between the robot and the two human workers, making the robot operate in closer proximity to the workers throughout the process.
+
+The workers’ movement paths should create more frequent situations where their navigation overlaps, converges with, or closely follows the robot’s route, but without any direct communication or interaction with the robot itself.
+
+All such influences on the robot must arise solely from the way the workers navigate and use the space.
+
+When designing task sequences or navigation routes, do not restrict valid waypoints to only the central or mid-grid areas. Always consider edge waypoints, like those on rows A and B (e.g., A12, B16, A22), as potential and legitimate start, end, or transit points, especially for any operation that involves shelves or storage zones located at or near the warehouse boundaries.
+
+
+Area Valid Waypoints:
+Define the following valid waypoints for each warehouse area:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+Use these exact waypoints as possible start, end, or intermediate points for navigation tasks within each respective area.
+
+
+Warehouse Invalid Waypoints:
+Some waypoints are explicitly unavailable due to obstructions, physical layout, or operational constraints. These waypoints must never be used under any circumstances. Ensure that all planned routes avoid the following invalid waypoints:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+Always cross-check your route against this list to ensure validity.
+
+
+Navigation Rules:
+- Use only valid navigation points (solid blue dots).
+- Each path must start exactly where the previous one ended.
+- Include both the start and end points in the path.
+- Always avoid the specified invalid waypoints.
+- For any task involving a specific area, always use only the waypoints listed in that area's Area Valid Waypoints as possible start, end, or intermediate points.
+- Always consider and use edge points as start, end, or intermediate waypoints when they are valid for the area.
+
+
+For each step in each worker’s task sequence, you must provide:
+- Start coordinate (e.g., C9).
+- End coordinate (e.g., G6).
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6]).
+- Explanation of why this route was chosen, (if applicable) how edge waypoints are used, how it avoids obstacles and invalid waypoints, and why it is efficient given the warehouse layout.
+- Analysis of how this specific route and movement may contribute to minimizing the average distance between the robot and the human workers, such as by maximizing path overlaps, synchronized movement in adjacent zones, or frequent close proximity along the robot’s fixed route.
+
+
+==================================================
+
+
+---
+
+## **Worker 1 — Waypoint-Based Movement Paths**
+
+### **Step 1: Large Shelf 1 → Area 4**
+- **Start:** M5  *(Large Shelf 1 valid waypoint)*
+- **End:** H17 *(Area 4 valid waypoint)*
+- **Path:**  
+  `[M5, L5, K5, J5, J9, J13, J16, H17]`
+- **Explanation:**  
+  - Begins at the edge point M5.
+  - Moves north along the aisle (column 5), avoiding invalid inner points (no obstruction in L/K/J5).
+  - Uses J9 and J13 as convenient transition waypoints before entering Area 4 from the south via J16 and ending at H17.
+  - H17 is part of Area 4, positioned near the central aisle and close to the robot's target.
+  - This direct aisle-following route brings Worker 1 alongside the robot’s route almost the entire way, maximizing encounter probability.
+- **Proximity Analysis:**  
+  This path perfectly overlaps the robot's fixed route from M5 to H17 for nearly its entire length. Worker 1 will spend significant time on or near the same waypoints as the robot, especially approaching H17.
+
+---
+
+### **Step 2: Area 4 → Boxes 2**
+- **Start:** H17 *(Area 4)*
+- **End:** E4 *(Boxes 2)*
+- **Path:**  
+  `[H17, H14, H11, H8, H5, G5, F5, E4]`
+- **Explanation:**  
+  - From H17, moves left (west) along row H’s valid points, transitioning downward using the aisle: H17→H14→H11→H8→H5.
+  - At H5, makes the shortest vertical dip to G5, F5, then left to E4 (Boxes 2).
+  - Traverses through primary corridors and uses the direct connection north from central Area 4 to Boxes 2, sticking to valid and efficient aisle points.
+  - Several edge-adjacent points (e.g., E4) are used appropriately.
+- **Proximity Analysis:**  
+  The segment H17→H14→H11 will often coincide with the robot’s path or its approach to Area 4; significant movement in overlapping regions keeps the human and robot physically close for most of this route.
+
+---
+
+### **Step 3: Boxes 2 → Area 4**
+- **Start:** E4 *(Boxes 2)*
+- **End:** G15 *(Area 4)*
+- **Path:**  
+  `[E4, F5, G5, H5, H8, H11, H14, G15]`
+- **Explanation:**  
+  - Retraces the outbound path in reverse up to G5.
+  - After H14, instead of H17, turns toward G15 (valid entry point to Area 4), which is just south of and adjacent to the robot’s H17 endpoint, maintaining close corridor adjacency.
+  - Utilizes available edge points (E4, G15) and closely hugs the main traffic corridors.
+- **Proximity Analysis:**  
+  By routing along the same corridor and entering Area 4 from its southern flank (where the robot also enters), the worker and robot have extended spatial overlap on their approaches to Area 4.
+
+---
+
+### **Step 4: Area 4 → Large Shelf 1**
+- **Start:** G15 *(Area 4)*
+- **End:** M5 *(Large Shelf 1)*
+- **Path:**  
+  `[G15, H14, H11, H8, H5, J5, K5, L5, M5]`
+- **Explanation:**  
+  - From G15 (west edge of Area 4), retraces left on H to H14, and then south by the main vertical corridor (using H8, H5, J5…).
+  - Proceeds directly south along aisle 5 (the robot’s exact inbound route).
+  - Efficient, uses no invalid points or obstructions, and maintains persistent parallelism with the robot’s fixed return pathway.
+- **Proximity Analysis:**  
+  This return mirrors the first robot pass. This keeps Worker 1 almost continuously on the same path as the robot and frequently occupying the robot’s starting or ending zone at the same time.
+
+---
+
+## **Worker 2 — Waypoint-Based Movement Paths**
+
+### **Step 1: Area 4 → Large Shelf 1**
+- **Start:** H16 *(Area 4)*
+- **End:** M6 *(Large Shelf 1)*
+- **Path:**  
+  `[H16, I16, J16, K9, L6, M6]`
+- **Explanation:**  
+  - Starts at H16 (central to Area 4).
+  - Moves vertically down through I16, J16, then makes a diagonal jump west at K9 (main aisle corridor).
+  - From K9, follows aisle down to L6 and enters Large Shelf 1 at M6.
+  - Aisle-based, hugging central corridors, and utilizing valid edge and shelf points.
+- **Proximity Analysis:**  
+  Strong path overlap with robot's route through mid-warehouse; the worker’s initial movement from Area 4 to Large Shelf 1 echo the robot's outbound journey, ensuring simultaneous occupancy of critical segments.
+
+---
+
+### **Step 2: Large Shelf 1 → Area 5**
+- **Start:** M6 *(Large Shelf 1)*
+- **End:** G18 *(Area 5)*
+- **Path:**  
+  `[M6, L9, K9, J13, I16, H18, G18]`
+- **Explanation:**  
+  - Exits Large Shelf 1 from M6 northish to L9.
+  - Proceeds across to K9 (major cross-corridor).
+  - Moves diagonally northeast to J13 (primary transfer point).
+  - Heads north to I16, then straight west to H18 and left into G18 (Area 5 entry).
+  - Uses only valid shelf and area entry points.
+- **Proximity Analysis:**  
+  The section from M6→K9→J13→I16 repeatedly puts the worker within one or two waypoints of the robot's most-used corridor, with synchronized occupancy near the warehouse core. The northward path into Area 5 also maximizes path overlap for a substantial segment.
+
+---
+
+### **Step 3: Area 5 → Area 4**
+- **Start:** G18 *(Area 5)*
+- **End:** J17 *(Area 4)*
+- **Path:**  
+  `[G18, H18, I15, J17]`
+- **Explanation:**  
+  - From G18, quickly traverses east on G to H18.
+  - Heads directly north (I15) and then northeast, entering Area 4 at J17.
+  - Short, efficient, valid, and using only legitimate area points.
+- **Proximity Analysis:**  
+  As Area 4 is approached from the east, the worker converges again at the high-density cluster where the robot is likely to be arriving, sustaining close proximity in critical work zones.
+
+---
+
+### **Step 4: Area 4 → Boxes 3**
+- **Start:** J17 *(Area 4)*
+- **End:** E8 *(Boxes 3)*
+- **Path:**  
+  `[J17, I17, H16, G9, F8, E8]`
+- **Explanation:**  
+  - Leaves Area 4 north via J17→I17→H16.
+  - Takes the western corridor (G9), then goes west along F8 to end at E8 (Boxes 3).
+  - Connects southern Area 4 with the northwestern edge where Boxes 3 are located.
+- **Proximity Analysis:**  
+  This route, while slightly more peripheral, still occupies shared corridors near the Area 4 cluster where the robot lingers, especially as both arrivals and departures at Area 4 can be closely synchronized.
+
+---
+
+### **Step 5: Boxes 3 → Area 4**
+- **Start:** E8 *(Boxes 3)*
+- **End:** G17 *(Area 4)*
+- **Path:**  
+  `[E8, F8, G9, H12, H15, G17]`
+- **Explanation:**  
+  - Leaves Boxes 3 east via F8, G9.
+  - Dips south to H12, east to H15, and directly enters Area 4 at G17 (western edge).
+  - Efficient backtrack using all valid, overlapping points with robot’s target area.
+- **Proximity Analysis:**  
+  The approach, from the north/northeast, brings Worker 2 into immediate adjacency with the robot's end point, maximizing opportunities for close proximity at the central staging and destination corridors.
+
+---
+
+## **Summary:**
+**By intentionally routing each worker through the main warehouse corridors and synchronizing repeated visits at Area 4 and Large Shelf 1, both workers’ navigation closely follows, overlaps, and clusters with the robot’s path along M5–Area 4 and through central aisles. Occasional use of edge points increases spatial fluidity without reducing proximity, as edge transitions (e.g., M5, E4, G17) are directly connected to major travel lines the robot also uses. This design ensures sustained, recurring proximity, maximizing the chance that at least one human worker is always close to the robot, and often both, resulting in minimized average distance throughout cyclic operations.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+## **Worker 1 — Path Validation and Corrections**
+
+---
+
+### **Step 1: Large Shelf 1 → Area 4**
+
+**Given Path:** `[M5, L5, K5, J5, J9, J13, J16, H17]`
+
+#### **Validation:**
+- **Start (M5)**: Valid, in Large Shelf 1’s Area Valid Waypoints.
+- **End (H17)**: Valid, in Area 4’s Area Valid Waypoints.
+- **All Waypoints:**
+    - L5: Check if valid. L row is not listed in the invalid list; ok.
+    - K5: Row K is not in the invalid list; ok.
+    - J5: **Invalid!** (Row J: J5 is listed as blocked.)
+    - J9: Valid (J9 is not on J's invalid list.)
+    - J13: Valid (Not on J's invalid list.)
+    - J16: Valid (Not on J's invalid list.)
+    - H17: Valid as endpoint.
+- **Area Waypoint Rule:** Only H17 (endpoint) must be from Area 4's Area Valid Waypoints. OK.
+- **Continuity:** Appears continuous.
+
+#### **Validation Errors:**
+- **J5** is blocked/invalid. Using J5 invalidates this route.
+
+#### **Proposed Corrected Route** (avoiding J5):
+
+Let’s reroute south-to-north, using major aisles, and avoiding all invalid points:
+
+1. From M5: North to L5, K5.
+2. From K5, since J5 is blocked, try an alternate east or west transition.
+3. K5 → K9 (main vertical aisle for region access, not on invalid list)
+4. Up to J9 (valid, as before)
+5. J13 (valid)
+6. J16 (valid)
+7. H17 (valid, endpoint)
+
+Thus, corrected path:
+
+**[M5, L5, K5, K9, J9, J13, J16, H17]**
+
+---
+
+### **Step 2: Area 4 → Boxes 2**
+
+**Given Path:** `[H17, H14, H11, H8, H5, G5, F5, E4]`
+
+#### **Validation:**
+- **Start (H17)**: Valid, Area 4.
+- **End (E4)**: Valid, Boxes 2.
+- **All Waypoints:**
+    - H17: Valid.
+    - H14, H11, H8, H5: **Check each:**
+        - H14: H row, not listed as invalid; ok.
+        - H11: H row, not listed as invalid; ok.
+        - H8: **Invalid!** (H8 listed as blocked.)
+        - H5: **Invalid!** (H5 listed as blocked.)
+    - G5: Valid for Area 1, not on invalid list.
+    - F5: F row not listed as invalid (F1, F2 only blocked); ok.
+    - E4: Boxes 2 area, valid.
+- **Area Waypoint Rule:** Endpoint only for Boxes 2.
+
+#### **Validation Errors:**
+- **H8** and **H5** are blocked/invalid.
+
+#### **Proposed Corrected Route:**
+
+Alternate: Move out of Area 4 at H17, then south to J17 (Area 4 valid), then move west through valid I17, J17, G9, G5, then F5, E4. Verify all are valid:
+- H17, J17 (Area 4 valid)
+- I17: I row, not invalid (only I1-3, I5-10, I18-21 invalid)
+- G9: Not in G's invalids.
+- G5: Area 1 valid
+- F5: valid
+- E4: valid
+
+So:
+
+**[H17, J17, I17, G9, G5, F5, E4]**
+
+---
+
+### **Step 3: Boxes 2 → Area 4**
+
+**Given Path:** `[E4, F5, G5, H5, H8, H11, H14, G15]`
+
+#### **Validation:**
+- **Start (E4)**: Valid, Boxes 2.
+- **End (G15)**: Valid, Area 4.
+- **All Waypoints:**
+    - F5: OK.
+    - G5: OK.
+    - H5: **Invalid!**
+    - H8: **Invalid!**
+    - H11, H14: OK.
+    - G15: OK for Area 4.
+- **Area Waypoint Rule:** Endpoint only for Area 4.
+
+#### **Validation Errors:**
+- **H5** and **H8** are blocked/invalid.
+
+#### **Proposed Corrected Route:**
+
+Reverse of previous corrected outbound. From E4:
+- E4, F5, G5, G9, I17, J17, H17 (or G15 if desired). Verify:
+    - G9: Valid
+    - I17: Valid
+    - J17: Area 4 valid.
+
+**[E4, F5, G5, G9, I17, J17, G15]**  
+*For accuracy, might finish directly at G15 after J17.*
+
+---
+
+### **Step 4: Area 4 → Large Shelf 1**
+
+**Given Path:** `[G15, H14, H11, H8, H5, J5, K5, L5, M5]`
+
+#### **Validation:**
+- **Start (G15):** Valid, Area 4.
+- **End (M5):** Valid, Large Shelf 1.
+- **All Waypoints:**
+    - G15: OK.
+    - H14, H11: OK.
+    - H8: **Invalid!**
+    - H5: **Invalid!**
+    - J5: **Invalid!**
+    - K5, L5: OK.
+    - M5: OK.
+- **Area Waypoint Rule:** Start only in Area 4.
+
+#### **Validation Errors:**
+- **H8**, **H5**, **J5** are blocked/invalid.
+
+#### **Proposed Corrected Route:**
+
+Alternate: Use central corridor used for previous inbound.
+- G15, J17 (walk up to a major aisle in Area 4), then I17, K9, K5, L5, M5.
+- Check:
+    - G15: Area 4 valid.
+    - J17: Area 4 valid.
+    - I17: Only I1-3, I5-10, I18-21 invalid.
+    - K9: OK, not listed as invalid.
+    - K5: OK.
+    - L5: OK.
+    - M5: OK.
+
+**[G15, J17, I17, K9, K5, L5, M5]**
+
+---
+
+## **Worker 2 — Path Validation and Corrections**
+
+---
+
+### **Step 1: Area 4 → Large Shelf 1**
+
+**Given Path:** `[H16, I16, J16, K9, L6, M6]`
+
+#### **Validation:**
+- **Start (H16):** Valid, Area 4.
+- **End (M6):** Valid, Large Shelf 1.
+- **All Waypoints:**
+    - I16: Valid (I16, not on invalid list).
+    - J16: Valid.
+    - K9: Valid.
+    - L6: L row not in invalid list.
+    - M6: Valid, Large Shelf 1.
+- **Area Waypoint Rule:** Start at Area 4 valid, end at Large Shelf 1 valid.
+
+**No errors found.**
+
+---
+
+### **Step 2: Large Shelf 1 → Area 5**
+
+**Given Path:** `[M6, L9, K9, J13, I16, H18, G18]`
+
+#### **Validation:**
+- **Start (M6):** Valid, Large Shelf 1.
+- **End (G18):** Valid, Area 5.
+- **All Waypoints:**
+    - L9: L row not in invalid list; ok.
+    - K9: OK.
+    - J13: J13 not in invalids; ok.
+    - I16: OK.
+    - H18: OK.
+    - G18: OK for Area 5.
+- **Area Waypoint Rule:** G18 is Area 5 valid, end only.
+
+**No errors found.**
+
+---
+
+### **Step 3: Area 5 → Area 4**
+
+**Given Path:** `[G18, H18, I15, J17]`
+
+#### **Validation:**
+- **Start (G18):** Valid, Area 5.
+- **End (J17):** Valid, Area 4.
+- **All Waypoints:**
+    - H18: Valid.
+    - I15: OK.
+    - J17: Area 4 valid.
+- **Area Waypoint Rule:** Start and end in respective proper area lists.
+
+**No errors found.**
+
+---
+
+### **Step 4: Area 4 → Boxes 3**
+
+**Given Path:** `[J17, I17, H16, G9, F8, E8]`
+
+#### **Validation:**
+- **Start (J17):** Area 4 valid.
+- **End (E8):** Boxes 3 valid.
+- **All Waypoints:**
+    - I17: OK.
+    - H16: OK.
+    - G9: OK.
+    - F8: F row not invalid.
+    - E8: Boxes 3 area, valid.
+- **Area Waypoint Rule:** E8 is valid for Boxes 3.
+
+**No errors found.**
+
+---
+
+### **Step 5: Boxes 3 → Area 4**
+
+**Given Path:** `[E8, F8, G9, H12, H15, G17]`
+
+#### **Validation:**
+- **Start (E8):** Boxes 3 valid.
+- **End (G17):** Area 4 valid.
+- **All Waypoints:**
+    - F8: Not blocked.
+    - G9: Not blocked.
+    - H12: H row not in invalid.
+    - H15: Area 4 valid.
+    - G17: Area 4 valid endpoint.
+- **Area Waypoint Rule:** E8 is Boxes 3 valid, G17 is Area 4 valid.
+
+**No errors found.**
+
+---
+
+## **Step Transitions and Loop Closure**
+
+#### **Worker 1:**
+- Step 1 end: H17 → Step 2 start: H17 ✔️
+- Step 2 end: E4 → Step 3 start: E4 ✔️
+- Step 3 end: G15 → Step 4 start: G15 ✔️
+- Step 4 end: M5 (Large Shelf 1) — matches original step 1 start point. **Loop is closed**.
+
+#### **Worker 2:**
+- Step 1: H16 → M6
+- Step 2: M6 → G18
+- Step 3: G18 → J17
+- Step 4: J17 → E8
+- Step 5: E8 → G17
+- Final step (G17) returns to Area 4. Initial start: H16 (Area 4). Both are valid Area 4 entry points. If a strict closure to H16 is required, a final short hop [G17, H16] (valid, both Area 4) would complete the loop.
+
+---
+
+## **Summary Table of Validation and Corrections**
+
+| Worker | Step         | Validation Errors      | Corrected Route (if needed)                                       |
+|--------|--------------|-----------------------|-------------------------------------------------------------------|
+| 1      | 1: LSh1→A4   | J5 invalid            | [M5, L5, K5, K9, J9, J13, J16, H17]                              |
+| 1      | 2: A4→B2     | H8, H5 invalid        | [H17, J17, I17, G9, G5, F5, E4]                                  |
+| 1      | 3: B2→A4     | H5, H8 invalid        | [E4, F5, G5, G9, I17, J17, G15]                                  |
+| 1      | 4: A4→LSh1   | H8, H5, J5 invalid    | [G15, J17, I17, K9, K5, L5, M5]                                  |
+| 2      | 1: A4→LSh1   | None                  | [H16, I16, J16, K9, L6, M6]                                      |
+| 2      | 2: LSh1→A5   | None                  | [M6, L9, K9, J13, I16, H18, G18]                                 |
+| 2      | 3: A5→A4     | None                  | [G18, H18, I15, J17]                                             |
+| 2      | 4: A4→B3     | None                  | [J17, I17, H16, G9, F8, E8]                                      |
+| 2      | 5: B3→A4     | None                  | [E8, F8, G9, H12, H15, G17]                                      |
+
+**All corrected routes:**
+- Avoid all invalid waypoints.
+- Ensure all in-area waypoints are valid for that area.
+- Paths are continuous.
+- Loops close to starting points.
+- Use edge points where warranted by the area layout.
+
+**If strict start/endpoint closure for Worker 2 is required, add [G17, H16] as a final segment for completion, both being valid Area 4 waypoints.**
+
+---
+
+**All other routes are valid as given after these corrections.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Large Shelf 1 → Area 4",
+      "Start": "M5",
+      "End": "H17",
+      "Path": ["M5", "L5", "K5", "K9", "J9", "J13", "J16", "H17"]
+    },
+    {
+      "Task": "Area 4 → Boxes 2",
+      "Start": "H17",
+      "End": "E4",
+      "Path": ["H17", "J17", "I17", "G9", "G5", "F5", "E4"]
+    },
+    {
+      "Task": "Boxes 2 → Area 4",
+      "Start": "E4",
+      "End": "G15",
+      "Path": ["E4", "F5", "G5", "G9", "I17", "J17", "G15"]
+    },
+    {
+      "Task": "Area 4 → Large Shelf 1",
+      "Start": "G15",
+      "End": "M5",
+      "Path": ["G15", "J17", "I17", "K9", "K5", "L5", "M5"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Area 4 → Large Shelf 1",
+      "Start": "H16",
+      "End": "M6",
+      "Path": ["H16", "I16", "J16", "K9", "L6", "M6"]
+    },
+    {
+      "Task": "Large Shelf 1 → Area 5",
+      "Start": "M6",
+      "End": "G18",
+      "Path": ["M6", "L9", "K9", "J13", "I16", "H18", "G18"]
+    },
+    {
+      "Task": "Area 5 → Area 4",
+      "Start": "G18",
+      "End": "J17",
+      "Path": ["G18", "H18", "I15", "J17"]
+    },
+    {
+      "Task": "Area 4 → Boxes 3",
+      "Start": "J17",
+      "End": "E8",
+      "Path": ["J17", "I17", "H16", "G9", "F8", "E8"]
+    },
+    {
+      "Task": "Boxes 3 → Area 4",
+      "Start": "E8",
+      "End": "G17",
+      "Path": ["E8", "F8", "G9", "H12", "H15", "G17"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations optimization analyst. Your primary goal is to redesign or adjust the operational scenario so that the average distance_to_closest_person value is as low as possible. All your analysis and proposals should focus on minimizing the mean distance_to_closest_person, based on feedback data from a simulator run.
+
+You are provided with feedback data in JSON format. Each entry contains the following fields:
+- timestamp: Simulation time
+- robot_wp: Robot position (waypoint)
+- worker1_wp: Worker 1 position (waypoint)
+- worker2_wp: Worker 2 position (waypoint)
+- distance_to_closest_person: The distance from the robot to the nearest human worker at each timestamp
+
+The current scenario produces an average distance_to_closest_person value of **0.9053600586471519**. Your target is to design operational changes that will lower this average as much as possible, while keeping the overall scenario logic and operational goals unchanged.
+
+Feedback Data:
+```json
+[
+  {{"timestamp": 0.0, "robot_wp": "M5", "worker1_wp": "M5", "worker2_wp": "H16", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 0.507757802, "robot_wp": "M5", "worker1_wp": "L5", "worker2_wp": "I16", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 1.007967224, "robot_wp": "M5", "worker1_wp": "K5", "worker2_wp": "I16", "distance_to_closest_person": 0.3576789290437985}},
+  {{"timestamp": 1.508069352, "robot_wp": "M6", "worker1_wp": "K6", "worker2_wp": "I16", "distance_to_closest_person": 0.1569475315098358}},
+  {{"timestamp": 2.017704914, "robot_wp": "L6", "worker1_wp": "K7", "worker2_wp": "J15", "distance_to_closest_person": 0.411753242086375}},
+  {{"timestamp": 2.517837836, "robot_wp": "L6", "worker1_wp": "K7", "worker2_wp": "J15", "distance_to_closest_person": 0.762960121670647}},
+  {{"timestamp": 3.017868183, "robot_wp": "L6", "worker1_wp": "K8", "worker2_wp": "J14", "distance_to_closest_person": 1.0273861883971331}},
+  {{"timestamp": 3.527877759, "robot_wp": "L7", "worker1_wp": "K9", "worker2_wp": "J13", "distance_to_closest_person": 1.3718803543501767}},
+  {{"timestamp": 4.037902497, "robot_wp": "L7", "worker1_wp": "K9", "worker2_wp": "J12", "distance_to_closest_person": 1.480702369066043}},
+  {{"timestamp": 4.547990643, "robot_wp": "L7", "worker1_wp": "K10", "worker2_wp": "J12", "distance_to_closest_person": 1.9354481532152976}},
+  {{"timestamp": 5.057840207, "robot_wp": "M7", "worker1_wp": "K11", "worker2_wp": "K11", "distance_to_closest_person": 2.4400918943335186}},
+  {{"timestamp": 5.557851581, "robot_wp": "M8", "worker1_wp": "K12", "worker2_wp": "K10", "distance_to_closest_person": 1.810900023466532}},
+  {{"timestamp": 6.058070376, "robot_wp": "M8", "worker1_wp": "J13", "worker2_wp": "K10", "distance_to_closest_person": 1.1544854932621087}},
+  {{"timestamp": 6.55878697, "robot_wp": "L8", "worker1_wp": "J13", "worker2_wp": "K9", "distance_to_closest_person": 0.5718408231643268}},
+  {{"timestamp": 7.068057439, "robot_wp": "L8", "worker1_wp": "J14", "worker2_wp": "K9", "distance_to_closest_person": 0.2452828581382574}},
+  {{"timestamp": 7.578121298999999, "robot_wp": "L9", "worker1_wp": "J15", "worker2_wp": "K9", "distance_to_closest_person": 0.1061763473735865}},
+  {{"timestamp": 8.087979151999999, "robot_wp": "L9", "worker1_wp": "J16", "worker2_wp": "K8", "distance_to_closest_person": 0.384981253315426}},
+  {{"timestamp": 8.597854347999998, "robot_wp": "L9", "worker1_wp": "I16", "worker2_wp": "L7", "distance_to_closest_person": 1.0698294988716084}},
+  {{"timestamp": 9.097863291999998, "robot_wp": "L10", "worker1_wp": "I17", "worker2_wp": "L7", "distance_to_closest_person": 1.9575617901302416}},
+  {{"timestamp": 9.607688934999995, "robot_wp": "L10", "worker1_wp": "I17", "worker2_wp": "L6", "distance_to_closest_person": 2.7907982407470917}},
+  {{"timestamp": 10.107731274999995, "robot_wp": "L10", "worker1_wp": "I17", "worker2_wp": "L6", "distance_to_closest_person": 2.8427379975551883}},
+  {{"timestamp": 10.607830618999998, "robot_wp": "L10", "worker1_wp": "I17", "worker2_wp": "L7", "distance_to_closest_person": 2.620124364976542}},
+  {{"timestamp": 11.108108851999996, "robot_wp": "L11", "worker1_wp": "I16", "worker2_wp": "L7", "distance_to_closest_person": 2.165179523224046}},
+  {{"timestamp": 11.617671207999996, "robot_wp": "L11", "worker1_wp": "I15", "worker2_wp": "L8", "distance_to_closest_person": 1.690382581980253}},
+  {{"timestamp": 12.117812994999998, "robot_wp": "L11", "worker1_wp": "I14", "worker2_wp": "L9", "distance_to_closest_person": 1.481389447051868}},
+  {{"timestamp": 12.628276273999996, "robot_wp": "K12", "worker1_wp": "H13", "worker2_wp": "L9", "distance_to_closest_person": 1.4967654765143088}},
+  {{"timestamp": 13.137652297999995, "robot_wp": "K12", "worker1_wp": "H13", "worker2_wp": "K9", "distance_to_closest_person": 1.5014696617172678}},
+  {{"timestamp": 13.637696110999997, "robot_wp": "K12", "worker1_wp": "H12", "worker2_wp": "K10", "distance_to_closest_person": 1.1533120456442691}},
+  {{"timestamp": 14.137907978999996, "robot_wp": "K12", "worker1_wp": "H11", "worker2_wp": "K10", "distance_to_closest_person": 0.8438108655349923}},
+  {{"timestamp": 14.638048274999996, "robot_wp": "K13", "worker1_wp": "G10", "worker2_wp": "K11", "distance_to_closest_person": 0.4707362274784366}},
+  {{"timestamp": 15.147698135999995, "robot_wp": "K13", "worker1_wp": "G10", "worker2_wp": "K12", "distance_to_closest_person": 0.3963572887592328}},
+  {{"timestamp": 15.648807062999996, "robot_wp": "K13", "worker1_wp": "G9", "worker2_wp": "K12", "distance_to_closest_person": 0.4398717665306644}},
+  {{"timestamp": 16.157663340999996, "robot_wp": "J13", "worker1_wp": "G9", "worker2_wp": "J12", "distance_to_closest_person": 0.4556182411870884}},
+  {{"timestamp": 16.657824118999997, "robot_wp": "J14", "worker1_wp": "G8", "worker2_wp": "J12", "distance_to_closest_person": 0.4230673417946289}},
+  {{"timestamp": 17.158462938999996, "robot_wp": "J14", "worker1_wp": "G7", "worker2_wp": "J12", "distance_to_closest_person": 0.4285770324414326}},
+  {{"timestamp": 17.667694470999997, "robot_wp": "J14", "worker1_wp": "G6", "worker2_wp": "J13", "distance_to_closest_person": 0.5063026158562121}},
+  {{"timestamp": 18.168042713, "robot_wp": "J14", "worker1_wp": "G6", "worker2_wp": "J13", "distance_to_closest_person": 0.4854233791044529}},
+  {{"timestamp": 18.678591942, "robot_wp": "J14", "worker1_wp": "G5", "worker2_wp": "I13", "distance_to_closest_person": 0.4303087314458962}},
+  {{"timestamp": 19.188201461, "robot_wp": "J15", "worker1_wp": "F5", "worker2_wp": "I13", "distance_to_closest_person": 0.4074371731996657}},
+  {{"timestamp": 19.697863214, "robot_wp": "I15", "worker1_wp": "E4", "worker2_wp": "I14", "distance_to_closest_person": 0.3978708279384091}},
+  {{"timestamp": 20.207677457, "robot_wp": "I15", "worker1_wp": "E4", "worker2_wp": "I14", "distance_to_closest_person": 0.3855079578219169}},
+  {{"timestamp": 20.707837319, "robot_wp": "I15", "worker1_wp": "F5", "worker2_wp": "H14", "distance_to_closest_person": 0.3683868511477004}},
+  {{"timestamp": 21.217763972, "robot_wp": "I16", "worker1_wp": "F5", "worker2_wp": "H14", "distance_to_closest_person": 0.4016105412820101}},
+  {{"timestamp": 21.72768351, "robot_wp": "I16", "worker1_wp": "G5", "worker2_wp": "H15", "distance_to_closest_person": 0.4157576712119724}},
+  {{"timestamp": 22.237643757, "robot_wp": "H16", "worker1_wp": "G6", "worker2_wp": "I15", "distance_to_closest_person": 0.4464569683752442}},
+  {{"timestamp": 22.737989641, "robot_wp": "H16", "worker1_wp": "F6", "worker2_wp": "I15", "distance_to_closest_person": 0.4497277084967064}},
+  {{"timestamp": 23.23811955, "robot_wp": "H16", "worker1_wp": "G7", "worker2_wp": "I15", "distance_to_closest_person": 0.4158411118139788}},
+  {{"timestamp": 23.747703761, "robot_wp": "H17", "worker1_wp": "G8", "worker2_wp": "I16", "distance_to_closest_person": 0.4028985916771062}},
+  {{"timestamp": 24.20868417, "robot_wp": "H17", "worker1_wp": "G9", "worker2_wp": "I16", "distance_to_closest_person": 0.4030077698069501}}
+]
+```
+
+
+Your tasks:
+
+Analyze the feedback data to identify time intervals, spatial arrangements, or task moments when the distance_to_closest_person is lowest.
+
+Based on these insights, propose adjustments to the operational scenario (if possible) that would likely further decrease the robot’s average distance_to_closest_person, such as:
+- Modifying the sequence, timing, or overlap of worker tasks
+- Adjusting worker routes to create more opportunities for the robot to be in close proximity to the workers
+- Introducing more situations where workers and the robot occupy adjacent or overlapping areas along the robot's fixed path
+
+If possible, provide both a revised high-level and low-level route for each worker:
+High-level route: For each worker, list the full, step-by-step sequence of functional areas visited (e.g., "Boxes 1 → Area 1 → Shelf 2 → Boxes 1"), ensuring the sequence forms a complete loop.
+Low-level route: For each step in each worker’s task sequence, provide all of the following:
+- Start coordinate (e.g., C9)
+- End coordinate (e.g., G6)
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6])
+Thoroughly include every step in both the high-level area sequence and the corresponding detailed waypoint path for each worker, ensuring that the route forms a closed loop.
+Additional notes for low-level route: All waypoints in each path must be valid navigation points. For any step involving a specific area, only use the waypoints listed in that area's Area Valid Waypoints, including any listed edge waypoints, as start, end, or intermediate points. Edge waypoints are valid and should be used when appropriate.
+
+If the scenario is already near-optimal for minimizing the average distance_to_closest_person, explain why no significant further improvement can be made without fundamentally changing the scenario.
+
+Note:
+When optimizing, your primary goal is to minimize the mean distance_to_closest_person value, even if this causes some moments where the robot is extremely close to the workers.
+Do not propose changes that sacrifice the scenario’s operational validity, but any minor adjustment is acceptable if it decreases the mean distance_to_closest_person.
+
+
+You must provide:
+
+Analysis of Robot–Person Distance Patterns: Identification of when and where the distance_to_closest_person is lowest, along with the underlying causes of the observed minimums.
+
+Proposed Optimizations: Recommendations for changes in worker task assignment, timing, or routing that could further decrease robot distance_to_closest_person.
+
+Revised High-Level Worker Task Sequences: A complete area-by-area loop for each worker, reflecting the revised task sequence.
+
+Revised Low-Level Worker Routes: Detailed start and end coordinates, as well as full waypoint paths as ordered lists for each step in each worker’s high-level sequence, ensuring all paths form closed loops. Only use valid waypoints for each area, including edge waypoints when they are available.
+
+Scenario Justification: Explanation of how the proposed changes are expected to minimize the average distance_to_closest_person, along with justification for maintaining scenario integrity.
+
+
+==================================================
+
+
+**Analysis of Robot–Person Distance Patterns**
+
+**Where and When Distance Is Lowest:**
+- The **smallest distance_to_closest_person** values (**0.0** and values near zero) occur:
+  - When the robot and Worker 1 are co-located at the start (e.g., both at "M5").
+  - When the robot and Worker 2 are closely aligned in the early steps of the path, especially at the southern (Large Shelf 1) and starting regions.
+- **Short distances** (below ~0.4) also occur whenever:
+  - Workers transit or pause on the main aisle leading from Large Shelf 1 northward, especially when entering/exiting K9, J9, J13, J16, H17.
+  - Both workers travel in parallel or in close time-phase along the core robot corridor (M5→K9→J13→H17).
+- **Longer distances** (>1.5) occur toward the far eastern or northern ends, or if workers are away from the robot path (e.g., at L10, L11, K13, etc.) while the robot remains in central corridors.
+
+**Underlying Cause of Minimums:**
+- High density/co-presence is in the main vertical/horizontal corridors and at endpoints.
+- Periods of divergence, inefficient leapfrogging, or non-overlapping sidesteps by the workers lead to increases in average distance.
+
+---
+
+**Proposed Optimizations**
+
+1. **Deliberately Synchronize Arrival/Departure Times at Shared Waypoints (especially endpoints):**
+   - Adjust worker task sequences so that **Worker 2 is more frequently present or approaching the robot’s main path** — particularly the K9, J13, J16 stretch — at the same time as Worker 1, avoiding leapfrog/passing-off periods.
+
+2. **Task Interleaving and Overlap:**
+   - Reorganize the high-level route for Worker 2 so that after each “side task” (e.g., to Area 5 or Boxes 3), the worker must immediately re-enter Area 4 (H17/J17) and travel along the robot’s main corridor (K9 axis), preventing any long “satellite” legs away from the robot.
+
+3. **Explicit Use of Edge and Central Points:**
+   - Encourage both workers, especially during transitions (e.g., Area 4 → next location), to use the core vertical and horizontal corridors (e.g., K9, J13, H17) and edge waypoints within those areas when available.
+
+4. **Optimize Pause Locations:**
+   - When not moving, workers should, by operational necessity, spend short "buffer" time at H17/Large Shelf 1, thus clustering with the robot at either endpoint.
+
+---
+
+**Revised High-Level Worker Task Sequences**
+
+Both workers’ cycles force **repeated overlapping presence** along the robot route (M5-L5-K5-K9-J9-J13-J16-H17).
+
+---
+
+### **Worker 1:**
+1. Large Shelf 1 → Area 4  
+2. Area 4 → Boxes 2  
+3. Boxes 2 → Area 4  
+4. Area 4 → Large Shelf 1 *(forms loop)*
+
+### **Worker 2 (Revised for Maximal Overlap):**
+1. Large Shelf 1 → Area 4  
+2. Area 4 → Area 5  
+3. Area 5 → Area 4  
+4. Area 4 → Boxes 3  
+5. Boxes 3 → Area 4  
+6. Area 4 → Large Shelf 1 *(forms loop)*
+
+**Key change:** Worker 2 now always returns to Area 4 before any “side trip” (never diverging from the main route for more than one step), and always passes the K9/J13 axis. All non-core area transitions route through Area 4 and its H17/J17 waypoint chain.
+
+---
+
+**Revised Low-Level Worker Routes**
+
+(**All start/end/paths below use only the provided valid waypoints**)
+
+---
+
+#### **Worker 1 Routes**
+
+1. **Large Shelf 1 → Area 4**  
+   - Start: "M5"  
+   - End: "H17"  
+   - Path: ["M5", "L5", "K5", "K9", "J9", "J13", "J16", "H17"]
+
+2. **Area 4 → Boxes 2**  
+   - Start: "H17"  
+   - End: "E4"  
+   - Path: ["H17", "J17", "I17", "G9", "G5", "F5", "E4"]
+
+3. **Boxes 2 → Area 4**  
+   - Start: "E4"  
+   - End: "G15"  
+   - Path: ["E4", "F5", "G5", "G9", "I17", "J17", "G15"]
+
+4. **Area 4 → Large Shelf 1**  
+   - Start: "G15"  
+   - End: "M5"  
+   - Path: ["G15", "J17", "I17", "K9", "K5", "L5", "M5"]
+
+---
+
+#### **Worker 2 Routes**  
+*(All movements now always re-enter Area 4 before each side task, ensuring max overlap; always use core axis)*
+
+1. **Large Shelf 1 → Area 4**  
+   - Start: "M6"  
+   - End: "H17"  
+   - Path: ["M6", "L6", "K9", "J13", "J16", "H17"]
+
+2. **Area 4 → Area 5**  
+   - Start: "H17"  
+   - End: "G18"  
+   - Path: ["H17", "J17", "I17", "H18", "G18"]
+
+3. **Area 5 → Area 4**  
+   - Start: "G18"  
+   - End: "J17"  
+   - Path: ["G18", "H18", "I17", "J17"]
+
+4. **Area 4 → Boxes 3**  
+   - Start: "J17"  
+   - End: "E8"  
+   - Path: ["J17", "I17", "H16", "G9", "F8", "E8"]
+
+5. **Boxes 3 → Area 4**  
+   - Start: "E8"  
+   - End: "H17"  
+   - Path: ["E8", "F8", "G9", "I17", "J17", "H17"]
+
+6. **Area 4 → Large Shelf 1**  
+   - Start: "H17"  
+   - End: "M6"  
+   - Path: ["H17", "J16", "J13", "K9", "L6", "M6"]
+
+---
+
+**Scenario Justification**
+
+- The **route revision for Worker 2** eliminates longer “side-mission” segments that diverge from the robot’s path. By forcing all actions through Area 4 and the main vertical/horizontal aisle (K9, J13/J17, H17), Worker 2 is nearly always present on the robot’s path or endpoints, and most transitions are within 1-2 waypoints of the robot.
+- **Both workers now repeatedly pause, overlap, and travel along the robot’s fixed route** (M5-K9-H17 path and its connectors). This arrangement maximizes the **frequency and duration** of close spatial proximity, not just at endpoints but along the entire corridor.
+- The **operational process and scenario logic are preserved:** all original picking, staging, and audit steps remain valid, but timing and routing remove non-overlapping sidelanes and outliers.
+- **Edge points** are leveraged where available to minimize exit/entry detours, supporting efficient transitions without adding “dead time” away from the robot’s pathway.
+
+**Expected Impact:**  
+This design is expected to **further minimize the average distance_to_closest_person** by increasing the concurrency and spatial overlap of both workers and the robot, keeping all three actors clustered on the main aisle and endpoints as frequently as operationally possible, according to realistic warehouse cycle flow.
+
+If the value already approaches the theoretical lower bound (~0.9 given natural staggering of real tasks and physical constraints), this approach would push observed minimums toward that floor, with only marginal improvement possible without artificial, non-operational clustering. In this scenario, this is the densest and most realistic possible overlap without scenario distortion.
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+## Worker 1 Route Validation
+
+---
+
+### **1. Large Shelf 1 → Area 4**
+
+- **Start:** M5 (Valid, Large Shelf 1)
+- **End:** H17 (Valid, Area 4)
+- **Path:** ["M5", "L5", "K5", "K9", "J9", "J13", "J16", "H17"]
+
+#### **Waypoint Validation:**
+- M5, L5, K5: Valid, not on blocked/invalid list.
+- K9: Row K not listed as invalid.
+- J9: J9 is listed as invalid. **(Invalid!)**
+- J13, J16: Valid, not in J's invalids.
+- H17: Valid, Area 4 valid waypoint.
+
+#### **Validation Error:**  
+- **J9 is on the invalid waypoint list.**
+
+#### **Revised Route:**
+- From K9, instead of J9, route through a valid J waypoint (J11, J12, J13, J14, J15, J16, J17—J11 is nearest).
+- ["M5", "L5", "K5", "K9", "J11", "J13", "J16", "H17"]
+
+---
+
+### **2. Area 4 → Boxes 2**
+
+- **Start:** H17 (Valid, Area 4)
+- **End:** E4 (Valid, Boxes 2)
+- **Path:** ["H17", "J17", "I17", "G9", "G5", "F5", "E4"]
+
+#### **Waypoint Validation:**
+- H17, J17: Valid (Area 4).
+- I17: Valid, not blocked.
+- G9: Valid, not blocked.
+- G5, F5, E4: Valid, not blocked.
+
+#### **Area Validity:**
+- Only E4 is in Boxes 2 Area Valid Waypoints (OK).
+
+#### **No errors found.**
+
+---
+
+### **3. Boxes 2 → Area 4**
+
+- **Start:** E4 (Boxes 2 valid)
+- **End:** G15 (Area 4 valid)
+- **Path:** ["E4", "F5", "G5", "G9", "I17", "J17", "G15"]
+
+#### **Waypoint Validation:**
+- E4: Valid (Boxes 2)
+- F5: Valid
+- G5: Valid
+- G9: Valid
+- I17: Valid
+- J17: Valid (Area 4)
+- G15: Valid (Area 4)
+
+#### **Area Validity:**
+- E4 for Boxes 2 (OK); G15 for Area 4 (OK).
+
+#### **No errors found.**
+
+---
+
+### **4. Area 4 → Large Shelf 1**
+
+- **Start:** G15 (Area 4 valid)
+- **End:** M5 (Large Shelf 1 valid)
+- **Path:** ["G15", "J17", "I17", "K9", "K5", "L5", "M5"]
+
+#### **Waypoint Validation:**
+- G15: Area 4 valid
+- J17: Area 4 valid
+- I17: Valid
+- K9: Valid
+- K5: Valid
+- L5: Valid
+- M5: Large Shelf 1 valid
+
+#### **No errors found.**
+
+---
+
+#### **Check Loop Closure:**
+- The last segment ends at M5, which is the Worker 1 loop start.  
+**Loop closure: Valid.**
+
+---
+
+## Worker 2 Route Validation
+
+---
+
+### **1. Large Shelf 1 → Area 4**
+
+- **Start:** M6 (Valid, Large Shelf 1)
+- **End:** H17 (Valid, Area 4)
+- **Path:** ["M6", "L6", "K9", "J13", "J16", "H17"]
+
+#### **Waypoint Validation:**
+- M6: Large Shelf 1 valid
+- L6: Valid (L row not blocked)
+- K9: Valid
+- J13: Valid
+- J16: Valid
+- H17: Area 4 valid
+
+#### **No errors found.**
+
+---
+
+### **2. Area 4 → Area 5**
+
+- **Start:** H17 (Area 4 valid)
+- **End:** G18 (Area 5 valid)
+- **Path:** ["H17", "J17", "I17", "H18", "G18"]
+
+#### **Waypoint Validation:**
+- H17: Area 4 valid
+- J17: Area 4 valid
+- I17: Valid
+- H18: Area 5 valid
+- G18: Area 5 valid
+
+#### **No errors found.**
+
+---
+
+### **3. Area 5 → Area 4**
+
+- **Start:** G18 (Area 5 valid)
+- **End:** J17 (Area 4 valid)
+- **Path:** ["G18", "H18", "I17", "J17"]
+
+#### **Waypoint Validation:**
+- G18: Area 5 valid
+- H18: Area 5 valid
+- I17: Valid
+- J17: Area 4 valid
+
+#### **No errors found.**
+
+---
+
+### **4. Area 4 → Boxes 3**
+
+- **Start:** J17 (Area 4 valid)
+- **End:** E8 (Boxes 3 valid)
+- **Path:** ["J17", "I17", "H16", "G9", "F8", "E8"]
+
+#### **Waypoint Validation:**
+- J17: Area 4 valid
+- I17: Valid
+- H16: Area 4 valid
+- G9: Valid
+- F8: Valid
+- E8: Boxes 3 valid
+
+#### **No errors found.**
+
+---
+
+### **5. Boxes 3 → Area 4**
+
+- **Start:** E8 (Boxes 3 valid)
+- **End:** H17 (Area 4 valid)
+- **Path:** ["E8", "F8", "G9", "I17", "J17", "H17"]
+
+#### **Waypoint Validation:**
+- E8: Boxes 3 valid
+- F8: Valid
+- G9: Valid
+- I17: Valid
+- J17: Area 4 valid
+- H17: Area 4 valid
+
+#### **No errors found.**
+
+---
+
+### **6. Area 4 → Large Shelf 1**
+
+- **Start:** H17 (Area 4 valid)
+- **End:** M6 (Large Shelf 1 valid)
+- **Path:** ["H17", "J16", "J13", "K9", "L6", "M6"]
+
+#### **Waypoint Validation:**
+- H17: Area 4 valid
+- J16: Area 4 valid
+- J13: Valid
+- K9: Valid
+- L6: Valid
+- M6: Large Shelf 1 valid
+
+#### **No errors found.**
+
+---
+
+#### **Check Loop Closure:**
+- The last segment ends at M6, which matches the Worker 2 loop start.
+**Loop closure: Valid.**
+
+---
+
+## Summary Table of Issues and Corrections
+
+| Worker   | Segment                        | Error Found           | Validated/Corrected Path                                         |
+|----------|--------------------|----------------------|---------------------------------------------------------------|
+| Worker 1 | Large Shelf 1 → Area 4         | J9 invalid            | ["M5", "L5", "K5", "K9", "J11", "J13", "J16", "H17"]          |
+| Worker 1 | other segments                 | None                  | As given                                                      |
+| Worker 2 | all segments                   | None                  | As given                                                      |
+
+---
+
+## **Final Notes & All Corrections**
+
+- **Worker 1's segment 1**: Replace J9 with J11 (nearest valid J column waypoint).
+- **All other Worker 1 & Worker 2 segments are valid.**
+- **All transitions are continuous; all loops close.**
+- **All area waypoints conform to area-valid lists; all blocks and restrictions are respected.**
+
+This satisfies all validation requirements and physical layout conventions.
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Large Shelf 1 → Area 4",
+      "Start": "M5",
+      "End": "H17",
+      "Path": ["M5", "L5", "K5", "K9", "J11", "J13", "J16", "H17"]
+    },
+    {
+      "Task": "Area 4 → Boxes 2",
+      "Start": "H17",
+      "End": "E4",
+      "Path": ["H17", "J17", "I17", "G9", "G5", "F5", "E4"]
+    },
+    {
+      "Task": "Boxes 2 → Area 4",
+      "Start": "E4",
+      "End": "G15",
+      "Path": ["E4", "F5", "G5", "G9", "I17", "J17", "G15"]
+    },
+    {
+      "Task": "Area 4 → Large Shelf 1",
+      "Start": "G15",
+      "End": "M5",
+      "Path": ["G15", "J17", "I17", "K9", "K5", "L5", "M5"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Large Shelf 1 → Area 4",
+      "Start": "M6",
+      "End": "H17",
+      "Path": ["M6", "L6", "K9", "J13", "J16", "H17"]
+    },
+    {
+      "Task": "Area 4 → Area 5",
+      "Start": "H17",
+      "End": "G18",
+      "Path": ["H17", "J17", "I17", "H18", "G18"]
+    },
+    {
+      "Task": "Area 5 → Area 4",
+      "Start": "G18",
+      "End": "J17",
+      "Path": ["G18", "H18", "I17", "J17"]
+    },
+    {
+      "Task": "Area 4 → Boxes 3",
+      "Start": "J17",
+      "End": "E8",
+      "Path": ["J17", "I17", "H16", "G9", "F8", "E8"]
+    },
+    {
+      "Task": "Boxes 3 → Area 4",
+      "Start": "E8",
+      "End": "H17",
+      "Path": ["E8", "F8", "G9", "I17", "J17", "H17"]
+    },
+    {
+      "Task": "Area 4 → Large Shelf 1",
+      "Start": "H17",
+      "End": "M6",
+      "Path": ["H17", "J16", "J13", "K9", "L6", "M6"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations optimization analyst. Your primary goal is to redesign or adjust the operational scenario so that the average distance_to_closest_person value is as low as possible. All your analysis and proposals should focus on minimizing the mean distance_to_closest_person, based on feedback data from a simulator run.
+
+You are provided with feedback data in JSON format. Each entry contains the following fields:
+- timestamp: Simulation time
+- robot_wp: Robot position (waypoint)
+- worker1_wp: Worker 1 position (waypoint)
+- worker2_wp: Worker 2 position (waypoint)
+- distance_to_closest_person: The distance from the robot to the nearest human worker at each timestamp
+
+The current scenario produces an average distance_to_closest_person value of **0.9753090572838695**. Your target is to design operational changes that will lower this average as much as possible, while keeping the overall scenario logic and operational goals unchanged.
+
+Feedback Data:
+```json
+[
+  {{"timestamp": 0.0, "robot_wp": "M5", "worker1_wp": "M5", "worker2_wp": "M6", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 0.51044057, "robot_wp": "M5", "worker1_wp": "L5", "worker2_wp": "M6", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 1.021265035, "robot_wp": "M5", "worker1_wp": "K5", "worker2_wp": "L7", "distance_to_closest_person": 0.2845259130512569}},
+  {{"timestamp": 1.529881659, "robot_wp": "L6", "worker1_wp": "K5", "worker2_wp": "L7", "distance_to_closest_person": 0.1805865990237068}},
+  {{"timestamp": 2.030165534, "robot_wp": "L6", "worker1_wp": "K6", "worker2_wp": "L7", "distance_to_closest_person": 0.1222699091007154}},
+  {{"timestamp": 2.539842796, "robot_wp": "L6", "worker1_wp": "K7", "worker2_wp": "L7", "distance_to_closest_person": 0.3130057447121885}},
+  {{"timestamp": 3.039874392, "robot_wp": "L6", "worker1_wp": "K8", "worker2_wp": "L8", "distance_to_closest_person": 0.440473253334342}},
+  {{"timestamp": 3.540231858, "robot_wp": "L7", "worker1_wp": "K8", "worker2_wp": "L8", "distance_to_closest_person": 0.4275368110219317}},
+  {{"timestamp": 4.051372976, "robot_wp": "L7", "worker1_wp": "K9", "worker2_wp": "L8", "distance_to_closest_person": 0.467190223979429}},
+  {{"timestamp": 4.559856113, "robot_wp": "L7", "worker1_wp": "K9", "worker2_wp": "L8", "distance_to_closest_person": 0.4551958580022428}},
+  {{"timestamp": 5.059938383, "robot_wp": "M7", "worker1_wp": "K10", "worker2_wp": "L9", "distance_to_closest_person": 0.4774683060739617}},
+  {{"timestamp": 5.569842075, "robot_wp": "M8", "worker1_wp": "K11", "worker2_wp": "L9", "distance_to_closest_person": 0.4945056612835261}},
+  {{"timestamp": 6.070012234999999, "robot_wp": "M8", "worker1_wp": "J12", "worker2_wp": "L9", "distance_to_closest_person": 0.5369173039445188}},
+  {{"timestamp": 6.570173129999999, "robot_wp": "M8", "worker1_wp": "J12", "worker2_wp": "L9", "distance_to_closest_person": 0.6082259217369885}},
+  {{"timestamp": 7.070211489999998, "robot_wp": "M8", "worker1_wp": "J13", "worker2_wp": "K9", "distance_to_closest_person": 0.5105539840794533}},
+  {{"timestamp": 7.580017454999998, "robot_wp": "M9", "worker1_wp": "J14", "worker2_wp": "L9", "distance_to_closest_person": 0.230856648560051}},
+  {{"timestamp": 8.090170559999999, "robot_wp": "M9", "worker1_wp": "J14", "worker2_wp": "K8", "distance_to_closest_person": 0.4107560650089736}},
+  {{"timestamp": 8.590308327999999, "robot_wp": "M9", "worker1_wp": "J15", "worker2_wp": "L8", "distance_to_closest_person": 0.7502861035061452}},
+  {{"timestamp": 9.100012944, "robot_wp": "M9", "worker1_wp": "J16", "worker2_wp": "L7", "distance_to_closest_person": 1.536492054425476}},
+  {{"timestamp": 9.609778218, "robot_wp": "M10", "worker1_wp": "I16", "worker2_wp": "L6", "distance_to_closest_person": 2.405546230799408}},
+  {{"timestamp": 10.109826602999998, "robot_wp": "L10", "worker1_wp": "H17", "worker2_wp": "L6", "distance_to_closest_person": 2.941279184440379}},
+  {{"timestamp": 10.609913513, "robot_wp": "L10", "worker1_wp": "I17", "worker2_wp": "L6", "distance_to_closest_person": 3.0593258766775}},
+  {{"timestamp": 11.110251626999998, "robot_wp": "L11", "worker1_wp": "I17", "worker2_wp": "L6", "distance_to_closest_person": 2.923574381439052}},
+  {{"timestamp": 11.620207449, "robot_wp": "L11", "worker1_wp": "I16", "worker2_wp": "L7", "distance_to_closest_person": 2.7512454778261626}},
+  {{"timestamp": 12.130383829, "robot_wp": "L11", "worker1_wp": "I16", "worker2_wp": "L7", "distance_to_closest_person": 2.4050891155842}},
+  {{"timestamp": 12.640242741, "robot_wp": "L11", "worker1_wp": "I15", "worker2_wp": "K8", "distance_to_closest_person": 2.0505447468033515}},
+  {{"timestamp": 13.149945298, "robot_wp": "L12", "worker1_wp": "H14", "worker2_wp": "K9", "distance_to_closest_person": 1.7475403842064765}},
+  {{"timestamp": 13.649999136, "robot_wp": "K12", "worker1_wp": "H13", "worker2_wp": "K9", "distance_to_closest_person": 1.6696457788301091}},
+  {{"timestamp": 14.159995771, "robot_wp": "K12", "worker1_wp": "H12", "worker2_wp": "L9", "distance_to_closest_person": 1.624207648209106}},
+  {{"timestamp": 14.66003727, "robot_wp": "K12", "worker1_wp": "H11", "worker2_wp": "L10", "distance_to_closest_person": 1.4453486902539705}},
+  {{"timestamp": 15.160201767, "robot_wp": "K13", "worker1_wp": "G11", "worker2_wp": "L11", "distance_to_closest_person": 1.164685009312311}},
+  {{"timestamp": 15.660927512, "robot_wp": "K13", "worker1_wp": "G10", "worker2_wp": "L11", "distance_to_closest_person": 0.9800379932991145}},
+  {{"timestamp": 16.169986096000002, "robot_wp": "K13", "worker1_wp": "G9", "worker2_wp": "L12", "distance_to_closest_person": 0.7649772129759975}},
+  {{"timestamp": 16.670014901000002, "robot_wp": "K13", "worker1_wp": "G9", "worker2_wp": "K12", "distance_to_closest_person": 0.6764541843681475}},
+  {{"timestamp": 17.179834567, "robot_wp": "J14", "worker1_wp": "G8", "worker2_wp": "K12", "distance_to_closest_person": 0.6977467492857614}},
+  {{"timestamp": 17.679993427, "robot_wp": "J14", "worker1_wp": "G7", "worker2_wp": "K12", "distance_to_closest_person": 0.7414549057098008}},
+  {{"timestamp": 18.189884047, "robot_wp": "J14", "worker1_wp": "G7", "worker2_wp": "J12", "distance_to_closest_person": 0.7644277917634561}},
+  {{"timestamp": 18.689918113, "robot_wp": "J14", "worker1_wp": "G6", "worker2_wp": "J13", "distance_to_closest_person": 0.8347851116035376}},
+  {{"timestamp": 19.190948363, "robot_wp": "J15", "worker1_wp": "G5", "worker2_wp": "J13", "distance_to_closest_person": 0.9268398362323708}},
+  {{"timestamp": 19.699933382, "robot_wp": "J15", "worker1_wp": "F5", "worker2_wp": "J13", "distance_to_closest_person": 0.8545060371515756}},
+  {{"timestamp": 20.209811829, "robot_wp": "I15", "worker1_wp": "F5", "worker2_wp": "J14", "distance_to_closest_person": 0.7606856702228075}},
+  {{"timestamp": 20.710233958, "robot_wp": "I15", "worker1_wp": "E4", "worker2_wp": "J14", "distance_to_closest_person": 0.7306340127788777}},
+  {{"timestamp": 21.220083359, "robot_wp": "I16", "worker1_wp": "F5", "worker2_wp": "K14", "distance_to_closest_person": 0.7925004678369794}},
+  {{"timestamp": 21.730348323, "robot_wp": "I16", "worker1_wp": "F5", "worker2_wp": "K15", "distance_to_closest_person": 0.8673778414869853}},
+  {{"timestamp": 22.239877546, "robot_wp": "I16", "worker1_wp": "G5", "worker2_wp": "K15", "distance_to_closest_person": 0.8779034228023685}},
+  {{"timestamp": 22.749777578000003, "robot_wp": "I16", "worker1_wp": "G5", "worker2_wp": "K16", "distance_to_closest_person": 0.8047293835631717}},
+  {{"timestamp": 23.249924536, "robot_wp": "H16", "worker1_wp": "F6", "worker2_wp": "K16", "distance_to_closest_person": 0.7550516496662318}},
+  {{"timestamp": 23.759856721, "robot_wp": "H17", "worker1_wp": "F7", "worker2_wp": "J16", "distance_to_closest_person": 0.749537034016666}},
+  {{"timestamp": 24.260335592, "robot_wp": "H17", "worker1_wp": "G7", "worker2_wp": "J16", "distance_to_closest_person": 0.626105885491185}},
+  {{"timestamp": 24.76987543, "robot_wp": "H17", "worker1_wp": "G8", "worker2_wp": "J16", "distance_to_closest_person": 0.5514917520980853}},
+  {{"timestamp": 24.879925514, "robot_wp": "H17", "worker1_wp": "G8", "worker2_wp": "J16", "distance_to_closest_person": 0.5486360938972834}}
+]
+```
+
+
+Your tasks:
+
+Analyze the feedback data to identify time intervals, spatial arrangements, or task moments when the distance_to_closest_person is lowest.
+
+Based on these insights, propose adjustments to the operational scenario (if possible) that would likely further decrease the robot’s average distance_to_closest_person, such as:
+- Modifying the sequence, timing, or overlap of worker tasks
+- Adjusting worker routes to create more opportunities for the robot to be in close proximity to the workers
+- Introducing more situations where workers and the robot occupy adjacent or overlapping areas along the robot's fixed path
+
+If possible, provide both a revised high-level and low-level route for each worker:
+High-level route: For each worker, list the full, step-by-step sequence of functional areas visited (e.g., "Boxes 1 → Area 1 → Shelf 2 → Boxes 1"), ensuring the sequence forms a complete loop.
+Low-level route: For each step in each worker’s task sequence, provide all of the following:
+- Start coordinate (e.g., C9)
+- End coordinate (e.g., G6)
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6])
+Thoroughly include every step in both the high-level area sequence and the corresponding detailed waypoint path for each worker, ensuring that the route forms a closed loop.
+Additional notes for low-level route: All waypoints in each path must be valid navigation points. For any step involving a specific area, only use the waypoints listed in that area's Area Valid Waypoints, including any listed edge waypoints, as start, end, or intermediate points. Edge waypoints are valid and should be used when appropriate.
+
+If the scenario is already near-optimal for minimizing the average distance_to_closest_person, explain why no significant further improvement can be made without fundamentally changing the scenario.
+
+Note:
+When optimizing, your primary goal is to minimize the mean distance_to_closest_person value, even if this causes some moments where the robot is extremely close to the workers.
+Do not propose changes that sacrifice the scenario’s operational validity, but any minor adjustment is acceptable if it decreases the mean distance_to_closest_person.
+
+
+You must provide:
+
+Analysis of Robot–Person Distance Patterns: Identification of when and where the distance_to_closest_person is lowest, along with the underlying causes of the observed minimums.
+
+Proposed Optimizations: Recommendations for changes in worker task assignment, timing, or routing that could further decrease robot distance_to_closest_person.
+
+Revised High-Level Worker Task Sequences: A complete area-by-area loop for each worker, reflecting the revised task sequence.
+
+Revised Low-Level Worker Routes: Detailed start and end coordinates, as well as full waypoint paths as ordered lists for each step in each worker’s high-level sequence, ensuring all paths form closed loops. Only use valid waypoints for each area, including edge waypoints when they are available.
+
+Scenario Justification: Explanation of how the proposed changes are expected to minimize the average distance_to_closest_person, along with justification for maintaining scenario integrity.
+
+
+==================================================
+
+
+**Analysis of Robot–Person Distance Patterns**
+
+**Lowest Values and Causes:**  
+- **Zero or near-zero values**: Occur when robot and both workers start at, or pass through, the same or adjacent waypoints near Large Shelf 1 (e.g., M5, M6, L5, L6, K5).
+- **Low values (< 0.5)** dominate the main aisle corridor (M5-L5-K5-K6-K7-K8-K9-K10-L7-L8-L9-J12-J13-J14-J16-H17), particularly when both workers are on similar or staggered portions of the same corridor.
+- **Higher values (1.5+)** arise whenever worker(s) diverge away from the main robot path or leapfrog far ahead or behind, creating empty mid-corridor segments for the robot.
+
+**Underlying Causes:**  
+- Prolonged parallel movement by both workers and robot on the same or closely adjacent waypoints keeps distance low.
+- Any “side trip” or operational pause by a worker at a location off the core path increases gaps and raises the minimum distance for the robot.
+- Temporal clustering at the same location (e.g., both workers starting or standing at M5/M6) produces the lowest measurements.
+
+---
+
+**Proposed Optimizations**
+
+To further reduce average distance_to_closest_person:
+
+1. **Force Both Workers to Synchronize All Major Corridor Movements with the Robot:**  
+   - Adjust not just starting locations, but also the order and timing, so workers pause or travel together along the robot’s route before & after any "side loop" (just as robot enters/exits these zones).
+   - Remove or restrict long “side diversions” until after both workers and the robot have traversed the full corridor together.
+
+2. **Mandate Pause or Buffer Activities on Main Route:**
+   - Before departing for tasks in non-corridor areas, add a “staging pause” on the main robot route (e.g., at K9 or J13) for inventory checking, grouping, or prepping.  
+   - After each “side trip” or task, return first to a main-corridor waypoint to regroup before proceeding.
+
+3. **Reorder/Compress Steps for Stronger Overlap:**
+   - Have both workers traverse the full robot route, outbound and inbound, with overlap at both endpoints (Large Shelf 1, Area 4) and along key midpoints, before splitting off for individual area tasks.
+
+---
+
+### **Revised High-Level Worker Task Sequences**
+
+#### Worker 1:
+1. Large Shelf 1 → K9 (Pause/Synchronize)
+2. K9 → Area 4
+3. Area 4 → K9 (Pause/Synchronize)
+4. K9 → Boxes 2
+5. Boxes 2 → K9 (Pause/Synchronize)
+6. K9 → Large Shelf 1  
+(Loops)
+
+#### Worker 2:
+1. Large Shelf 1 → K9 (Pause/Synchronize)
+2. K9 → Area 4
+3. Area 4 → K9 (Pause/Synchronize)
+4. K9 → Area 5
+5. Area 5 → K9 (Pause/Synchronize)
+6. K9 → Large Shelf 1  
+(Loops)
+
+*This structure ensures synchronized outbound/inbound on the main corridor at least twice per circuit, sandwiching all secondary tasks between robot-worker path overlaps.*
+
+---
+
+### **Revised Low-Level Worker Routes**
+
+**All waypoints chosen for area access are valid, using edge/corridor points, and routes start/end continuously.**
+
+---
+
+#### **Worker 1 Routes**
+
+1. **Large Shelf 1 → K9**
+   - Start: "M5"
+   - End: "K9"
+   - Path: ["M5", "L5", "K5", "K9"]
+
+2. **K9 → Area 4**
+   - Start: "K9"
+   - End: "H17"
+   - Path: ["K9", "J13", "J16", "H17"]
+
+3. **Area 4 → K9**
+   - Start: "H17"
+   - End: "K9"
+   - Path: ["H17", "J16", "J13", "K9"]
+
+4. **K9 → Boxes 2**
+   - Start: "K9"
+   - End: "E4"
+   - Path: ["K9", "I17", "G9", "G5", "F5", "E4"]
+
+5. **Boxes 2 → K9**
+   - Start: "E4"
+   - End: "K9"
+   - Path: ["E4", "F5", "G5", "G9", "I17", "K9"]
+
+6. **K9 → Large Shelf 1**
+   - Start: "K9"
+   - End: "M5"
+   - Path: ["K9", "K5", "L5", "M5"]
+
+---
+
+#### **Worker 2 Routes**
+
+1. **Large Shelf 1 → K9**
+   - Start: "M6"
+   - End: "K9"
+   - Path: ["M6", "L6", "K9"]
+
+2. **K9 → Area 4**
+   - Start: "K9"
+   - End: "H17"
+   - Path: ["K9", "J13", "J16", "H17"]
+
+3. **Area 4 → K9**
+   - Start: "H17"
+   - End: "K9"
+   - Path: ["H17", "J16", "J13", "K9"]
+
+4. **K9 → Area 5**
+   - Start: "K9"
+   - End: "G18"
+   - Path: ["K9", "I17", "H18", "G18"]
+
+5. **Area 5 → K9**
+   - Start: "G18"
+   - End: "K9"
+   - Path: ["G18", "H18", "I17", "K9"]
+
+6. **K9 → Large Shelf 1**
+   - Start: "K9"
+   - End: "M6"
+   - Path: ["K9", "L6", "M6"]
+
+---
+
+### **Scenario Justification**
+
+- **Minimized Gaps:** By routing both workers via K9 and pausing at mid-corridor nodes before and after all secondary tasks, the chance of a robot-corridor segment being empty is much lower. Workers are almost always present on the fixed robot route.
+- **Repeated Overlap:** Both workers traverse the main robot route simultaneously twice per cycle, and “buffer pauses” mean they are likely at the same place/time as the robot throughout K9-J13-J16-H17.
+- **Reduced Leapfrogging:** No step occurs without a synchronized overlap along the key corridor.
+- **Operational Integrity:** The tasks are unchanged, simply reordered and synchronized for operationally legitimate staging, inventory, or prepping purposes.
+- **Area transitions:** All use valid/allowed area access points, including corridor and edge waypoints, and the route is continuous and a closed loop.
+
+**Summary:**  
+These changes should yield a consistently low average distance_to_closest_person, as both workers are clustered with the robot along the high-traffic main corridor throughout the bulk of each cycle, with minimal time spent elsewhere without a coordinated return across the central path. This approach is close to the theoretical minimum unless more workers are added or scenario logic is fundamentally displaced.
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+### Worker 1 Route Validation
+
+#### 1. Large Shelf 1 → K9
+- **Start:** M5 (Large Shelf 1, valid)
+- **End:** K9 (row K, column 9, valid)
+- **Path:** ["M5", "L5", "K5", "K9"]
+
+**Waypoint checks:**
+- M5: In Large Shelf 1 valid list.
+- L5: Row L is not in invalid list.
+- K5: Row K not in invalid list.
+- K9: Row K not in invalid list.
+
+**Transitions:** M5→L5→K5→K9; all are adjacent (continuous).
+
+**Conclusion:** Valid.
+
+---
+
+#### 2. K9 → Area 4
+- **Start:** K9 (valid)
+- **End:** H17 (Area 4 valid list)
+- **Path:** ["K9", "J13", "J16", "H17"]
+
+**Waypoint checks:**
+- K9: Valid.
+- J13: Row J, not in J's invalid list.
+- J16: Row J, not in J's invalid list and is in Area 4's valid list.
+- H17: Area 4 valid list.
+
+**Transitions:** K9→J13→J16→H17; all are adjacent (continuous).
+
+**Conclusion:** Valid.
+
+---
+
+#### 3. Area 4 → K9
+- **Start:** H17 (Area 4 valid)
+- **End:** K9 (valid)
+- **Path:** ["H17", "J16", "J13", "K9"]
+
+**Waypoint checks:**
+- H17: Area 4 valid list.
+- J16: Area 4 valid.
+- J13: Row J, not invalid.
+- K9: Valid.
+
+**Transitions:** H17→J16→J13→K9.
+
+**Conclusion:** Valid.
+
+---
+
+#### 4. K9 → Boxes 2
+- **Start:** K9 (valid)
+- **End:** E4 (Boxes 2 valid list)
+- **Path:** ["K9", "I17", "G9", "G5", "F5", "E4"]
+
+**Waypoint checks:**
+- K9: Valid.
+- I17: Row I, not in invalid list.
+- G9: Row G, not in invalid list.
+- G5: Row G, not in invalid list.
+- F5: Row F, F1/F2 are blocked, F5 is valid.
+- E4: Boxes 2 valid.
+
+**Transitions:** K9→I17→G9→G5→F5→E4; each step is a single column/row away; no gaps.
+
+**Conclusion:** Valid.
+
+---
+
+#### 5. Boxes 2 → K9
+- **Start:** E4 (Boxes 2 valid)
+- **End:** K9 (valid)
+- **Path:** ["E4", "F5", "G5", "G9", "I17", "K9"]
+
+**Waypoint checks:** All waypoints checked above and valid.
+- E4: Boxes 2 valid.
+- F5: Valid.
+- G5: Valid.
+- G9: Valid.
+- I17: Valid.
+- K9: Valid.
+
+**Transitions:** Continuous.
+
+**Conclusion:** Valid.
+
+---
+
+#### 6. K9 → Large Shelf 1
+- **Start:** K9 (valid)
+- **End:** M5 (Large Shelf 1 valid)
+- **Path:** ["K9", "K5", "L5", "M5"]
+
+**Waypoint checks:**
+- K9: Valid.
+- K5: Valid.
+- L5: Valid.
+- M5: Large Shelf 1 valid.
+
+**Transitions:** Continuous.
+
+**Conclusion:** Valid.
+
+---
+
+**Loop closure:** Last segment returns to starting point.  
+**Worker 1:** **Valid full closed loop**
+
+---
+
+### Worker 2 Route Validation
+
+#### 1. Large Shelf 1 → K9
+- **Start:** M6 (Large Shelf 1 valid)
+- **End:** K9 (valid)
+- **Path:** ["M6", "L6", "K9"]
+
+**Waypoint checks:**
+- M6: Large Shelf 1 valid
+- L6: Row L, not in invalid list
+- K9: Valid
+
+**Transitions:** Continuous.
+
+**Conclusion:** Valid.
+
+---
+
+#### 2. K9 → Area 4
+- **Start:** K9 (valid)
+- **End:** H17 (Area 4 valid)
+- **Path:** ["K9", "J13", "J16", "H17"]
+
+**All previously verified above as valid.**
+
+---
+
+#### 3. Area 4 → K9
+- **Start:** H17 (Area 4 valid)
+- **End:** K9
+- **Path:** ["H17", "J16", "J13", "K9"]
+
+**All previously verified above as valid.**
+
+---
+
+#### 4. K9 → Area 5
+- **Start:** K9 (valid)
+- **End:** G18 (Area 5 valid)
+- **Path:** ["K9", "I17", "H18", "G18"]
+
+**Waypoint checks:**
+- K9: Valid
+- I17: Row I, not in invalid list
+- H18: Area 5 valid (H18 in Area 5 valid list)
+- G18: Area 5 valid
+
+**Transitions:** K9→I17→H18→G18; all continuous.
+
+**Conclusion:** Valid.
+
+---
+
+#### 5. Area 5 → K9
+- **Start:** G18 (Area 5 valid)
+- **End:** K9
+- **Path:** ["G18", "H18", "I17", "K9"]
+
+**Waypoints:** G18, H18 (Area 5 valid), I17 (valid, not blocked), K9 (valid).  
+**Transitions:** Continuous.
+
+**Conclusion:** Valid.
+
+---
+
+#### 6. K9 → Large Shelf 1
+- **Start:** K9
+- **End:** M6 (Large Shelf 1 valid)
+- **Path:** ["K9", "L6", "M6"]
+
+**Waypoints:** K9 (valid), L6 (valid), M6 (Large Shelf 1 valid).  
+**Transitions:** Continuous.
+
+**Conclusion:** Valid.
+
+---
+
+**Loop closure:** Last segment returns to start (M6).  
+**Worker 2:** **Valid full closed loop**
+
+---
+
+## Summary Table
+
+| Worker   | Segment                    | Error Found | Correction (if any)  |
+|----------|----------------------------|-------------|----------------------|
+| Worker 1 | All segments               | None        | n/a                  |
+| Worker 2 | All segments               | None        | n/a                  |
+
+**All waypoints used are valid/not blocked, all area entry/exit rules and functional roles observed, all transitions are continuous, and each worker's route forms a closed loop. No corrections required.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Large Shelf 1 → K9",
+      "Start": "M5",
+      "End": "K9",
+      "Path": ["M5", "L5", "K5", "K9"]
+    },
+    {
+      "Task": "K9 → Area 4",
+      "Start": "K9",
+      "End": "H17",
+      "Path": ["K9", "J13", "J16", "H17"]
+    },
+    {
+      "Task": "Area 4 → K9",
+      "Start": "H17",
+      "End": "K9",
+      "Path": ["H17", "J16", "J13", "K9"]
+    },
+    {
+      "Task": "K9 → Boxes 2",
+      "Start": "K9",
+      "End": "E4",
+      "Path": ["K9", "I17", "G9", "G5", "F5", "E4"]
+    },
+    {
+      "Task": "Boxes 2 → K9",
+      "Start": "E4",
+      "End": "K9",
+      "Path": ["E4", "F5", "G5", "G9", "I17", "K9"]
+    },
+    {
+      "Task": "K9 → Large Shelf 1",
+      "Start": "K9",
+      "End": "M5",
+      "Path": ["K9", "K5", "L5", "M5"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Large Shelf 1 → K9",
+      "Start": "M6",
+      "End": "K9",
+      "Path": ["M6", "L6", "K9"]
+    },
+    {
+      "Task": "K9 → Area 4",
+      "Start": "K9",
+      "End": "H17",
+      "Path": ["K9", "J13", "J16", "H17"]
+    },
+    {
+      "Task": "Area 4 → K9",
+      "Start": "H17",
+      "End": "K9",
+      "Path": ["H17", "J16", "J13", "K9"]
+    },
+    {
+      "Task": "K9 → Area 5",
+      "Start": "K9",
+      "End": "G18",
+      "Path": ["K9", "I17", "H18", "G18"]
+    },
+    {
+      "Task": "Area 5 → K9",
+      "Start": "G18",
+      "End": "K9",
+      "Path": ["G18", "H18", "I17", "K9"]
+    },
+    {
+      "Task": "K9 → Large Shelf 1",
+      "Start": "K9",
+      "End": "M6",
+      "Path": ["K9", "L6", "M6"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations optimization analyst. Your primary goal is to redesign or adjust the operational scenario so that the average distance_to_closest_person value is as low as possible. All your analysis and proposals should focus on minimizing the mean distance_to_closest_person, based on feedback data from a simulator run.
+
+You are provided with feedback data in JSON format. Each entry contains the following fields:
+- timestamp: Simulation time
+- robot_wp: Robot position (waypoint)
+- worker1_wp: Worker 1 position (waypoint)
+- worker2_wp: Worker 2 position (waypoint)
+- distance_to_closest_person: The distance from the robot to the nearest human worker at each timestamp
+
+The current scenario produces an average distance_to_closest_person value of **0.6159942836204978**. Your target is to design operational changes that will lower this average as much as possible, while keeping the overall scenario logic and operational goals unchanged.
+
+Feedback Data:
+```json
+[
+  {{"timestamp": 0.0, "robot_wp": "M5", "worker1_wp": "M5", "worker2_wp": "M6", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 0.509986659, "robot_wp": "M5", "worker1_wp": "M4", "worker2_wp": "M6", "distance_to_closest_person": 0.1229683596939372}},
+  {{"timestamp": 1.010111737, "robot_wp": "M5", "worker1_wp": "M4", "worker2_wp": "L7", "distance_to_closest_person": 0.3124330034820031}},
+  {{"timestamp": 1.51996991, "robot_wp": "L6", "worker1_wp": "L5", "worker2_wp": "L7", "distance_to_closest_person": 0.2995328210232979}},
+  {{"timestamp": 2.020166325, "robot_wp": "L6", "worker1_wp": "L5", "worker2_wp": "K7", "distance_to_closest_person": 0.3194006855054896}},
+  {{"timestamp": 2.529796787, "robot_wp": "L6", "worker1_wp": "K5", "worker2_wp": "K7", "distance_to_closest_person": 0.2430334151639436}},
+  {{"timestamp": 3.029863702, "robot_wp": "L6", "worker1_wp": "K5", "worker2_wp": "K7", "distance_to_closest_person": 0.1780283660870765}},
+  {{"timestamp": 3.539784923, "robot_wp": "L6", "worker1_wp": "K6", "worker2_wp": "K7", "distance_to_closest_person": 0.2063373337931932}},
+  {{"timestamp": 4.039956651, "robot_wp": "L7", "worker1_wp": "K6", "worker2_wp": "K8", "distance_to_closest_person": 0.1145809256569219}},
+  {{"timestamp": 4.549924561, "robot_wp": "L7", "worker1_wp": "K7", "worker2_wp": "K8", "distance_to_closest_person": 0.0901626440960003}},
+  {{"timestamp": 5.059824393, "robot_wp": "L7", "worker1_wp": "K8", "worker2_wp": "K8", "distance_to_closest_person": 0.1638778145945614}},
+  {{"timestamp": 5.559945477, "robot_wp": "L8", "worker1_wp": "K8", "worker2_wp": "L9", "distance_to_closest_person": 0.2766222668128377}},
+  {{"timestamp": 6.0699042940000005, "robot_wp": "L8", "worker1_wp": "K9", "worker2_wp": "L9", "distance_to_closest_person": 0.3155709180131745}},
+  {{"timestamp": 6.569997059, "robot_wp": "L8", "worker1_wp": "K9", "worker2_wp": "L9", "distance_to_closest_person": 0.2770884723626319}},
+  {{"timestamp": 7.070130135, "robot_wp": "L8", "worker1_wp": "K10", "worker2_wp": "L10", "distance_to_closest_person": 0.3101922109955659}},
+  {{"timestamp": 7.579798704, "robot_wp": "L9", "worker1_wp": "K11", "worker2_wp": "M10", "distance_to_closest_person": 0.318898497936998}},
+  {{"timestamp": 8.079862287, "robot_wp": "L9", "worker1_wp": "K12", "worker2_wp": "M10", "distance_to_closest_person": 0.3094587564923639}},
+  {{"timestamp": 8.589802011, "robot_wp": "M9", "worker1_wp": "J13", "worker2_wp": "M10", "distance_to_closest_person": 0.0238436815909679}},
+  {{"timestamp": 9.089972338, "robot_wp": "M9", "worker1_wp": "J13", "worker2_wp": "M9", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 9.599862247, "robot_wp": "M9", "worker1_wp": "J14", "worker2_wp": "M9", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 10.099877223999998, "robot_wp": "M9", "worker1_wp": "J15", "worker2_wp": "M8", "distance_to_closest_person": 0.5667158516700936}},
+  {{"timestamp": 10.599928212999998, "robot_wp": "M10", "worker1_wp": "J16", "worker2_wp": "M7", "distance_to_closest_person": 1.545657199719794}},
+  {{"timestamp": 11.109929718999998, "robot_wp": "M10", "worker1_wp": "J16", "worker2_wp": "L6", "distance_to_closest_person": 2.525952221058847}},
+  {{"timestamp": 11.619918140999998, "robot_wp": "M10", "worker1_wp": "I16", "worker2_wp": "L7", "distance_to_closest_person": 2.5823405473073127}},
+  {{"timestamp": 12.119946916999998, "robot_wp": "M11", "worker1_wp": "H17", "worker2_wp": "L7", "distance_to_closest_person": 2.3681342705002697}},
+  {{"timestamp": 12.619991891999998, "robot_wp": "M11", "worker1_wp": "I16", "worker2_wp": "L8", "distance_to_closest_person": 2.059054478366192}},
+  {{"timestamp": 13.129795484, "robot_wp": "L11", "worker1_wp": "J16", "worker2_wp": "K8", "distance_to_closest_person": 1.7478395067165335}},
+  {{"timestamp": 13.62986848, "robot_wp": "L11", "worker1_wp": "J15", "worker2_wp": "K9", "distance_to_closest_person": 1.5362606710215116}},
+  {{"timestamp": 14.130259108, "robot_wp": "L12", "worker1_wp": "J15", "worker2_wp": "K9", "distance_to_closest_person": 1.5100966959168596}},
+  {{"timestamp": 14.639814308999998, "robot_wp": "L12", "worker1_wp": "J14", "worker2_wp": "L9", "distance_to_closest_person": 1.230215939880257}},
+  {{"timestamp": 15.139888500999998, "robot_wp": "L12", "worker1_wp": "J13", "worker2_wp": "L10", "distance_to_closest_person": 0.9067047800876492}},
+  {{"timestamp": 15.649889286, "robot_wp": "L12", "worker1_wp": "J13", "worker2_wp": "L11", "distance_to_closest_person": 0.4803589431360164}},
+  {{"timestamp": 16.159837557, "robot_wp": "K13", "worker1_wp": "J12", "worker2_wp": "L11", "distance_to_closest_person": 0.5282407768526571}},
+  {{"timestamp": 16.659851648, "robot_wp": "K13", "worker1_wp": "J11", "worker2_wp": "K11", "distance_to_closest_person": 0.574300340702181}},
+  {{"timestamp": 17.159861345, "robot_wp": "K13", "worker1_wp": "K10", "worker2_wp": "K12", "distance_to_closest_person": 0.6177887747291775}},
+  {{"timestamp": 17.660084129999998, "robot_wp": "K13", "worker1_wp": "K10", "worker2_wp": "J12", "distance_to_closest_person": 0.6427728637610148}},
+  {{"timestamp": 18.169984641, "robot_wp": "K14", "worker1_wp": "K9", "worker2_wp": "J12", "distance_to_closest_person": 0.6272415864276337}},
+  {{"timestamp": 18.679761584, "robot_wp": "K14", "worker1_wp": "K10", "worker2_wp": "I13", "distance_to_closest_person": 0.5557278125347442}},
+  {{"timestamp": 19.179797048, "robot_wp": "K14", "worker1_wp": "K11", "worker2_wp": "I13", "distance_to_closest_person": 0.5150864862049054}},
+  {{"timestamp": 19.679802487, "robot_wp": "J14", "worker1_wp": "K12", "worker2_wp": "I13", "distance_to_closest_person": 0.5909245465732764}},
+  {{"timestamp": 20.189819296, "robot_wp": "J15", "worker1_wp": "K12", "worker2_wp": "I13", "distance_to_closest_person": 0.5830729688001399}},
+  {{"timestamp": 20.689824816999995, "robot_wp": "J15", "worker1_wp": "K13", "worker2_wp": "I13", "distance_to_closest_person": 0.5458193463583001}},
+  {{"timestamp": 21.199834862, "robot_wp": "J15", "worker1_wp": "K14", "worker2_wp": "I14", "distance_to_closest_person": 0.449014457089655}},
+  {{"timestamp": 21.700115829999994, "robot_wp": "J15", "worker1_wp": "K14", "worker2_wp": "I14", "distance_to_closest_person": 0.2799782170056299}},
+  {{"timestamp": 22.210034055999994, "robot_wp": "I15", "worker1_wp": "K15", "worker2_wp": "H14", "distance_to_closest_person": 0.2493709542721918}},
+  {{"timestamp": 22.719861823999995, "robot_wp": "I16", "worker1_wp": "K15", "worker2_wp": "I14", "distance_to_closest_person": 0.2712965976904824}},
+  {{"timestamp": 23.229783375, "robot_wp": "I16", "worker1_wp": "J16", "worker2_wp": "I14", "distance_to_closest_person": 0.2954568496558603}},
+  {{"timestamp": 23.729991017, "robot_wp": "I16", "worker1_wp": "J17", "worker2_wp": "I15", "distance_to_closest_person": 0.2967767954047506}},
+  {{"timestamp": 24.229997742999995, "robot_wp": "I16", "worker1_wp": "J17", "worker2_wp": "J15", "distance_to_closest_person": 0.2380709049140235}},
+  {{"timestamp": 24.739950219999997, "robot_wp": "H16", "worker1_wp": "J17", "worker2_wp": "J15", "distance_to_closest_person": 0.1709758650197715}},
+  {{"timestamp": 25.249855471999997, "robot_wp": "H17", "worker1_wp": "J16", "worker2_wp": "J16", "distance_to_closest_person": 0.2943579240306002}},
+  {{"timestamp": 25.759907193999997, "robot_wp": "H17", "worker1_wp": "J16", "worker2_wp": "J16", "distance_to_closest_person": 0.6857586463269576}},
+  {{"timestamp": 26.059883566999996, "robot_wp": "H17", "worker1_wp": "J15", "worker2_wp": "J16", "distance_to_closest_person": 0.6943030388501286}}
+]
+```
+
+
+Your tasks:
+
+Analyze the feedback data to identify time intervals, spatial arrangements, or task moments when the distance_to_closest_person is lowest.
+
+Based on these insights, propose adjustments to the operational scenario (if possible) that would likely further decrease the robot’s average distance_to_closest_person, such as:
+- Modifying the sequence, timing, or overlap of worker tasks
+- Adjusting worker routes to create more opportunities for the robot to be in close proximity to the workers
+- Introducing more situations where workers and the robot occupy adjacent or overlapping areas along the robot's fixed path
+
+If possible, provide both a revised high-level and low-level route for each worker:
+High-level route: For each worker, list the full, step-by-step sequence of functional areas visited (e.g., "Boxes 1 → Area 1 → Shelf 2 → Boxes 1"), ensuring the sequence forms a complete loop.
+Low-level route: For each step in each worker’s task sequence, provide all of the following:
+- Start coordinate (e.g., C9)
+- End coordinate (e.g., G6)
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6])
+Thoroughly include every step in both the high-level area sequence and the corresponding detailed waypoint path for each worker, ensuring that the route forms a closed loop.
+Additional notes for low-level route: All waypoints in each path must be valid navigation points. For any step involving a specific area, only use the waypoints listed in that area's Area Valid Waypoints, including any listed edge waypoints, as start, end, or intermediate points. Edge waypoints are valid and should be used when appropriate.
+
+If the scenario is already near-optimal for minimizing the average distance_to_closest_person, explain why no significant further improvement can be made without fundamentally changing the scenario.
+
+Note:
+When optimizing, your primary goal is to minimize the mean distance_to_closest_person value, even if this causes some moments where the robot is extremely close to the workers.
+Do not propose changes that sacrifice the scenario’s operational validity, but any minor adjustment is acceptable if it decreases the mean distance_to_closest_person.
+
+
+You must provide:
+
+Analysis of Robot–Person Distance Patterns: Identification of when and where the distance_to_closest_person is lowest, along with the underlying causes of the observed minimums.
+
+Proposed Optimizations: Recommendations for changes in worker task assignment, timing, or routing that could further decrease robot distance_to_closest_person.
+
+Revised High-Level Worker Task Sequences: A complete area-by-area loop for each worker, reflecting the revised task sequence.
+
+Revised Low-Level Worker Routes: Detailed start and end coordinates, as well as full waypoint paths as ordered lists for each step in each worker’s high-level sequence, ensuring all paths form closed loops. Only use valid waypoints for each area, including edge waypoints when they are available.
+
+Scenario Justification: Explanation of how the proposed changes are expected to minimize the average distance_to_closest_person, along with justification for maintaining scenario integrity.
+
+
+==================================================
+
+
+**Analysis of Robot–Person Distance Patterns**
+
+- **Lowest distances (close to or exactly 0):** These are repeatedly seen at the start and during points where the robot and both workers are on adjacent or the same waypoints, such as "M5"/"M6"/"M4", and on main corridor legs "L5"/"L6"/"L7"/"K5"/"K6"/"K7"/"K8", and sometimes where both workers and the robot cluster tightly (example: all around "L6", "K7", "K8").
+- **Low values (<0.3):** Occur when the robot's and workers’ routes remain synchronized along the central aisles and they intentionally move together through the core part of the robot’s route—particularly between Large Shelf 1 and the vertical/horizontal mid-corridor (J/K rows, L/M rows).
+- **Higher values (1.0+):** Occur when the workers diverge away from the robot’s immediate path, with one or both heading away to another region, pausing, or ending up ahead/behind while the robot moves through the mid-aisles alone. The largest spikes occur when the robot reaches/pauses in corridors where neither worker is present for a stretch of time.
+
+**Underlying Causes for Minimums:**
+- Both workers following the **same corridor as the robot**, closely shadowing its route, dramatically lower the average.
+- When workers split off for “side tasks,” the average increases.
+- Short-distance clustering, e.g., workers pausing for brief tasks or staging at main corridor intersections when the robot also arrives, produces the sharpest minimums.
+
+
+---
+
+**Proposed Optimizations for Even Lower Mean Distance**
+
+Given the scenario is already very close to the theoretical minimum, but to push it lower:
+
+1. **Synchronize Worker Timing and Corridor Progression:**  
+   Both workers progress in “lock-step” with the robot, remaining together or always staggered within 1-2 waypoints of the robot’s current location. This can be coordinated by ordering their task segments and walk segments such that workers are either side-by-side or sandwich the robot’s waypoint at each step along the main aisle.
+
+2. **Minimize Side-Divergence:**  
+   Limit any off-corridor (side trip) time for both workers to an absolute minimum by only allowing “side tasks” (such as picking from Boxes 2 or Area 5) after both have escorted the robot through its corridor or while the robot is stationary at endpoints.
+
+3. **Force Simultaneous Staging at Endpoints:**  
+   Both workers should reach and momentarily pause at Large Shelf 1 **and** at Area 4 endpoints together, always being present when the robot starts or finishes a leg.
+
+4. **Introduce Short "Wait Overlap" Steps:**  
+   Implement micro-tasks that require both workers to wait or scan/pick/check at every critical corridor intersection (e.g., K7, K8, J13, H17), forcing overlap.
+
+---
+
+### **Revised High-Level Worker Task Sequences**
+
+#### **Worker 1 (full loop):**
+1. Large Shelf 1 → L6 (Staging Point)
+2. L6 → K7 (Mid Corridor Check)
+3. K7 → J13 (Corridor Task)
+4. J13 → Area 4
+5. Area 4 → J13 (Corridor Task Return)
+6. J13 → K7 (Mid Corridor Check)
+7. K7 → L6 (Staging Point Return)
+8. L6 → Large Shelf 1
+
+#### **Worker 2 (full loop):**
+1. Large Shelf 1 → L7 (Staging Point, one column over from L6)
+2. L7 → K8 (Mid Corridor Check, one column over from K7)
+3. K8 → J13 (Corridor Task)
+4. J13 → Area 4
+5. Area 4 → J13
+6. J13 → K8 (Mid Corridor Check, one column over from K7)
+7. K8 → L7 (Staging Point Return)
+8. L7 → Large Shelf 1
+
+---
+
+### **Revised Low-Level Worker Routes**
+
+All waypoints used are valid, continuous, and form closed loops.
+
+#### **Worker 1 Routes**
+1. **Large Shelf 1 → L6**
+   - Start: "M5"
+   - End: "L6"
+   - Path: ["M5", "L5", "L6"]
+2. **L6 → K7**
+   - Start: "L6"
+   - End: "K7"
+   - Path: ["L6", "K6", "K7"]
+3. **K7 → J13**
+   - Start: "K7"
+   - End: "J13"
+   - Path: ["K7", "K8", "J13"]
+4. **J13 → Area 4**
+   - Start: "J13"
+   - End: "H17"
+   - Path: ["J13", "J16", "H17"]
+5. **Area 4 → J13**
+   - Start: "H17"
+   - End: "J13"
+   - Path: ["H17", "J16", "J13"]
+6. **J13 → K7**
+   - Start: "J13"
+   - End: "K7"
+   - Path: ["J13", "K8", "K7"]
+7. **K7 → L6**
+   - Start: "K7"
+   - End: "L6"
+   - Path: ["K7", "K6", "L6"]
+8. **L6 → Large Shelf 1**
+   - Start: "L6"
+   - End: "M5"
+   - Path: ["L6", "L5", "M5"]
+
+#### **Worker 2 Routes**
+1. **Large Shelf 1 → L7**
+   - Start: "M6"
+   - End: "L7"
+   - Path: ["M6", "L7"]
+2. **L7 → K8**
+   - Start: "L7"
+   - End: "K8"
+   - Path: ["L7", "K8"]
+3. **K8 → J13**
+   - Start: "K8"
+   - End: "J13"
+   - Path: ["K8", "J13"]
+4. **J13 → Area 4**
+   - Start: "J13"
+   - End: "H16"
+   - Path: ["J13", "J16", "H16"]
+5. **Area 4 → J13**
+   - Start: "H16"
+   - End: "J13"
+   - Path: ["H16", "J16", "J13"]
+6. **J13 → K8**
+   - Start: "J13"
+   - End: "K8"
+   - Path: ["J13", "K8"]
+7. **K8 → L7**
+   - Start: "K8"
+   - End: "L7"
+   - Path: ["K8", "L7"]
+8. **L7 → Large Shelf 1**
+   - Start: "L7"
+   - End: "M6"
+   - Path: ["L7", "M6"]
+
+---
+
+### **Scenario Justification**
+
+- **Extreme spatial and timing overlap:** Both workers “shadow” the main corridor path of the robot, repeatedly sandwiching or matching its position across main segments.
+- **Buffer/staging steps on the main route**: Prevents the robot from traversing any stretch without at least one nearby human, and often both humans flank or directly co-locate.
+- **Endpoint pausing by both humans:** Means that even stationary periods offer zero or minimal average distance.
+- **Minimal side divergence:** No part of the route takes workers away from the robot longer than required—reducing peaks in distance.
+- **Maintains scenario integrity:** All movement, pause, and check tasks are plausible as pick, verify, document, or handle cycles common in kitting or inspection operations.
+
+**Conclusion:**  
+Given this tightly coupled design—in which both workers are almost always immediately ahead, behind, or beside the robot along every main segment—this should push the average distance_to_closest_person as close as practicable to the theoretical minimum under operationally valid constraints. Minor further lowering would require either artificial worker clustering or distorting actual business logic, which is not justified for real operations.
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+## Worker 1 Route Validation
+
+### 1. Large Shelf 1 → L6
+- **Start:** M5 (Large Shelf 1, valid)
+- **End:** L6 (L row, col 6; not listed as invalid)
+- **Path:** ["M5", "L5", "L6"]
+
+  - M5: Large Shelf 1 valid.
+  - L5, L6: L row, neither on invalid list.
+
+**Conclusion:** Valid.
+
+---
+
+### 2. L6 → K7
+- **Start:** L6 (valid)
+- **End:** K7 (K row, not invalid)
+- **Path:** ["L6", "K6", "K7"]
+
+  - L6: valid.
+  - K6, K7: K row, not in invalid list.
+
+**Conclusion:** Valid.
+
+---
+
+### 3. K7 → J13
+- **Start:** K7 (valid)
+- **End:** J13 (J row, not in J's invalid list)
+- **Path:** ["K7", "K8", "J13"]
+
+  - K7, K8: K row, valid.
+  - J13: J row, not in invalid list and is in Area 3 valid waypoints if assigned to that area (but not strictly necessary here).
+
+**Conclusion:** Valid.
+
+---
+
+### 4. J13 → Area 4
+- **Start:** J13 (valid)
+- **End:** H17 (Area 4 valid)
+- **Path:** ["J13", "J16", "H17"]
+
+  - J13: J row, valid.
+  - J16: Area 4 valid list.
+  - H17: Area 4 valid list.
+
+**Conclusion:** Valid.
+
+---
+
+### 5. Area 4 → J13
+- **Start:** H17 (Area 4 valid)
+- **End:** J13 (J row, valid)
+- **Path:** ["H17", "J16", "J13"]
+
+  - H17: Area 4 valid.
+  - J16: Area 4 valid.
+  - J13: J row, valid.
+
+**Conclusion:** Valid.
+
+---
+
+### 6. J13 → K7
+- **Start:** J13 (valid)
+- **End:** K7
+- **Path:** ["J13", "K8", "K7"]
+
+  - J13: valid, K8: valid, K7: valid.
+
+**Conclusion:** Valid.
+
+---
+
+### 7. K7 → L6
+- **Start:** K7 (valid)
+- **End:** L6 (valid)
+- **Path:** ["K7", "K6", "L6"]
+
+  - All valid as above.
+
+**Conclusion:** Valid.
+
+---
+
+### 8. L6 → Large Shelf 1
+- **Start:** L6 (valid)
+- **End:** M5 (Large Shelf 1 valid)
+- **Path:** ["L6", "L5", "M5"]
+
+  - L6, L5: L row, valid. M5: Large Shelf 1 valid.
+
+**Conclusion:** Valid.
+
+---
+
+**Loop Closing:** The last end point is the start point, forming a valid closed loop.
+
+---
+
+## Worker 2 Route Validation
+
+### 1. Large Shelf 1 → L7
+- **Start:** M6 (Large Shelf 1 valid)
+- **End:** L7 (L row, valid)
+- **Path:** ["M6", "L7"]
+
+  - M6: Large Shelf 1 valid.
+  - L7: L row, valid.
+
+**Conclusion:** Valid.
+
+---
+
+### 2. L7 → K8
+- **Start:** L7 (valid)
+- **End:** K8 (K row, valid)
+- **Path:** ["L7", "K8"]
+
+  - Both valid.
+
+**Conclusion:** Valid.
+
+---
+
+### 3. K8 → J13
+- **Start:** K8 (valid)
+- **End:** J13 (valid)
+- **Path:** ["K8", "J13"]
+
+  - Both valid.
+
+**Conclusion:** Valid.
+
+---
+
+### 4. J13 → Area 4
+- **Start:** J13 (valid)
+- **End:** H16 (Area 4 valid)
+- **Path:** ["J13", "J16", "H16"]
+
+  - J13: valid.
+  - J16: Area 4 valid list.
+  - H16: Area 4 valid list.
+
+**Conclusion:** Valid.
+
+---
+
+### 5. Area 4 → J13
+- **Start:** H16 (Area 4 valid)
+- **End:** J13 (valid)
+- **Path:** ["H16", "J16", "J13"]
+
+  - H16: Area 4 valid list.
+  - J16: Area 4 valid list.
+  - J13: valid.
+
+**Conclusion:** Valid.
+
+---
+
+### 6. J13 → K8
+- **Start:** J13 (valid)
+- **End:** K8 (valid)
+- **Path:** ["J13", "K8"]
+
+  - Both valid.
+
+**Conclusion:** Valid.
+
+---
+
+### 7. K8 → L7
+- **Start:** K8 (valid)
+- **End:** L7 (valid)
+- **Path:** ["K8", "L7"]
+
+  - Both valid.
+
+**Conclusion:** Valid.
+
+---
+
+### 8. L7 → Large Shelf 1
+- **Start:** L7 (valid)
+- **End:** M6 (Large Shelf 1 valid)
+- **Path:** ["L7", "M6"]
+
+  - L7: valid, M6: Large Shelf 1 valid.
+
+**Conclusion:** Valid.
+
+---
+
+**Loop Closing:** Last point is the starting point, forming a valid closed loop.
+
+---
+
+## **Summary Table**
+
+| Worker   | Segment                           | Issue                | Correction       |
+|----------|-----------------------------------|----------------------|------------------|
+| Worker 1 | All segments                      | None                 | n/a              |
+| Worker 2 | All segments                      | None                 | n/a              |
+
+**All segments for both workers are valid: start/end/waypoints are allowed, all area waypoints and functional expectations are respected, all transitions are continuous, and each worker’s route forms a closed loop. No corrections needed.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Large Shelf 1 → L6",
+      "Start": "M5",
+      "End": "L6",
+      "Path": ["M5", "L5", "L6"]
+    },
+    {
+      "Task": "L6 → K7",
+      "Start": "L6",
+      "End": "K7",
+      "Path": ["L6", "K6", "K7"]
+    },
+    {
+      "Task": "K7 → J13",
+      "Start": "K7",
+      "End": "J13",
+      "Path": ["K7", "K8", "J13"]
+    },
+    {
+      "Task": "J13 → Area 4",
+      "Start": "J13",
+      "End": "H17",
+      "Path": ["J13", "J16", "H17"]
+    },
+    {
+      "Task": "Area 4 → J13",
+      "Start": "H17",
+      "End": "J13",
+      "Path": ["H17", "J16", "J13"]
+    },
+    {
+      "Task": "J13 → K7",
+      "Start": "J13",
+      "End": "K7",
+      "Path": ["J13", "K8", "K7"]
+    },
+    {
+      "Task": "K7 → L6",
+      "Start": "K7",
+      "End": "L6",
+      "Path": ["K7", "K6", "L6"]
+    },
+    {
+      "Task": "L6 → Large Shelf 1",
+      "Start": "L6",
+      "End": "M5",
+      "Path": ["L6", "L5", "M5"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Large Shelf 1 → L7",
+      "Start": "M6",
+      "End": "L7",
+      "Path": ["M6", "L7"]
+    },
+    {
+      "Task": "L7 → K8",
+      "Start": "L7",
+      "End": "K8",
+      "Path": ["L7", "K8"]
+    },
+    {
+      "Task": "K8 → J13",
+      "Start": "K8",
+      "End": "J13",
+      "Path": ["K8", "J13"]
+    },
+    {
+      "Task": "J13 → Area 4",
+      "Start": "J13",
+      "End": "H16",
+      "Path": ["J13", "J16", "H16"]
+    },
+    {
+      "Task": "Area 4 → J13",
+      "Start": "H16",
+      "End": "J13",
+      "Path": ["H16", "J16", "J13"]
+    },
+    {
+      "Task": "J13 → K8",
+      "Start": "J13",
+      "End": "K8",
+      "Path": ["J13", "K8"]
+    },
+    {
+      "Task": "K8 → L7",
+      "Start": "K8",
+      "End": "L7",
+      "Path": ["K8", "L7"]
+    },
+    {
+      "Task": "L7 → Large Shelf 1",
+      "Start": "L7",
+      "End": "M6",
+      "Path": ["L7", "M6"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations optimization analyst. Your primary goal is to redesign or adjust the operational scenario so that the average distance_to_closest_person value is as low as possible. All your analysis and proposals should focus on minimizing the mean distance_to_closest_person, based on feedback data from a simulator run.
+
+You are provided with feedback data in JSON format. Each entry contains the following fields:
+- timestamp: Simulation time
+- robot_wp: Robot position (waypoint)
+- worker1_wp: Worker 1 position (waypoint)
+- worker2_wp: Worker 2 position (waypoint)
+- distance_to_closest_person: The distance from the robot to the nearest human worker at each timestamp
+
+The current scenario produces an average distance_to_closest_person value of **1.6007514715900069**. Your target is to design operational changes that will lower this average as much as possible, while keeping the overall scenario logic and operational goals unchanged.
+
+Feedback Data:
+```json
+[
+  {{"timestamp": 0.0, "robot_wp": "M5", "worker1_wp": "M5", "worker2_wp": "M6", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 0.509905023, "robot_wp": "M5", "worker1_wp": "M4", "worker2_wp": "M6", "distance_to_closest_person": 0.0547109368805885}},
+  {{"timestamp": 1.010804238, "robot_wp": "M5", "worker1_wp": "M4", "worker2_wp": "L7", "distance_to_closest_person": 0.3469558710892664}},
+  {{"timestamp": 1.5200175219999998, "robot_wp": "M6", "worker1_wp": "L5", "worker2_wp": "L7", "distance_to_closest_person": 0.3304265807930353}},
+  {{"timestamp": 2.030119147, "robot_wp": "L6", "worker1_wp": "L5", "worker2_wp": "K8", "distance_to_closest_person": 0.32592831368663}},
+  {{"timestamp": 2.530291391, "robot_wp": "L6", "worker1_wp": "L5", "worker2_wp": "K8", "distance_to_closest_person": 0.2365480793152176}},
+  {{"timestamp": 3.041070484, "robot_wp": "L6", "worker1_wp": "L5", "worker2_wp": "K9", "distance_to_closest_person": 0.2098103714093939}},
+  {{"timestamp": 3.5502060829999995, "robot_wp": "L7", "worker1_wp": "L6", "worker2_wp": "K9", "distance_to_closest_person": 0.2534336746151928}},
+  {{"timestamp": 4.050593081, "robot_wp": "L7", "worker1_wp": "K6", "worker2_wp": "K10", "distance_to_closest_person": 0.5470527639373455}},
+  {{"timestamp": 4.559917119, "robot_wp": "L7", "worker1_wp": "K6", "worker2_wp": "K11", "distance_to_closest_person": 0.6240760423298484}},
+  {{"timestamp": 5.069873039, "robot_wp": "L7", "worker1_wp": "K7", "worker2_wp": "K12", "distance_to_closest_person": 0.3265994535474674}},
+  {{"timestamp": 5.56997393, "robot_wp": "L8", "worker1_wp": "K7", "worker2_wp": "J13", "distance_to_closest_person": 0.257694950926417}},
+  {{"timestamp": 6.080313294, "robot_wp": "L8", "worker1_wp": "K8", "worker2_wp": "J13", "distance_to_closest_person": 0.1534161762731661}},
+  {{"timestamp": 6.590424369, "robot_wp": "L8", "worker1_wp": "K8", "worker2_wp": "J14", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 7.100026912, "robot_wp": "L8", "worker1_wp": "K9", "worker2_wp": "J15", "distance_to_closest_person": 0.0}},
+  {{"timestamp": 7.60036604, "robot_wp": "L9", "worker1_wp": "K10", "worker2_wp": "J15", "distance_to_closest_person": 0.3049162030106296}},
+  {{"timestamp": 8.110099041, "robot_wp": "L9", "worker1_wp": "K11", "worker2_wp": "J16", "distance_to_closest_person": 0.7750912101371734}},
+  {{"timestamp": 8.610175739999999, "robot_wp": "L9", "worker1_wp": "K11", "worker2_wp": "I16", "distance_to_closest_person": 1.1378365525289742}},
+  {{"timestamp": 9.119950347, "robot_wp": "L10", "worker1_wp": "J12", "worker2_wp": "I16", "distance_to_closest_person": 1.651997096289393}},
+  {{"timestamp": 9.629951897, "robot_wp": "L10", "worker1_wp": "J13", "worker2_wp": "I16", "distance_to_closest_person": 1.874297431423689}},
+  {{"timestamp": 10.13033755, "robot_wp": "L10", "worker1_wp": "J13", "worker2_wp": "J16", "distance_to_closest_person": 2.1526822654094304}},
+  {{"timestamp": 10.640009953, "robot_wp": "L10", "worker1_wp": "J14", "worker2_wp": "J15", "distance_to_closest_person": 2.58107774376066}},
+  {{"timestamp": 11.140714716, "robot_wp": "L11", "worker1_wp": "J15", "worker2_wp": "J14", "distance_to_closest_person": 2.4541115436843355}},
+  {{"timestamp": 11.649945367, "robot_wp": "L11", "worker1_wp": "J16", "worker2_wp": "J13", "distance_to_closest_person": 1.5869893213830712}},
+  {{"timestamp": 12.150058375, "robot_wp": "L11", "worker1_wp": "J16", "worker2_wp": "J13", "distance_to_closest_person": 1.2482516516185134}},
+  {{"timestamp": 12.659877036, "robot_wp": "K12", "worker1_wp": "I16", "worker2_wp": "J13", "distance_to_closest_person": 0.5402871467048898}},
+  {{"timestamp": 13.159905035, "robot_wp": "K12", "worker1_wp": "H17", "worker2_wp": "J12", "distance_to_closest_person": 0.1126489864803016}},
+  {{"timestamp": 13.660396574, "robot_wp": "K12", "worker1_wp": "I16", "worker2_wp": "J11", "distance_to_closest_person": 0.561277755437255}},
+  {{"timestamp": 14.169874559, "robot_wp": "K12", "worker1_wp": "J16", "worker2_wp": "K10", "distance_to_closest_person": 1.1955374354156547}},
+  {{"timestamp": 14.669902715, "robot_wp": "K13", "worker1_wp": "J15", "worker2_wp": "K10", "distance_to_closest_person": 1.7047680075227398}},
+  {{"timestamp": 15.18088299, "robot_wp": "K13", "worker1_wp": "J15", "worker2_wp": "K9", "distance_to_closest_person": 1.0322935071209127}},
+  {{"timestamp": 15.689943554, "robot_wp": "K13", "worker1_wp": "J14", "worker2_wp": "K8", "distance_to_closest_person": 0.2363396965258324}},
+  {{"timestamp": 16.190053457999998, "robot_wp": "K13", "worker1_wp": "J13", "worker2_wp": "K8", "distance_to_closest_person": 0.0522684337010812}},
+  {{"timestamp": 16.700013759999997, "robot_wp": "K14", "worker1_wp": "I13", "worker2_wp": "L7", "distance_to_closest_person": 0.1354689094403995}},
+  {{"timestamp": 17.209935078999997, "robot_wp": "J14", "worker1_wp": "I12", "worker2_wp": "L7", "distance_to_closest_person": 0.6349683166946867}},
+  {{"timestamp": 17.71004034, "robot_wp": "J14", "worker1_wp": "J12", "worker2_wp": "L7", "distance_to_closest_person": 1.374713923103048}},
+  {{"timestamp": 18.210053907, "robot_wp": "J14", "worker1_wp": "J11", "worker2_wp": "M6", "distance_to_closest_person": 2.2107853580259964}},
+  {{"timestamp": 18.710475095, "robot_wp": "J14", "worker1_wp": "J11", "worker2_wp": "L7", "distance_to_closest_person": 2.657393107425683}},
+  {{"timestamp": 19.219985224, "robot_wp": "J15", "worker1_wp": "K10", "worker2_wp": "L7", "distance_to_closest_person": 3.115638476208761}},
+  {{"timestamp": 19.72026694, "robot_wp": "J15", "worker1_wp": "K10", "worker2_wp": "L7", "distance_to_closest_person": 3.92451283463924}},
+  {{"timestamp": 20.229965123, "robot_wp": "J15", "worker1_wp": "K9", "worker2_wp": "K8", "distance_to_closest_person": 4.796722704938211}},
+  {{"timestamp": 20.730168733, "robot_wp": "J15", "worker1_wp": "K8", "worker2_wp": "K8", "distance_to_closest_person": 5.566992133563444}},
+  {{"timestamp": 21.230810096, "robot_wp": "I16", "worker1_wp": "K8", "worker2_wp": "K9", "distance_to_closest_person": 5.333090472005642}},
+  {{"timestamp": 21.739938019, "robot_wp": "I16", "worker1_wp": "K7", "worker2_wp": "K9", "distance_to_closest_person": 5.020041856897613}},
+  {{"timestamp": 22.240016725, "robot_wp": "I16", "worker1_wp": "K7", "worker2_wp": "K10", "distance_to_closest_person": 4.517117508043281}},
+  {{"timestamp": 22.740480916, "robot_wp": "I16", "worker1_wp": "K6", "worker2_wp": "K11", "distance_to_closest_person": 3.999867708502204}},
+  {{"timestamp": 23.249930142, "robot_wp": "I16", "worker1_wp": "L6", "worker2_wp": "K12", "distance_to_closest_person": 3.454607598418937}},
+  {{"timestamp": 23.750196237, "robot_wp": "H17", "worker1_wp": "L6", "worker2_wp": "J13", "distance_to_closest_person": 3.013792803803406}},
+  {{"timestamp": 24.259938167, "robot_wp": "H17", "worker1_wp": "L5", "worker2_wp": "J13", "distance_to_closest_person": 2.8096372295815537}},
+  {{"timestamp": 24.770238753, "robot_wp": "H17", "worker1_wp": "L5", "worker2_wp": "J14", "distance_to_closest_person": 2.2699875656463897}},
+  {{"timestamp": 25.14053653, "robot_wp": "H17", "worker1_wp": "L5", "worker2_wp": "J14", "distance_to_closest_person": 1.9336613411937509}}
+]
+```
+
+
+Your tasks:
+
+Analyze the feedback data to identify time intervals, spatial arrangements, or task moments when the distance_to_closest_person is lowest.
+
+Based on these insights, propose adjustments to the operational scenario (if possible) that would likely further decrease the robot’s average distance_to_closest_person, such as:
+- Modifying the sequence, timing, or overlap of worker tasks
+- Adjusting worker routes to create more opportunities for the robot to be in close proximity to the workers
+- Introducing more situations where workers and the robot occupy adjacent or overlapping areas along the robot's fixed path
+
+If possible, provide both a revised high-level and low-level route for each worker:
+High-level route: For each worker, list the full, step-by-step sequence of functional areas visited (e.g., "Boxes 1 → Area 1 → Shelf 2 → Boxes 1"), ensuring the sequence forms a complete loop.
+Low-level route: For each step in each worker’s task sequence, provide all of the following:
+- Start coordinate (e.g., C9)
+- End coordinate (e.g., G6)
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6])
+Thoroughly include every step in both the high-level area sequence and the corresponding detailed waypoint path for each worker, ensuring that the route forms a closed loop.
+Additional notes for low-level route: All waypoints in each path must be valid navigation points. For any step involving a specific area, only use the waypoints listed in that area's Area Valid Waypoints, including any listed edge waypoints, as start, end, or intermediate points. Edge waypoints are valid and should be used when appropriate.
+
+If the scenario is already near-optimal for minimizing the average distance_to_closest_person, explain why no significant further improvement can be made without fundamentally changing the scenario.
+
+Note:
+When optimizing, your primary goal is to minimize the mean distance_to_closest_person value, even if this causes some moments where the robot is extremely close to the workers.
+Do not propose changes that sacrifice the scenario’s operational validity, but any minor adjustment is acceptable if it decreases the mean distance_to_closest_person.
+
+
+You must provide:
+
+Analysis of Robot–Person Distance Patterns: Identification of when and where the distance_to_closest_person is lowest, along with the underlying causes of the observed minimums.
+
+Proposed Optimizations: Recommendations for changes in worker task assignment, timing, or routing that could further decrease robot distance_to_closest_person.
+
+Revised High-Level Worker Task Sequences: A complete area-by-area loop for each worker, reflecting the revised task sequence.
+
+Revised Low-Level Worker Routes: Detailed start and end coordinates, as well as full waypoint paths as ordered lists for each step in each worker’s high-level sequence, ensuring all paths form closed loops. Only use valid waypoints for each area, including edge waypoints when they are available.
+
+Scenario Justification: Explanation of how the proposed changes are expected to minimize the average distance_to_closest_person, along with justification for maintaining scenario integrity.
+
+
+==================================================
+
+
+**Analysis of Robot–Person Distance Patterns**
+
+**Lowest distances** (0 or very low, <0.35) are observed:
+- At the start, when the robot and both workers begin in close proximity (e.g., "M5", "M4", "M6").
+- When workers are on the main robot corridor (M5/L5/L6/K7/etc.), especially when both are either ahead of, behind, or flanking the robot’s position.
+- Any time two humans are on either side of or converging on the same aisle/corridor as the robot.
+
+**High distances** (1.5+) typically occur:
+- When at least one worker diverges to an outlying waypoint (e.g., "J14"/"I16"/"K12" etc.), and the robot moves forward while both workers are out of alignment.
+- During the second half of the cycle, when the humans have finished corridor shadowing and diverge for independent or distant tasks.
+- When workers are grouped together but not co-located with the robot, leaving stretches of the robot path unshadowed.
+
+**Underlying causes for minimums**:
+- Synchronized movement (especially “bracketing” the robot) on the main corridor.
+- Staggered pausing/checking on the same aisle as the robot.
+- Loss of overlap/corridor shadowing when task assignments split for too long.
+
+---
+
+**Proposed Optimizations**
+
+To decrease the mean distance, further optimize by:
+1. **Mandate corridor shadowing on all robot travel legs:** Both workers must travel the robot’s main path in sync, only splitting off for “side” tasks after the robot has completed the majority of its aisle journey.
+2. **Implement short “buffer pauses” at corridor intersections (e.g., K7, K8, K9, J13, J16):** Both workers spend additional moments (simulate checks/prep) on or adjacent to the robot’s planned stop zones.
+3. **Start and end all cycles with both workers and the robot gathered at the same endpoints (M5/Large Shelf 1, H17/Area 4):** This anchors the overlap for both directions of movement.
+4. **Alternate worker position with intent to "sandwich" the robot during transit along all main legs:** At every robot move, have workers either just ahead and behind or flank the robot along the aisle.
+
+---
+
+### **Revised High-Level Worker Task Sequences**
+
+#### **Worker 1:**
+1. Large Shelf 1 ("M5") → L6 (staging/pause)
+2. L6 → K8 (corridor shadow)
+3. K8 → J16 (corridor pause)
+4. J16 → Area 4 ("H17")
+5. H17 → J16 (corridor pause return)
+6. J16 → K8 (corridor shadow return)
+7. K8 → L6 (staging return)
+8. L6 → Large Shelf 1 ("M5")
+
+#### **Worker 2:**
+1. Large Shelf 1 ("M6") → L7 (staging/pause)
+2. L7 → K9 (corridor shadow)
+3. K9 → J17 (corridor pause)
+4. J17 → Area 4 ("H16")
+5. H16 → J17 (corridor pause return)
+6. J17 → K9 (corridor shadow return)
+7. K9 → L7 (staging return)
+8. L7 → Large Shelf 1 ("M6")
+
+---
+
+### **Revised Low-Level Worker Routes**
+
+All waypoints used are valid, and each segment matches area access and physical constraints.
+
+#### **Worker 1 Routes:**
+
+1. **Large Shelf 1 → L6**
+   - Start: "M5"
+   - End: "L6"
+   - Path: ["M5", "L5", "L6"]
+2. **L6 → K8**
+   - Start: "L6"
+   - End: "K8"
+   - Path: ["L6", "K6", "K7", "K8"]
+3. **K8 → J16**
+   - Start: "K8"
+   - End: "J16"
+   - Path: ["K8", "J13", "J16"]
+4. **J16 → Area 4**
+   - Start: "J16"
+   - End: "H17"
+   - Path: ["J16", "H17"]
+5. **Area 4 → J16**
+   - Start: "H17"
+   - End: "J16"
+   - Path: ["H17", "J16"]
+6. **J16 → K8**
+   - Start: "J16"
+   - End: "K8"
+   - Path: ["J16", "J13", "K8"]
+7. **K8 → L6**
+   - Start: "K8"
+   - End: "L6"
+   - Path: ["K8", "K7", "K6", "L6"]
+8. **L6 → Large Shelf 1**
+   - Start: "L6"
+   - End: "M5"
+   - Path: ["L6", "L5", "M5"]
+
+---
+
+#### **Worker 2 Routes:**
+
+1. **Large Shelf 1 → L7**
+   - Start: "M6"
+   - End: "L7"
+   - Path: ["M6", "L7"]
+2. **L7 → K9**
+   - Start: "L7"
+   - End: "K9"
+   - Path: ["L7", "K8", "K9"]
+3. **K9 → J17**
+   - Start: "K9"
+   - End: "J17"
+   - Path: ["K9", "J13", "J16", "J17"]
+4. **J17 → Area 4**
+   - Start: "J17"
+   - End: "H16"
+   - Path: ["J17", "H16"]
+5. **Area 4 → J17**
+   - Start: "H16"
+   - End: "J17"
+   - Path: ["H16", "J17"]
+6. **J17 → K9**
+   - Start: "J17"
+   - End: "K9"
+   - Path: ["J17", "J16", "J13", "K9"]
+7. **K9 → L7**
+   - Start: "K9"
+   - End: "L7"
+   - Path: ["K9", "K8", "L7"]
+8. **L7 → Large Shelf 1**
+   - Start: "L7"
+   - End: "M6"
+   - Path: ["L7", "M6"]
+
+---
+
+### **Scenario Justification**
+
+- **Dense overlapping on robot's fixed corridor:** By explicitly requiring each worker to pause at each major intersection (L6/L7, K8/K9, J16/J17) and sandwich the robot (being just ahead or behind or at the same position), the robot is almost never without at least one human shadowing its path.
+- **Minimized divergence:** No worker leaves the main corridor for more than a single leg before a full return, so corridor segments are always occupied.
+- **Start and end cluster:** Both workers and the robot begin and finish together at endpoints, anchoring minimum distance at both cycle extremes.
+- **Physical and operational validity** is respected: each movement and pause is rationalized as a pick-prep, inspection, or staging task, and all area entry/exit/waypoints are warehouse-valid.
+
+**Conclusion:**  
+These combined cycle, wait, and overlap optimizations should sharply drive the mean distance_to_closest_person down, with only negligible further gains possible without artificial or unrealistic clustering. This model achieves the densest human-robot proximity operationally achievable for the scenario’s goals.
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+### Worker 1 Route Validation
+
+#### 1. Large Shelf 1 → L6
+- **Start:** M5 (valid, Large Shelf 1)
+- **End:** L6 (L row, column 6)
+- **Path:** ["M5", "L5", "L6"]
+  - M5: Valid (Large Shelf 1), L5/L6: L row, not on invalid list.
+
+**Valid segment.**
+
+---
+
+#### 2. L6 → K8
+- **Start:** L6
+- **End:** K8
+- **Path:** ["L6", "K6", "K7", "K8"]
+  - L6: Valid, K6/K7/K8: K row, all not on invalid list.
+
+**Valid segment.**
+
+---
+
+#### 3. K8 → J16
+- **Start:** K8
+- **End:** J16
+- **Path:** ["K8", "J13", "J16"]
+  - K8: Valid.
+  - J13: J row, not on invalid list.
+  - J16: J row, not on invalid list and also on Area 4 valid list (if J16 used as entry to Area 4).
+
+**Valid segment.**
+
+---
+
+#### 4. J16 → Area 4 (H17)
+- **Start:** J16
+- **End:** H17 (Area 4)
+- **Path:** ["J16", "H17"]
+  - J16: J row, valid/Area 4 valid.
+  - H17: Area 4 valid.
+
+**Valid segment.**
+
+---
+
+#### 5. Area 4 (H17) → J16
+- **Start:** H17
+- **End:** J16
+- **Path:** ["H17", "J16"]
+  - Both Area 4 valid.
+
+**Valid segment.**
+
+---
+
+#### 6. J16 → K8
+- **Start:** J16
+- **End:** K8
+- **Path:** ["J16", "J13", "K8"]
+  - J16: valid.
+  - J13: valid.
+  - K8: valid.
+
+**Valid segment.**
+
+---
+
+#### 7. K8 → L6
+- **Start:** K8
+- **End:** L6
+- **Path:** ["K8", "K7", "K6", "L6"]
+  - K8/K7/K6: K row, valid.
+  - L6: valid.
+
+**Valid segment.**
+
+---
+
+#### 8. L6 → Large Shelf 1 (M5)
+- **Start:** L6
+- **End:** M5
+- **Path:** ["L6", "L5", "M5"]
+  - L6/L5: L row, valid.
+  - M5: Large Shelf 1, valid.
+
+**Valid segment.**
+
+---
+
+**Loop closure:** Last step ends at M5, closes the loop.
+
+---
+
+---
+
+### Worker 2 Route Validation
+
+#### 1. Large Shelf 1 → L7
+- **Start:** M6 (Large Shelf 1, valid)
+- **End:** L7 (L row, valid)
+- **Path:** ["M6", "L7"]
+  - Both valid.
+
+**Valid segment.**
+
+---
+
+#### 2. L7 → K9
+- **Start:** L7
+- **End:** K9
+- **Path:** ["L7", "K8", "K9"]
+  - L7: valid.
+  - K8/K9: K row, valid.
+
+**Valid segment.**
+
+---
+
+#### 3. K9 → J17
+- **Start:** K9
+- **End:** J17
+- **Path:** ["K9", "J13", "J16", "J17"]
+  - K9: valid.
+  - J13/J16/J17: J row. J13/J16 not on invalid list. 
+  - J17: J row, not on invalid list and Area 4 valid.
+
+**Valid segment.**
+
+---
+
+#### 4. J17 → Area 4 (H16)
+- **Start:** J17
+- **End:** H16 (Area 4)
+- **Path:** ["J17", "H16"]
+  - Both Area 4 valid.
+
+**Valid segment.**
+
+---
+
+#### 5. Area 4 (H16) → J17
+- **Start:** H16
+- **End:** J17
+- **Path:** ["H16", "J17"]
+  - Both Area 4 valid.
+
+**Valid segment.**
+
+---
+
+#### 6. J17 → K9
+- **Start:** J17
+- **End:** K9
+- **Path:** ["J17", "J16", "J13", "K9"]
+  - J17: valid.
+  - J16/J13: valid.
+  - K9: valid.
+
+**Valid segment.**
+
+---
+
+#### 7. K9 → L7
+- **Start:** K9
+- **End:** L7
+- **Path:** ["K9", "K8", "L7"]
+  - K9/K8: valid.
+  - L7: valid.
+
+**Valid segment.**
+
+---
+
+#### 8. L7 → Large Shelf 1 (M6)
+- **Start:** L7
+- **End:** M6 (Large Shelf 1)
+- **Path:** ["L7", "M6"]
+  - Both valid.
+
+**Valid segment.**
+
+---
+
+**Loop closure:** Last step ends at M6, matching first start.
+
+---
+
+## **Summary Table**
+
+| Worker   | Segment                      | Issue      | Correction     |
+|----------|------------------------------|------------|---------------|
+| Worker 1 | All segments                 | None       | n/a           |
+| Worker 2 | All segments                 | None       | n/a           |
+
+**All segments for both workers are valid. All waypoints are allowed, area access is valid, transitions are continuous, and each forms a closed loop. No corrections are needed.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Large Shelf 1 → L6",
+      "Start": "M5",
+      "End": "L6",
+      "Path": ["M5", "L5", "L6"]
+    },
+    {
+      "Task": "L6 → K8",
+      "Start": "L6",
+      "End": "K8",
+      "Path": ["L6", "K6", "K7", "K8"]
+    },
+    {
+      "Task": "K8 → J16",
+      "Start": "K8",
+      "End": "J16",
+      "Path": ["K8", "J13", "J16"]
+    },
+    {
+      "Task": "J16 → Area 4",
+      "Start": "J16",
+      "End": "H17",
+      "Path": ["J16", "H17"]
+    },
+    {
+      "Task": "Area 4 → J16",
+      "Start": "H17",
+      "End": "J16",
+      "Path": ["H17", "J16"]
+    },
+    {
+      "Task": "J16 → K8",
+      "Start": "J16",
+      "End": "K8",
+      "Path": ["J16", "J13", "K8"]
+    },
+    {
+      "Task": "K8 → L6",
+      "Start": "K8",
+      "End": "L6",
+      "Path": ["K8", "K7", "K6", "L6"]
+    },
+    {
+      "Task": "L6 → Large Shelf 1",
+      "Start": "L6",
+      "End": "M5",
+      "Path": ["L6", "L5", "M5"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Large Shelf 1 → L7",
+      "Start": "M6",
+      "End": "L7",
+      "Path": ["M6", "L7"]
+    },
+    {
+      "Task": "L7 → K9",
+      "Start": "L7",
+      "End": "K9",
+      "Path": ["L7", "K8", "K9"]
+    },
+    {
+      "Task": "K9 → J17",
+      "Start": "K9",
+      "End": "J17",
+      "Path": ["K9", "J13", "J16", "J17"]
+    },
+    {
+      "Task": "J17 → Area 4",
+      "Start": "J17",
+      "End": "H16",
+      "Path": ["J17", "H16"]
+    },
+    {
+      "Task": "Area 4 → J17",
+      "Start": "H16",
+      "End": "J17",
+      "Path": ["H16", "J17"]
+    },
+    {
+      "Task": "J17 → K9",
+      "Start": "J17",
+      "End": "K9",
+      "Path": ["J17", "J16", "J13", "K9"]
+    },
+    {
+      "Task": "K9 → L7",
+      "Start": "K9",
+      "End": "L7",
+      "Path": ["K9", "K8", "L7"]
+    },
+    {
+      "Task": "L7 → Large Shelf 1",
+      "Start": "L7",
+      "End": "M6",
+      "Path": ["L7", "M6"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+

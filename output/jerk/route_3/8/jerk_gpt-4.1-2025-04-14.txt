@@ -1,0 +1,4013 @@
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations scenario planner. Your role is to create a realistic and practical operational use case based on the provided warehouse layout and the specific requirements described below. Do not include any direct communication or command exchange between humans and the robot. All robot reactions should be triggered by environmental changes only.
+
+
+Provided Known Information:
+
+1. Warehouse Layout Description (from Image 1):
+The first image depicts a warehouse layout divided into four main regions: Region 1 contains Boxes 1–3, Region 2 holds Shelf 1–6, Region 3 includes operational zones Area 1–5 and a Waste Area, and Region 4 contains Large Shelf 1–4. Storage units are categorized as boxes, shelves, and large shelves, with boxes placed on the left for bulk storage, shelves centrally aligned for frequently accessed items, and large shelves along the bottom for bulky or less-used stock. Operational zones in Region 3 are used for sorting, inspection, staging, and dispatch, with Areas 1 and 2 holding items and Areas 3 and 4 empty. The Waste Area is isolated for non-usable materials. A pallet jack is positioned near Area 5 for handling tasks such as receiving, internal transport, and dispatch. Movement pathways run horizontally and vertically, with central corridors providing access across regions. Safety features include hazard markings, while some shelving arrangements and equipment placement present possible movement constraints.
+
+2. Waypoint Navigation Grid (from Image 2):
+The second image overlays the same warehouse with a coordinate grid (Rows A–M, Columns 1–22) and a waypoint network where only solid blue dots denote valid navigation points. Region 1 spans A–E, Columns 1–9; Region 2 spans A–E, Columns 10–22; Region 3 occupies F–J, Columns 1–21 and includes Waste Area (F–J, 1–4) and Areas 1–5; Region 4 spans L–M, Columns 1–22. Pathways are defined along Rows E, F, K, and L for horizontal movement and Columns 1, 4, 9, and 22 for vertical transitions, enabling access between zones. Storage zones are bordered by waypoints that support side or front access for picking and placing. Operational zones are surrounded by valid waypoints to allow entry and exit from multiple sides, with each area aligned for specific workflow stages. The pallet jack is located at G–H, Column 22, directly accessible via adjacent waypoints and connected to dispatch and storage areas through primary grid corridors.
+
+3. Robot Navigation Route:
+The robot starts near grid point A9, close to Shelf 1, and travels leftward from row A to row G, moving from column 9 to column 4, and ends around G4 in Area 1. The approximate waypoints it passes through are: A9 → B9 → C9 → D9 → E9 → E8 → E7 → F7 → F6 → F5 → G4. This route suggests the robot is likely performing a material relocation task, picking up an item from Shelf 1 and delivering it to Area 1 for sorting, inspection, or further processing.
+
+
+Special Requirements:
+
+The use case you generate must be designed so that the coordination, task sequence, and workflow of the two human workers are likely to cause the robot, which follows a fixed path, to experience a higher average jerk (rate of change of acceleration) during execution.
+
+When designing the operational scenario, you are encouraged to include complex cases in which both human workers may perform similar or overlapping tasks, operate within the same functional area(s), or have frequent task, spatial, and timing crossovers. Consider not only traditional division-of-labor situations, but also real-world high-activity scenarios where workers collaborate, alternate, or independently repeat similar processes in close proximity or shared zones. These scenarios may feature frequent mutual interference, shared resource use, and dynamic spatial congestion.
+
+Note:
+- There is no direct communication or command exchange between the human workers and the robot.
+- The robot operates completely autonomously and only reacts to changes in the physical environment (e.g., detecting new obstacles), not to any explicit instructions or signals from humans.
+- Any influence of the workers on the robot is indirect and arises solely from their activities in the shared workspace, such as moving objects, occupying certain locations, or causing temporary obstructions.
+
+
+Important Instruction:
+One or more previous scenarios will be provided below, formatted in JSON. These are provided for reference only to help ensure that your new scenario is fundamentally different from any previous ones. You do not need to use this format for your new scenario.
+
+```json
+{
+  "scenario_0": {
+    "summary": "During a high-activity incoming shipment period, Worker 1 transports boxes from Regions 1 and 4 to Area 1 for initial sorting, using central pathways that align closely with the robot’s fixed delivery route from Shelf 1 (A9) to Area 1 (G4). Concurrently, Worker 2 performs quality control in Area 1, then repeatedly shuttles between Area 1 and Shelf 1 to restock, as well as to the Waste Area for rejected items. Both workers use and periodically pause at waypoints along the robot’s path, sometimes occupying corridor space with carts or staged boxes, resulting in frequent, unpredictable physical obstructions. The robot, operating autonomously, must constantly adjust its velocity—braking, accelerating, and occasionally making sharp course corrections—whenever worker activity or object placement temporarily blocks or unblocks its navigation grid points. This dense, overlapping workflow induces a significantly higher average jerk in the robot’s motion, with all disruptions arising naturally from legitimate operational pressures and dynamic human movements within the shared workspace.",
+    "Worker 1": ["Boxes 1 → E7 Pause", "E7 Pause → E9 Pause", "E9 Pause → F7 Pause", "F7 Pause → Area 1 (G6)", "Area 1 (G6) → F7 Pause", "F7 Pause → Area 1 (G5)", "Area 1 (G5) → E7 Pause", "E7 Pause → Boxes 1"],
+    "Worker 2": ["Shelf 1 → Area 1 (G5)", "Area 1 (G5) → G7 Pause", "G7 Pause → F7 Pause", "F7 Pause → Waste Area", "Waste Area → Area 1 (G6)", "Area 1 (G6) → G4 Pause", "G4 Pause → Shelf 1"],
+    "average_robot_jerk": 3.359081747586619,
+  },
+  "scenario_1": {
+    "summary": "During a mid-cycle inventory audit and stock reconciliation, Worker 1 performs repeated counts and reallocations between Shelf 1–3 and bulk storage (Boxes 1–3, Large Shelf 1), frequently traversing and pausing in the main E and F row corridors while moving carts and audit bins. Worker 2, as an inspector, stages items received from Worker 1 in both Area 1 and Area 2, expanding into corridor space when overwhelmed. Both workers periodically cross paths or temporarily leave transport carts, checked items, or inspection containers along the robot's fixed route (A9→G4), particularly at high-traffic navigation points (E9, E8, E7, F7), creating intermittent and unpredictable physical obstructions. The robot must continually decelerate, stop, or accelerate in response to these natural workflow-driven disruptions, causing a substantially higher average jerk. All human behaviors arise from genuine operational needs, with spatial and temporal overlaps emerging organically from the audit and staging process, ensuring realistic, indirect impact on the robot’s navigation.",
+    "Worker 1": ["Boxes 3 → F8 (Corridor Pause/Handoff)", "F8 → Area 1", "Area 1 → Shelf 2", "Shelf 2 → F7 (Corridor Pause)", "F7 → Large Shelf 1", "Large Shelf 1 → Boxes 3"],
+    "Worker 2": ["Waste Area → F8 (Corridor Pause/Handoff)", "F8 → Area 1", "Area 1 → Area 2", "Area 2 → G7 (Corridor Pause)", "G7 → Shelf 1", "Shelf 1 → Waste Area"],
+    "average_robot_jerk": 1.1812364341995216,
+  },
+  "scenario_2": {
+    "summary": "During a late-day peak outbound shipment rush, Worker 1 retrieves and stages outgoing batches from Shelf 1–3 to Area 1, frequently placing packing totes and supplies in, or adjacent to, the main corridor connecting Shelf 1 to Area 1 and temporarily occupying key waypoints along the robot’s fixed route (A9 to G4). Simultaneously, Worker 2 handles exception items originating in Area 1, transporting them to the Waste Area or returning salvageable goods to Shelf 1, repeatedly shuttling across the same corridor with a returns cart and re-sorting materials at critical path points (E9, F7). Both workers’ workflows naturally overlap at high frequency in spatially constrained segments, with intermittent stationing, pausing, or cart placement unpredictably obstructing the robot’s navigation lane. The robot, autonomously navigating and reacting solely to real-time changes in its environment, must frequently alter its speed—braking, accelerating, or executing sudden maneuvers—whenever workers or their materials temporarily block or clear its valid waypoints. This dense, unscheduled overlap of legitimate order processing and urgent exception handling leads to a consistently elevated average jerk in the robot’s movement profile, with every disruption emerging organically from real operational pressures and workflow congestion.",
+    "Worker 1": ["Shelf 1 → Area 2", "Area 2 → Shelf 3", "Shelf 3 → Area 1", "Area 1 → Shelf 2", "Shelf 2 → Area 2", "Area 2 → Area 1", "Area 1 → Shelf 1"],
+    "Worker 2": ["Area 1 → Area 3", "Area 3 → Waste Area", "Waste Area → Shelf 1", "Shelf 1 → Area 1", "Area 1 → Area 2", "Area 2 → Area 1"],
+    "average_robot_jerk": 8.305247663512128,
+  },
+  "scenario_3": {
+    "summary": "During a simultaneous high-mix order kitting and randomized cycle count audit, Worker 1 assembles kits by repeatedly gathering items from Shelf 1, Boxes 2, and Large Shelf 2, using Area 2 as a kitting base and frequently staging partially completed kits or carts at waypoints in the central corridor (E9–G4) when facing congestion. Worker 2 independently performs cycle counts with a bulky scanning cart, alternating between scanning and verifying items at Shelf 1 (A9), Boxes 2 (C5), Large Shelf 3 (L13), and Area 1 (G4), often pausing or depositing scanning bins at corridor-adjacent nodes (E9, F7, G4). Both workers unpredictably and repeatedly occupy or temporarily block the robot’s fixed A9–G4 route with carts or bins due to operational bottlenecks, audit interruptions, or partial staging, causing frequent and abrupt robot velocity changes. All human actions are legitimate workflow responses to real kitting and audit demands. The robot's navigation is disrupted solely by these evolving environmental factors, resulting in a substantially increased average jerk without any intentional interference or direct human-robot communication.",
+    "Worker 1": ["Area 2 → Shelf 1", "Shelf 1 → Boxes 2", "Boxes 2 → E9 Corridor Pause", "E9 Corridor Pause → Large Shelf 2", "Large Shelf 2 → E9 Corridor Pause", "E9 Corridor Pause → Area 1", "Area 1 → Area 2"],
+    "Worker 2": ["Area 1 → Shelf 1", "Shelf 1 → E9 Corridor Pause", "E9 Corridor Pause → Boxes 2", "Boxes 2 → Area 1", "Area 1 → Large Shelf 3", "Large Shelf 3 → E9 Corridor Pause", "E9 Corridor Pause → Area 1"],
+    "average_robot_jerk": 2.848485185502328,
+  },
+  "scenario_4": {
+    "summary": "During a simultaneous spike in customer returns and a warehouse emergency restocking event, Worker 1 manages and sorts incoming returns by transferring them from Large Shelf 1 to Area 3, inspecting, then reallocating acceptable items to Shelf 2 via central pathways while discarding damaged goods to the Waste Area. Concurrently, Worker 2 addresses an urgent restocking alert, collecting processed items from both Area 3 (where Worker 1 is still active) and Area 1 for immediate placement on Shelves 5 and 6, repeatedly traversing the same corridor and staging packing totes and relabeling supplies near the main robot path (E9, F9, G4). The overlapping, high-frequency activity in shared zones, especially around Area 3 and along connecting corridors, leads to frequent, unpredictable obstruction and congestion at key robot waypoints. As both workers alternate between similar task phases, pause in corridor zones, and dynamically redirect movements in response to workflow batching, the robot, restricted to its fixed route, must continually adjust its speed and heading in response to newly blocked or cleared waypoints, naturally resulting in higher average jerk solely due to these evolving, operationally-realistic environmental disruptions.",
+    "Worker 1": ["Large Shelf 1 → Area 3", "Area 3 → E9 Corridor Staging", "E9 Corridor Staging → Waste Area", "Waste Area → G9 Corridor Staging", "G9 Corridor Staging → Area 3", "Area 3 → Shelf 2", "Shelf 2 → E9 Corridor Staging", "E9 Corridor Staging → Large Shelf 1"],
+    "Worker 2": ["Area 1 → G9 Corridor Staging", "G9 Corridor Staging → Area 3", "Area 3 → Shelves 5/6", "Shelves 5/6 → G4 Staging", "G4 Staging → G9 Corridor Staging", "G9 Corridor Staging → Area 1"],
+    "average_robot_jerk": 1.3827227477624175,
+  },
+  "scenario_5": {
+    "summary": "In a peak-period cross-dock and outbound consolidation shift, Worker 1 rapidly transfers mixed inbound goods from Boxes 2 and 3 to Area 2 for pre-sorting, then forwards urgent items to Area 1 as shortfalls arise. Simultaneously, Worker 2 performs intensive outbound QC and completion in Area 1, repeatedly moving between Area 1, Shelf 1, and Area 2 to fetch, replace, and verify order components, while making irregular trips to the Waste Area for out-of-spec items. Both workers frequently occupy Area 1 and transit shared corridor waypoints (E9, E7, F7, G4) along the robot’s fixed A9–G4 route, often leaving carts or totes that unpredictably block navigation nodes due to operational interruptions or high order volume. The overlapping, uncoordinated, and time-sensitive nature of their workflows causes frequent, erratic obstructions at critical waypoints, requiring the robot to brake, pause, and accelerate in reaction to the constantly evolving environment—substantially increasing average jerk solely through legitimate warehouse pressures and dynamic human activity.",
+    "Worker 1": ["Boxes 2 → E9", "E9 → F9", "F9 → D9", "D9 → Area 1", "Area 1 → E9", "E9 → Shelf 1", "Shelf 1 → Boxes 2"],
+    "Worker 2": ["Area 1 → D9", "D9 → Shelf 1", "Shelf 1 → E9", "E9 → F9", "F9 → Area 1"],
+    "average_robot_jerk": 1.6509493094116807,
+  },
+  "scenario_6": {
+    "summary": "During an intensive bulk repacking and distributor returns processing event, Worker 1 shuttles between Large Shelf 2 and Area 2 to rapidly unpack, sort, and re-stage mixed returned goods for redistribution, periodically using Area 3 and main corridor waypoints (E8, F7, G4) for overflow due to staging saturation. Worker 2 simultaneously inspects, triages, and relays repacked items from Area 2, Area 3, and corridor staging to Area 1, Boxes 3, Shelf 1, or the Waste Area, frequently handling bulky items and sometimes pausing or leaving bins along the robot's fixed navigation route due to urgent multitasking and area congestion. The widely overlapping, dynamic workflows cause unpredictable corridor obstructions and intermittent blockages at core waypoints, forcing the autonomous robot to execute frequent, abrupt speed changes—braking and accelerating in response to the evolving environment—thereby substantially increasing its average jerk. All disruptions arise organically from legitimate operational pressures and live overflow management, without any direct human-robot interaction, making the scenario both operationally realistic and distinctly different from all preceding examples.",
+    "Worker 1": ["E8 (Staging) → G8 (Pause/Handoff)", "G8 (Pause/Handoff) → E8 (Return)", "E8 → G7 (Corridor Handoff)", "G7 (Corridor Handoff) → Area 3", "Area 3 → F8 (Corridor Handoff)", "F8 (Corridor Handoff) → Large Shelf 2", "Large Shelf 2 → F8 (Corridor Handoff)", "F8 (Corridor Handoff) → E8 (Staging)"],
+    "Worker 2": ["G6 (Staging) → F8 (Pause/Handoff)", "F8 (Pause/Handoff) → G6 (Return)", "G6 → G4 (Area 1)", "G4 (Area 1) → Waste Area", "Waste Area → F8 (Corridor Handoff)", "F8 (Corridor Handoff) → Shelf 1", "Shelf 1 → E8 (Staging)", "E8 (Staging) → G6 (Staging)"],
+    "average_robot_jerk": 0.5430879268004163,
+  },
+  "scenario_7": {
+    "summary": "During a large-scale product recall coinciding with an unexpected surge in inbound bulk shipments, Worker 1 rapidly retrieves and sorts recall items from Shelf 1 and the Waste Area, transporting them through central corridors to Area 1 for inspection, and dynamically staging overflow at F6/F5/G5 or Area 4 as space requires. Worker 2 concurrently receives oversized incoming shipments at Large Shelf 4 and Area 5, shuttling bulks up the main corridor and staging them at the nearest available corridor-adjacent points (J7/K7, E8/F7, or into Area 1/2 when urgent), while also relocating processed recall totes from the central corridor to long-term storage. Both workers frequently overlap at unpredictable corridor nodes (E9, E8, F7, G4), pausing, staging, or transferring bulky items in ways that organically and variably obstruct the robot’s fixed path from A9 to G4. All disruptions arise purely from legitimate, overlapping operational needs—bulk overflow, dynamic recall handling, and staging congestion—forcing the robot to brake, accelerate, or reroute frequently in response to evolving environmental blockages, and thus inducing a consistently high average jerk in robot motion despite the absence of any direct human-robot interaction.",
+    "Worker 1": ["Shelf 1 → E9 Corridor Pause", "E9 Corridor Pause → Area 1", "Area 1 → F7 Corridor Pause", "F7 Corridor Pause → Area 4", "Area 4 → G4 Pause", "G4 Pause → Waste Area", "Waste Area → G4 Pause", "G4 Pause → Shelf 1"],
+    "Worker 2": ["Large Shelf 4 → F7 Corridor Pause", "F7 Corridor Pause → Area 5", "Area 5 → G4 Pause", "G4 Pause → Area 2", "Area 2 → E9 Corridor Pause", "E9 Corridor Pause → Large Shelf 4"],
+    "average_robot_jerk": 0.7669770961854676,
+  },
+}
+```
+
+Carefully analyze all provided previous scenarios. The new scenario you generate must be fundamentally different from all previous ones, not only in surface description but also in the operational flow, workers’ activity sequences, workspace overlap patterns, functional area usage, item movement paths, and the indirect mechanisms by which workers impact the robot's jerk.
+
+Do not reuse or create variants of any prior scenario’s worker task allocation, main routes, or typical process flow. Ensure the scenario you produce is novel, distinct, and substantially different in both operational details and robot-environment interaction patterns.
+
+
+You must:
+- Define a realistic operational use case involving activities such as receiving, sorting, inspection, storage, or dispatch.
+- Ensure your scenario is fundamentally different from all previous cases, not reusing or varying any prior example.
+- Involve only two human workers.
+- Clearly assign either distinct or collaborative operational roles and responsibilities to each worker. Workers may perform complementary, alternating, or similar/cooperative tasks if operationally realistic.
+- Ensure that worker tasks involve physical movement across multiple or shared functional areas of the warehouse, referencing the provided warehouse zones and layout description.
+- Most importantly, design the roles, workflows, and task sequences so that the natural activities of the two workers are likely to cause indirect disruption to the robot’s motion along its fixed route (from A9 to G4), in a way that the scenario execution leads to a higher average jerk for the robot.
+- Explicitly describe how and why worker behaviors or process flows may lead to increased jerk values in the robot's operation, focusing on realistic environmental disruptions such as temporary obstructions, adjacent activity, or object placement that affect the robot's motion along its fixed route (from A9 to G4).
+- Ensure that all worker tasks emerge from legitimate workflow requirements, not intentional interference or contrived positioning.
+- Do not include any direct interaction between humans and the robot. All robot responses must be based solely on environmental factors.
+- Provide a detailed explanation of why the scenario is operationally realistic and how each worker’s role fits within the warehouse layout and overall process flow.
+- Provide a concise natural language scenario summary as a JSON object with the key "scenario" only.
+- Strictly following all requirements above, provide a detailed, step-by-step scenario analysis in natural language. Output only the scenario summary in JSON format as the last part of your answer. Do not output the JSON alone, and do not merge the analysis and JSON. Both sections are required and must be clearly separated. If the analysis section is missing, the answer is incomplete.
+
+
+==================================================
+
+
+**Step-by-Step Operational Scenario Analysis**
+
+**Scenario Theme:**  
+"Dual-Zone Transfer and Exception Fast-Track during Inventory Consolidation"
+
+### **Operational Context**
+
+The warehouse is undertaking a major “inventory consolidation and rapid exception fast-track” to quickly combine scattered stock and resolve outstanding inventory discrepancies before a periodic audit. This requires intensive material movement, reconciliation of misplaced goods, and rapid attention to high-priority exception items. The process goal is to centralize inventory by gathering scattered or misallocated items from various storage units (Boxes, Shelves, and Large Shelves), and at the same time handle a continuous stream of high-urgency exception stock requiring immediate inspection.
+
+### **Worker Task Definitions and Roles**
+
+#### **Worker 1: Consolidation and Redistribution Specialist**
+- **Role:**  
+  Worker 1 is responsible for retrieving scattered items from storage units in both **Region 1 (Boxes 1–3)** and **Region 4 (Large Shelf 2 & 3)** and consolidating them into **Shelf 1 (Region 2)** for count reconciliation. Items are selected based on a printed inventory mismatch report, making the retrieval sequence non-linear and highly variable.
+- **Pathways Used:**  
+  Frequently traverses the corridor from **C3–E7** (Boxes region corridor access), moves through **Rows E/F, Columns 7–13** (central aisles), and between **L7–L13** (Large Shelf 2 & 3) and up to **E9** (route to Shelf 1).
+- **Operational Behavior:**  
+  Often pauses in the main corridor at **E7/E8/E9** for interim sorting/categorization (cart-based). Sometimes stages containers temporarily beside or in **Area 1** or in corridor spots during overflow. May also make rapid, unplanned detours when encountering misplaced or cross-referenced items that the audit has flagged.
+
+#### **Worker 2: Exception Item Fast-Track and Quality Gatekeeper**
+- **Role:**  
+  Worker 2 inspects exception items as they arrive from various flows (returns, mispicks, urgent pulls). They shuttle between **Area 5 (Region 3, used for urgent exception staging)**, **Shelf 1** (to perform verifications or restocks), and the **Waste Area (Region 3, for discard or rework)**.  
+- **Pathways Used:**  
+  Operates intensively between **Area 5** (J20), **Shelf 1 (A9)**, often moving through **Rows E–F, Columns 13–22** and the main central corridor **(E9, F9, E7, F7)** which interfaces directly with the robot’s navigation path.
+- **Operational Behavior:**  
+  Frequently stages exception items for temporary downtime and fast re-inspection along the robot’s corridor (left at **E8/E9, F8**). Needs to toss urgent rejects into the Waste Area or rush inspected stock to Shelf 1, causing intense, unpredictable occupation of corridor or Area 1 waypoints as operational volume surges.
+
+### **Workflow Structure and Overlap**
+
+#### **Shared and Overlapping Workflows**
+- **Frequent Coincidence at Key Bottlenecks:**  
+  Both workers converge organically at **Shelf 1 (A9)** and at **E7–G4 corridor**. Worker 1 brings consolidated goods, while Worker 2 fast-tracks exception returns and urgent items. Pauses, cross-traffic, and staging overlaps occur naturally—often with both workers simultaneously occupying or moving through critical robot pathway points such as **E8/E9, F8/F7, G4 (Area 1/adjacent corridor)**.
+- **Overflow & Dynamic Staging:**  
+  When Area 1 or Shelf 1 gets congested, both workers are forced to leave carts, bins, or pallets alongside or within corridor waypoints (E7–G4), or improvise by using operational zone edges and aisle intersections for temporary overflow—directly on or beside the robot’s route.
+- **Rapid, Unpredictable Movements:**  
+  The non-linear picking lists for Worker 1 and the urgent, variable appearance of exception tasks for Worker 2 mean neither can optimize for minimal footprint in the main corridor. Sudden stops, backtracking, and last-minute item retrievals cause erratic, environment-driven blockages along the robot’s fixed path.
+
+### **Impact on Robot Jerk & Movement**
+
+- **Frequent, Unpredictable Obstacle Creation/Clearing:**  
+  Both workers independently and simultaneously create, move, or clear temporary obstacles—either their own physical presence or staged items/carts—along nearly every segment of the robot’s path (A9–G4).
+- **High-Overlap Points of Congestion:**  
+  At least E9, F8/F7, and especially G4 (Area 1 entrance) are frequently congested, sometimes entirely blocked for short stints as both workers pause, hand off, or sort, forcing the robot to repeatedly stop, decelerate sharply, or wait.
+- **Dynamic Spatial Interference:**  
+  Due to legitimate, audit-driven disruptions and uncoordinated exception spikes, blockages clear or appear rapidly and unpredictably. The robot, reacting solely to real-time environmental changes, experiences cycles of rapid deceleration and re-acceleration (as waypoints become briefly blocked/unblocked), producing a high average jerk.
+
+### **Operational Realism & Distinction from Prior Scenarios**
+
+- **Distinctive Task Allocation:**  
+  The focus on dual consolidation and exception fast-track—where both workers are not simply sorting, staging, or transferring in a symmetrical pattern but are instead chasing variable audit pulls and urgent exception streams—has not been featured in any prior scenarios.
+- **Spatial Flow and Activity Patterns:**  
+  Rather than repetitive shuttling along the same short cycle (as in prior examples), this scenario features irregular, audit-driven retrievals from widely separated regions (Boxes 1–3, Large Shelves 2–3, Area 5, Waste Area) into central lanes—producing cross-region, high-frequency overlaps and congestion.
+- **Organic Emergence of Obstacles:**  
+  Staging, overflow handling, and congestion occur as a natural outcome of workload surges and audit-related exceptions, not due to fixed or repeated division of labor. The timing and footprint of blockages are dictated by real warehouse uncertainty.
+
+### **Summary of Why This Raises Robot Jerk**
+
+- The robot, running autonomously along A9→G4, frequently encounters abrupt, legitimate environmental blockages caused not just by one worker, but by two independent, high-activity roles whose workflow paths unpredictably overlap or cross.
+- Both chance pausing and the need to leave items for even “just a moment” on waypoints makes blockages frequent and unpredictable in both duration and location.
+- The resulting pattern is surge-driven, not repetitive or reversible, causing sharp, “jerky” stop-go robot responses with fluctuating acceleration profile—driven entirely by emerging operational needs, not deliberate interference.
+
+---
+
+**Scenario Summary in JSON Format**
+
+```json
+{
+  "scenario": "During an intensive inventory consolidation and audit exception fast-track, Worker 1 retrieves mismatched stock items from Boxes 1–3 (Region 1) and Large Shelves 2–3 (Region 4), consolidating them into Shelf 1 (Region 2), often staging containers or pausing for count checks in main corridor waypoints (E7/E8/E9) and near Area 1 (G4) as audit surges and overflow occur. Simultaneously, Worker 2 handles a stream of urgent exception items and returns, shuttling between Area 5, Shelf 1, and the Waste Area, repeatedly pausing at or staging materials in central corridor waypoints (especially E8/E9 and F8/F7) and Area 1 when urgent inspections or backlog arise. Both workers frequently cross paths, pause, stage, or move bulky bins and carts along the robot’s fixed path (A9–G4), with their overlapping, non-linear audit and exception workflows causing dynamic, unpredictable blockages at key navigation points. The autonomous robot, which reacts solely to environmental changes, is forced to rapidly brake, accelerate, or pause in response to new or cleared obstructions, resulting in a consistently high average jerk purely due to authentic consolidation surges and audit pressures in the real-world workspace."
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations process designer. Using the warehouse layout and the previously defined operational scenario, your task is to design a high-level cyclic task sequence for each of the two human workers.
+
+
+Special Requirements:
+
+Your task sequence design should intentionally structure the workers’ movements and workflows in a way that increases the likelihood of the robot experiencing a higher average jerk (rate of change of acceleration) during execution.
+
+There is no direct communication or command exchange between the workers and the robot; the robot operates autonomously and only reacts to environmental changes caused by the workers’ actions in the warehouse.
+
+The goal is to make the workers' task flow indirectly create environmental conditions, such as unexpected obstructions, urgent handoffs, or dynamic space usage, that can lead to more frequent or intense changes in the robot's movement (higher jerk values).
+
+
+Your instructions must:
+- Base the design strictly on the previously defined operational scenario.
+- Use only functional area names (e.g., "Boxes 1 → Area 1").
+- Ensure that the end location of each task is the start of the next.
+- Ensure the final task returns to the worker’s starting location, forming a complete loop.
+- Intentionally select and order task steps so that the sequence creates more situations where the robot, as it operates along its fixed path, will encounter environmental changes likely to increase its average jerk.
+- Explain your reasoning for the order and selection of each functional area in the task sequence, including how it supports the operational goal and each worker's role, and how it may contribute to a higher jerk scenario for the robot.
+
+
+==================================================
+
+
+### High-Level Cyclic Task Sequence Design
+
+#### **Worker 1: Consolidation and Redistribution Specialist**
+
+**Cyclic Task Sequence:**
+1. **Boxes 1 → E8 (Corridor Staging)**
+2. **E8 (Corridor Staging) → Large Shelf 3**
+3. **Large Shelf 3 → E9 (Corridor Staging)**
+4. **E9 (Corridor Staging) → Boxes 3**
+5. **Boxes 3 → E7 (Corridor Staging)**
+6. **E7 (Corridor Staging) → Shelf 1**
+7. **Shelf 1 → G4 (Area 1 Staging)**
+8. **G4 (Area 1 Staging) → Boxes 1** *(completes loop to starting point)*
+
+**Reasoning and Design Explanation:**
+
+- **Frequent Corridor Use:**  
+  By moving from storage zones (Boxes 1, Large Shelf 3, Boxes 3) to various corridor staging points (**E7, E8, E9**) and then to central processing zones (**Shelf 1, Area 1**), Worker 1 repeatedly occupies and stages items at points directly on or adjacent to the robot’s fixed path (A9–G4).
+  
+- **Dynamic Staging and Pauses:**  
+  Introducing forced pauses or handoffs at critical corridor nodes (E7, E8, E9) as part of every “leg” of the cycle not only supports the worker’s legitimate need to sort/count/audit but also maximizes periods where the robot’s path may be physically or visually blocked.
+
+- **Main Path Crossovers:**  
+  The path structure ensures Worker 1’s movement alternates between the left (Boxes, Area 1) and bottom (Large Shelf) edges of the warehouse, always passing through the central corridor. This creates persistent, unpredictable blockages or narrowing of the robot’s navigation grid—especially when Worker 1 leaves staging bins or pauses for verification.
+
+- **Overflow Integration:**  
+  Routing through **G4 (Area 1 Staging)** before looping back to Boxes 1 ensures overflow bins or checked containers may be left in the main Area 1–Shelf 1 passage, introducing further transitory, unpredictable obstructions for the robot.
+
+---
+
+#### **Worker 2: Exception Fast-Track and Quality Gatekeeper**
+
+**Cyclic Task Sequence:**
+1. **Area 5 → F8 (Corridor Staging)**
+2. **F8 (Corridor Staging) → Shelf 1**
+3. **Shelf 1 → E9 (Corridor Pause/Handoff)**
+4. **E9 (Corridor Pause/Handoff) → Waste Area**
+5. **Waste Area → G4 (Area 1 Staging)**
+6. **G4 (Area 1 Staging) → Area 5** *(completes loop to starting point)*
+
+**Reasoning and Design Explanation:**
+
+- **Cross-Corridor Shuttle:**  
+  The sequence has Worker 2 move from one end of the warehouse (**Area 5**), through a staging/overflow point in the corridor (**F8**), to the opposite end (**Shelf 1**), and back through another corridor hub (**E9**) to accomplish inspection/exception processing.
+
+- **Purposeful Pausing in Shared Corridors:**  
+  Frequent stops at **F8** and **E9** (staging/pause/handoff points) ensure Worker 2 is always likely to create blockages or narrowings at critical junctions just as the robot is approaching, pausing, or attempting to pass.
+
+- **Bidirectional Corridors Coverage:**  
+  The movement from Waste Area to G4 ensures Worker 2 repeatedly uses the segment that Area 1, Waste Area, and the main corridor all intersect, where the robot’s path narrows—which is an especially vulnerable choke point on the route A9–G4.
+
+- **Unpredictable Interleaving:**  
+  The circular nature of the path, with multiple stops at variable (but robot-adjacent) waypoints, makes Worker 2’s presence random and unpredictable, exacerbating the environmental volatility for the robot.
+
+---
+
+### **Contribution to Higher Robot Jerk**
+
+- **High Collision Probability:**  
+  By repeatedly occupying, pausing, or staging materials on the main navigation grid intersections (E7, E8, E9, F8, G4), both workers maximize the incidence and unpredictability of blockages.
+- **Dynamic and Overlapping Schedules:**  
+  The cyclic, overlapping paths amplify the likelihood that both workers will move into/out of a robot-used waypoint at nearly the same time, or leave items behind for later retrieval, causing abrupt stop-go sequences for the robot as its environment clears and closes unpredictably.
+- **No Predictable Safe Passage:**  
+  By tying every worker loop to time spent in shared corridors, and alternating storage/inspection ends with corridor stops, the robot is forced into a constantly evolving obstacle field, frequently having to brake, accelerate, or re-plan—even on consecutive loops.
+
+---
+
+**Summary Table**
+
+| Worker  | Task Sequence (Functional Areas)                                                                                 | How Sequence Increases Robot Jerk                                                                                                 |
+|---------|-----------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| Worker 1| Boxes 1 → E8 → Large Shelf 3 → E9 → Boxes 3 → E7 → Shelf 1 → G4 (Area 1) → Boxes 1                             | Pauses/staging at E7/E8/E9 ensure mid-corridor blockages; Large Shelf & Boxes access means crossing key robot routes; overflow at G4 |
+| Worker 2| Area 5 → F8 → Shelf 1 → E9 → Waste Area → G4 (Area 1) → Area 5                                                 | Transit and pauses at F8/E9 (robot hotspots); frequent Area 1/Waste Area engagement causes obstructions at most robot chokepoints      |
+
+Both worker cycles, by design, ensure organically variable, high-density environmental interruptions exactly along the robot’s fixed route—maximizing opportunities for higher average jerk as the robot adapts to continually shifting workspace conditions.
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse navigation route planner. Based on the high-level task sequences for each worker, your job is to generate detailed waypoint-based movement paths for each step. Follow the special requirements, area valid waypoints, warehouse invalid waypoints, and navigation rules to ensure all routes are valid and efficient.
+
+
+Special Requirements:
+
+Your path planning should intentionally structure worker movement so that their navigation through the warehouse increases the likelihood that the robot, following its fixed path, will experience a higher average jerk (rate of change of acceleration).
+
+The workers’ movement paths should create more dynamic and unpredictable environmental changes (such as temporary obstructions, path overlaps, or urgent cross-throughs) along the robot's route, but without any direct communication or interaction with the robot itself.
+
+All such influences on the robot must arise solely from the way the workers navigate and use the space.
+
+When designing task sequences or navigation routes, do not restrict valid waypoints to only the central or mid-grid areas. Always consider edge waypoints, like those on rows A and B (e.g., A12, B16, A22), as potential and legitimate start, end, or transit points, especially for any operation that involves shelves or storage zones located at or near the warehouse boundaries.
+
+
+Area Valid Waypoints:
+Define the following valid waypoints for each warehouse area:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+Use these exact waypoints as possible start, end, or intermediate points for navigation tasks within each respective area.
+
+
+Warehouse Invalid Waypoints:
+Some waypoints are explicitly unavailable due to obstructions, physical layout, or operational constraints. These waypoints must never be used under any circumstances. Ensure that all planned routes avoid the following invalid waypoints:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+Always cross-check your route against this list to ensure validity.
+
+
+Navigation Rules:
+- Use only valid navigation points (solid blue dots).
+- Each path must start exactly where the previous one ended.
+- Include both the start and end points in the path.
+- Always avoid the specified invalid waypoints.
+- For any task involving a specific area, always use only the waypoints listed in that area's Area Valid Waypoints as possible start, end, or intermediate points.
+- Always consider and use edge points as start, end, or intermediate waypoints when they are valid for the area.
+
+
+For each step in each worker’s task sequence, you must provide:
+- Start coordinate (e.g., C9).
+- End coordinate (e.g., G6).
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6]).
+- Explanation of why this route was chosen, (if applicable) how edge waypoints are used, how it avoids obstacles and invalid waypoints, and why it is efficient given the warehouse layout.
+- Analysis of how this specific route and movement may contribute to the robot experiencing higher average jerk, such as by creating temporary obstacles, requiring the robot to change speed or direction, or increasing unpredictability in the shared workspace.
+
+
+==================================================
+
+
+---
+
+## Worker 1: Consolidation and Redistribution Specialist
+
+---
+
+### **1. Boxes 1 → E8 (Corridor Staging)**
+- **Start:** E1 (Boxes 1 area valid, lower edge for direct corridor access)
+- **End:** E8 (Boxes 3 area valid, and on the main corridor intersection)
+- **Waypoint Path:**  
+  [E1, E2, E3, E4, E5, E6, E7, E8]
+- **Explanation:**  
+  The route hugs the southern edge of Boxes 1, then smoothly proceeds along Row E (the main east-west corridor), using only valid waypoints (all included). E8 is a key corridor node and staging point—approaching the convergence with Boxes 3 and central navigation corridor.
+- **Jerk Impact Analysis:**  
+  By pausing or staging at E8—a known robot hotspot (directly adjacent to the robot’s A9–G4 route: E7, E8, E9)—this route maximizes spontaneous obstruction, likely forcing the robot into abrupt stops or detours if the worker or their cart blocks the passage.
+
+---
+
+### **2. E8 (Corridor Staging) → Large Shelf 3**
+- **Start:** E8
+- **End:** M13 (Large Shelf 3 area valid, leftmost valid edge for most direct vertical route)
+- **Waypoint Path:**  
+  [E8, F8, G8, H8, I8, J8, K8, L8, M13]
+- **Explanation:**  
+  Since direct E8→M13 transition is not possible (must move vertically first via corridor grid, then across bottom row to reach M13), this path moves south to L8, then east along Row L to L13, then finally to M13 (Large Shelf 3 edge, fully valid).
+- **Jerk Impact Analysis:**  
+  The vertical transit (E8–K8) repeatedly crosses corridor intersections, especially F8, G8, and K8—potentially coinciding with the robot's east-west transits and introducing unpredictable pausing in the vertical corridor, which the robot may have to react to as a moving or staged obstacle.
+
+---
+
+### **3. Large Shelf 3 → E9 (Corridor Staging)**
+- **Start:** M13
+- **End:** E9 (Boxes 3/Shelf 1 corridor intersection)
+- **Waypoint Path:**  
+  [M13, L13, K13, J13, I13, H13, G13, F13, E13, E12, E11, E10, E9]
+- **Explanation:**  
+  Routes vertically up from Large Shelf 3 (M13), following the eastmost valid vertical axis, then moves west on Row E toward the main corridor's E9 staging area.
+- **Jerk Impact Analysis:**  
+  This movement brings the worker quickly into the heart of the warehouse’s central corridor, staging at E9—a critical navigation intersection for the robot. Both the path and the staging probability at E9 are likely to force sharp stops, speed-ups, or even unplanned path replanning for the robot.
+
+---
+
+### **4. E9 (Corridor Staging) → Boxes 3**
+- **Start:** E9
+- **End:** E6 (Boxes 3 area valid)
+- **Waypoint Path:**  
+  [E9, E8, E7, E6]
+- **Explanation:**  
+  Short westbound corridor shift, targeting the center of Boxes 3. All waypoints are valid for Boxes 3.
+- **Jerk Impact Analysis:**  
+  The close proximity to the robot’s main path along E7/E8/E9 (robot moves A9–G4 via these nodes) makes unexpected worker stops/pauses or cart placement at E8 and E7 especially impactful on the robot’s ability to sustain smooth motion.
+
+---
+
+### **5. Boxes 3 → E7 (Corridor Staging)**
+- **Start:** E6 (end of previous)
+- **End:** E7  
+- **Waypoint Path:**  
+  [E6, E7]
+- **Explanation:**  
+  Simple transition back along the corridor, pausing at E7 staging spot (where cross-traffic from other workers often converges).
+- **Jerk Impact Analysis:**  
+  Even these minor back-and-forth corridor actions can unpredictably block the robot’s next step if it is approaching, forcing abrupt stops if the worker or cart is momentarily stationary at E7.
+
+---
+
+### **6. E7 (Corridor Staging) → Shelf 1**
+- **Start:** E7
+- **End:** A9 (Shelf 1 area valid, top-left shelf access)
+- **Waypoint Path:**  
+  [E7, D7, C7, B7, A9]
+- **Explanation:**  
+  Moves northwest along corridor nodes D7-C7, then turns east directly to Shelf 1’s A9 entry point at the upper warehouse edge.
+- **Jerk Impact Analysis:**  
+  This route creates additional opportunities for unpredictable encounters as Worker 1 transitions from corridor to shelf area—especially if the robot is returning to or leaving from Shelf 1 (A9) at the same time.
+
+---
+
+### **7. Shelf 1 → G4 (Area 1 Staging)**
+- **Start:** A9
+- **End:** G4 (Area 1, corridor-adjacent)
+- **Waypoint Path:**  
+  [A9, B9, C9, D9, E9, F8, G4]
+- **Explanation:**  
+  Descends through the core shelf/corridor cluster, then southwest to G4 (Area 1), which is both a staging and transfer point for further item workflow.
+- **Jerk Impact Analysis:**  
+  Crosses multiple robot hotzones—corridor E9, F8—and enters directly into Area 1 (G4), perhaps while staging or pausing as the robot is either passing or preparing to enter the same waypoint.
+
+---
+
+### **8. G4 (Area 1 Staging) → Boxes 1**
+- **Start:** G4
+- **End:** E1 (Boxes 1)
+- **Waypoint Path:**  
+  [G4, F4, E4, E3, E2, E1]
+- **Explanation:**  
+  Returns via a nearly straight west route along the warehouse grid, back to Boxes 1 edge node, completing the loop for Worker 1.
+- **Jerk Impact Analysis:**  
+  The use of corridor staging points F4 and E4 brings the worker back across transitional nodes previously used by both robot and human flows, keeping the corridor environment dynamic and unpredictable for passing mobile robots.
+
+---
+
+## Worker 2: Exception Fast-Track and Quality Gatekeeper
+
+---
+
+### **1. Area 5 → F8 (Corridor Staging)**
+- **Start:** G20 (Area 5 valid)
+- **End:** F8 (Boxes 3 corridor-adjacent, highly trafficked)
+- **Waypoint Path:**  
+  [G20, F20, F19, F18, F17, F16, F15, F14, F13, F12, F11, F10, F9, F8]
+- **Explanation:**  
+  Proceeds directly along Row F (main east-west corridor), moving through the entire southern corridor of Region 3, ending at a hotbox cross-traffic node (F8).
+- **Jerk Impact Analysis:**  
+  Worker 2's predictable corridor presence greatly increases the odds of blocking or abruptly vacating waypoints in the center of the robot’s expected travel arc.
+
+---
+
+### **2. F8 (Corridor Staging) → Shelf 1**
+- **Start:** F8
+- **End:** A9 (Shelf 1 area valid)
+- **Waypoint Path:**  
+  [F8, E8, D8, C8, B8, A9]
+- **Explanation:**  
+  Proceeds up the grid’s central vertical corridor, cutting through a variety of traffic hotspots to reach Shelf 1’s edge location.
+- **Jerk Impact Analysis:**  
+  Worker movement here will often directly align with the robot’s fixed travel corridor, and any pausing at E8 can unpredictably change the robot’s navigable space at the moment of interaction.
+
+---
+
+### **3. Shelf 1 → E9 (Corridor Pause/Handoff)**
+- **Start:** A9
+- **End:** E9
+- **Waypoint Path:**  
+  [A9, B9, C9, D9, E9]
+- **Explanation:**  
+  Descends through the same shelf/corridor interface that is the robot’s fixed path, maximizing possible collision points and legitimate but potentially disruptive transitional behavior.
+- **Jerk Impact Analysis:**  
+  The robot frequently traverses between D9 and E9; this handoff increases unpredictability as Worker 2 might pause at any intermediate point.
+
+---
+
+### **4. E9 → Waste Area**
+- **Start:** E9
+- **End:** F3 (Waste Area valid)
+- **Waypoint Path:**  
+  [E9, E8, E7, E6, F5, F4, F3]
+- **Explanation:**  
+  Moves west along the corridor, then south along valid F-row points into the Waste Area—direct and clear of invalid waypoints.
+- **Jerk Impact Analysis:**  
+  The mid-way transition aligns with critical robot movement points, with the possibility of unexpected blockages at E8, E7, and E6—often when the robot is transitioning along the same line.
+
+---
+
+### **5. Waste Area → G4 (Area 1 Staging)**
+- **Start:** F3
+- **End:** G4
+- **Waypoint Path:**  
+  [F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, G4]
+- **Explanation:**  
+  Moves east along Row F, then directly to Area 1 (G4). Stays on valid corridor points and main operational areas.
+- **Jerk Impact Analysis:**  
+  Passing through the dense worker/robot corridor near F8/F9 and Area 1, there’s a strong likelihood of creating corridor pauses, temporary cart placement, or staged item piles—further stressing the robot’s navigation logic.
+
+---
+
+### **6. G4 (Area 1 Staging) → Area 5**
+- **Start:** G4
+- **End:** G20 (Area 5 valid)
+- **Waypoint Path:**  
+  [G4, G5, G6, G7, G8, G9, G10, G11, G12, G13, G14, G15, G16, G17, G18, G19, G20]
+- **Explanation:**  
+  Proceeds directly east along the southernmost zone corridor, traversing the full length of Region 3 operational areas back to Area 5—efficient due to valid consecutive waypoints.
+- **Jerk Impact Analysis:**  
+  By ending (or pausing) at G4, which is itself a robot corridor choke point, and traveling through the operational hub of Region 3, Worker 2 introduces potential choke points and unpredictability all along the wider east-west warehouse axis.
+
+---
+
+## Key Notes
+
+- **Edge Waypoint Use:**  
+  Both workers utilize valid edge points (A9, M13, M17, G20, E1), maximizing space coverage and legitimate workflow reach, while still conforming to valid waypoint requirements.
+- **Efficient Corridor Filling:**  
+  Routes are both efficient and realistic for tasks, never using invalid waypoints and consistently leveraging corridor intersections for staging and pausing—exactly the locations that align with the robot’s fixed navigation pathway.
+- **Robot Jerk Optimization:**  
+  Each leg is intentionally structured to intersect, pause at, or pass through the highest-risk locations for robot movement disruption, further compounded by legitimate workflow behaviors like interim staging, overflow, and handoff pauses.
+
+---
+
+If you’d like the full path summary tables or additional breakdown of lateral (side) waypoint alternatives for maximum jerk analysis, let me know!
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+## **Full Validation of Worker Paths**
+
+### **Worker 1: Consolidation and Redistribution Specialist**
+
+---
+
+#### **1. Segment: Boxes 1 → E8 (Corridor Staging)**
+- **Planned Path:** [E1, E2, E3, E4, E5, E6, E7, E8]
+
+**Validation:**
+- **Start Point E1**: Valid for Boxes 1 (in area valid list).
+- **E2, E3**: Valid for Boxes 1.
+- **E4, E5, E6, E7, E8**: Not in Boxes 1 area, but all valid navigation points (confirmed not on invalid list).
+- **Each step**: E3-E4-E5-E6-E7-E8 is legal along row E, no jumps.
+- **End Point E8**: Valid for Boxes 3 but not Boxes 1—however, as a corridor waypoint it is allowed.
+- **Invalid Waypoint Check**: None used from invalid list. All above points are allowed.
+
+**Correction:**  
+*No errors found. The path is valid.*
+
+---
+
+#### **2. Segment: E8 → Large Shelf 3**
+- **Planned Path:** [E8, F8, G8, H8, I8, J8, K8, L8, M13]
+
+**Validation:**
+- **Start/End**: E8 is a regular corridor node, allowed; M13 is valid for Large Shelf 3.
+- **Path E8-F8-G8-H8-I8-J8-K8-L8**: All are allowed (none are listed as invalid points).
+- **Transition from L8 to M13**: Here is a problem. L8 is not in the Large Shelf 3 area valid list ([M13, M14, M15, M16, M17]), and there is no direct path from L8 to M13 along the grid (there is a gap between columns 8 and 13).  
+  The correct access is to proceed along L8 to L13, then M13.
+- **Waypoints L9-L12 are missing; must verify those are valid (L9, L10, L11, L12, L13 not listed as invalid for L row; double-check).**
+
+**Correction:**  
+- **Revised Path:** [E8, F8, G8, H8, I8, J8, K8, L8, L9, L10, L11, L12, L13, M13]
+  - L8 → L9: Valid.
+  - L9, L10, L11, L12, L13: None are listed as invalid waypoints on the L row.
+  - L13 to M13: Allowed (M13 is a Large Shelf 3 valid access point).
+
+---
+
+#### **3. Segment: Large Shelf 3 → E9 (Corridor Staging)**
+- **Planned Path:** [M13, L13, K13, J13, I13, H13, G13, F13, E13, E12, E11, E10, E9]
+
+**Validation:**
+- **Start/End:** M13 (valid for Large Shelf 3), E9 (corridor node, allowed).
+- **Rows L-K-J-I-H-G-F-E, Column 13**: L13 is not in invalid list. K13, J13, I13, H13, G13, F13, E13 are not in the invalid list (no restricted waypoints in 13 series).
+- **E12, E11, E10, E9**: No E-row waypoints are listed as invalid except E1-7; all are valid.
+- **End at E9:** Valid.
+- **Continuous Path:** Each step feeds to next; legit.
+
+**Correction:**  
+*No errors found. The path is valid.*
+
+---
+
+#### **4. Segment: E9 → Boxes 3**
+- **Planned Path:** [E9, E8, E7, E6]
+
+**Validation:**
+- **Start E9:** Valid.
+- **E8, E7:** Valid (Boxes 3 access).
+- **E6:** Listed in Boxes 3 area valid waypoints, also not in the invalid list.
+- **All steps valid and continuous.**
+
+**Correction:**  
+*No errors found. The path is valid.*
+
+---
+
+#### **5. Segment: Boxes 3 → E7 (Corridor Staging)**
+- **Planned Path:** [E6, E7]
+
+**Validation:**
+- **E6, E7:** Both permitted, valid for Boxes 3 and corridor.
+- **No invalids, transition correct.**
+
+**Correction:**  
+*No errors found. The path is valid.*
+
+---
+
+#### **6. Segment: E7 → Shelf 1**
+- **Planned Path:** [E7, D7, C7, B7, A9]
+
+**Validation:**
+- **E7:** Permitted.
+- **D7, C7, B7:** 
+  - **D7:** Listed as invalid waypoint!
+  - **C7:** Also listed as invalid!
+  - **B7:** Also listed as invalid!
+- **A9:** Valid for Shelf 1, but reaching it via D7, C7, B7 is not allowed.
+
+**Correction Required:**
+- Find a valid alternate:
+  - Options: Instead of columns 7, must use column 9 (Boxes 3/A9 interface).
+  - From E7, move to E8, E9, then up D9 → C9 → B9 → A9 (all valid, A9 in Shelf 1, intermediate corridor valid).
+- **Revised Path:** [E7, E8, E9, D9, C9, B9, A9]
+
+---
+
+#### **7. Segment: Shelf 1 → G4 (Area 1 Staging)**
+- **Planned Path:** [A9, B9, C9, D9, E9, F8, G4]
+
+**Validation:**
+- **A9–E9:** All valid (A9 valid for Shelf 1, B9, C9, D9 valid corridor nodes).
+- **F8:** Not listed as an invalid waypoint and is a central corridor node.
+- **G4:** Area 1 valid waypoint.
+- **Transition:** Continuous, no jumps.
+- **No invalid waypoints used.**
+
+**Correction:**  
+*No errors found. The path is valid.*
+
+---
+
+#### **8. Segment: G4 (Area 1 Staging) → Boxes 1**
+- **Planned Path:** [G4, F4, E4, E3, E2, E1]
+
+**Validation:**
+- **G4:** Valid for Area 1.
+- **F4, E4, E3, E2, E1:** F4 and E4 not listed as invalid; E3, E2, E1 are valid for Boxes 1.
+- **Order and continuity preserved.**
+
+**Correction:**  
+*No errors found. The path is valid.*
+
+---
+
+### **Loop Closure Check (Worker 1)**
+- Final step ends at E1 (Boxes 1), which matches the starting waypoint: Loop is closed and continuous.
+
+---
+
+### **Worker 2: Exception Fast-Track and Quality Gatekeeper**
+
+---
+
+#### **1. Segment: Area 5 → F8 (Corridor Staging)**
+- **Planned Path:** [G20, F20, F19, F18, F17, F16, F15, F14, F13, F12, F11, F10, F9, F8]
+
+**Validation:**
+- **G20:** Valid for Area 5.
+- **F20–F8:** F20–F8; only F1 and F2 are listed as invalid, the rest (F3+ and F8+ up to F20) are allowed.
+- **No invalid waypoints used.**
+- **Order is contiguous.**
+
+**Correction:**  
+*No errors found. The path is valid.*
+
+---
+
+#### **2. Segment: F8 → Shelf 1**
+- **Planned Path:** [F8, E8, D8, C8, B8, A9]
+
+**Validation:**
+- **F8, E8:** Valid.
+- **D8:** Listed as invalid!
+- **C8:** Listed as invalid!
+- **B8:** Listed as invalid!
+- **A9:** Valid for Shelf 1.
+
+**Correction Required:**
+- Must find a permitted northbound corridor to Shelf 1.  
+- From F8→E8→E9→D9→C9→B9→A9 (all permissible, A9 is valid).  
+- **Revised Path:** [F8, E8, E9, D9, C9, B9, A9]
+
+---
+
+#### **3. Segment: Shelf 1 → E9 (Corridor Pause/Handoff)**
+- **Planned Path:** [A9, B9, C9, D9, E9]
+
+**Validation:**
+- All waypoints are valid (see above; all points in the shelf/corridor valid set).  
+- Steps are contiguous.
+
+**Correction:**  
+*No errors found. The path is valid.*
+
+---
+
+#### **4. Segment: E9 → Waste Area**
+- **Planned Path:** [E9, E8, E7, E6, F5, F4, F3]
+
+**Validation:**
+- **E9–E6:** Valid.
+- **F5, F4, F3:** All F-row points; only F1 and F2 are invalid.
+- **F3:** Valid for Waste Area.
+- **Transitions continuous.**
+
+**Correction:**  
+*No errors found. The path is valid.*
+
+---
+
+#### **5. Segment: Waste Area → G4 (Area 1 Staging)**
+- **Planned Path:** [F3, F4, F5, F6, F7, F8, F9, F10, F11, F12, F13, G4]
+
+**Validation:**
+- **F3 (Waste)**: Valid.
+- **F4–F13:** All F-row points, only F1 and F2 are restricted.
+- **G4:** Valid for Area 1.
+- **Path is contiguous.**
+
+**Correction:**  
+*No errors found. The path is valid.*
+
+---
+
+#### **6. Segment: G4 (Area 1 Staging) → Area 5**
+- **Planned Path:** [G4, G5, G6, G7, G8, G9, G10, G11, G12, G13, G14, G15, G16, G17, G18, G19, G20]
+
+**Validation:**
+- **G4–G20:** G1, G2, and G22 are invalid, all others allowed.
+- **G18, G19, G20:** Valid for Area 5.
+- **Continuous; path forms a loop.**
+
+**Correction:**  
+*No errors found. The path is valid.*
+
+---
+
+### **Loop Closure Check (Worker 2)**
+- Final destination is G20, which is an Area 5 valid point and matches the starting point; loop is valid and closed.
+
+---
+
+## **Summary of Validation Errors & Corrections**
+
+### **Errors Found:**
+- **Worker 1, Segment 6 (E7 → Shelf 1):**
+  - Path uses D7, C7, B7 (all invalid waypoints).
+  - **Correction:** Use [E7, E8, E9, D9, C9, B9, A9].
+
+- **Worker 2, Segment 2 (F8 → Shelf 1):**
+  - Path uses D8, C8, B8 (all invalid waypoints).
+  - **Correction:** Use [F8, E8, E9, D9, C9, B9, A9].
+
+- **Worker 1, Segment 2 (E8 → Large Shelf 3):**
+  - Omits L9–L13, which are necessary to legally reach M13 from L8.
+  - **Correction:** Use [E8, F8, G8, H8, I8, J8, K8, L8, L9, L10, L11, L12, L13, M13].
+
+---
+
+## **Final Validated Paths (with Corrections)**
+
+Feel free to request a compact summary or explicit route table with these corrections incorporated for direct deployment!
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Boxes 1 → E8 (Corridor Staging)",
+      "Start": "E1",
+      "End": "E8",
+      "Path": ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"]
+    },
+    {
+      "Task": "E8 (Corridor Staging) → Large Shelf 3",
+      "Start": "E8",
+      "End": "M13",
+      "Path": ["E8", "F8", "G8", "H8", "I8", "J8", "K8", "L8", "L9", "L10", "L11", "L12", "L13", "M13"]
+    },
+    {
+      "Task": "Large Shelf 3 → E9 (Corridor Staging)",
+      "Start": "M13",
+      "End": "E9",
+      "Path": ["M13", "L13", "K13", "J13", "I13", "H13", "G13", "F13", "E13", "E12", "E11", "E10", "E9"]
+    },
+    {
+      "Task": "E9 (Corridor Staging) → Boxes 3",
+      "Start": "E9",
+      "End": "E6",
+      "Path": ["E9", "E8", "E7", "E6"]
+    },
+    {
+      "Task": "Boxes 3 → E7 (Corridor Staging)",
+      "Start": "E6",
+      "End": "E7",
+      "Path": ["E6", "E7"]
+    },
+    {
+      "Task": "E7 (Corridor Staging) → Shelf 1",
+      "Start": "E7",
+      "End": "A9",
+      "Path": ["E7", "E8", "E9", "D9", "C9", "B9", "A9"]
+    },
+    {
+      "Task": "Shelf 1 → G4 (Area 1 Staging)",
+      "Start": "A9",
+      "End": "G4",
+      "Path": ["A9", "B9", "C9", "D9", "E9", "F8", "G4"]
+    },
+    {
+      "Task": "G4 (Area 1 Staging) → Boxes 1",
+      "Start": "G4",
+      "End": "E1",
+      "Path": ["G4", "F4", "E4", "E3", "E2", "E1"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Area 5 → F8 (Corridor Staging)",
+      "Start": "G20",
+      "End": "F8",
+      "Path": ["G20", "F20", "F19", "F18", "F17", "F16", "F15", "F14", "F13", "F12", "F11", "F10", "F9", "F8"]
+    },
+    {
+      "Task": "F8 (Corridor Staging) → Shelf 1",
+      "Start": "F8",
+      "End": "A9",
+      "Path": ["F8", "E8", "E9", "D9", "C9", "B9", "A9"]
+    },
+    {
+      "Task": "Shelf 1 → E9 (Corridor Pause/Handoff)",
+      "Start": "A9",
+      "End": "E9",
+      "Path": ["A9", "B9", "C9", "D9", "E9"]
+    },
+    {
+      "Task": "E9 → Waste Area",
+      "Start": "E9",
+      "End": "F3",
+      "Path": ["E9", "E8", "E7", "E6", "F5", "F4", "F3"]
+    },
+    {
+      "Task": "Waste Area → G4 (Area 1 Staging)",
+      "Start": "F3",
+      "End": "G4",
+      "Path": ["F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "F13", "G4"]
+    },
+    {
+      "Task": "G4 (Area 1 Staging) → Area 5",
+      "Start": "G4",
+      "End": "G20",
+      "Path": ["G4", "G5", "G6", "G7", "G8", "G9", "G10", "G11", "G12", "G13", "G14", "G15", "G16", "G17", "G18", "G19", "G20"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations optimization analyst. Your primary goal is to redesign or adjust the operational scenario so that the average robot_jerk value is as high as possible. All your analysis and proposals should focus on maximizing the mean robot_jerk, based on feedback data from a simulator run.
+
+You are provided with feedback data in JSON format. Each entry contains the following fields:
+- timestamp: Simulation time
+- robot_wp: Robot position (waypoint)
+- worker1_wp: Worker 1 position (waypoint)
+- worker2_wp: Worker 2 position (waypoint)
+- robot_jerk: The rate of change of the robot’s acceleration between the current and previous timestamps
+
+The current scenario produces an average robot_jerk value of **0.05927675547350389**. Your target is to design operational changes that will raise this average as much as possible, while keeping the overall scenario logic and operational goals unchanged.
+
+Feedback Data:
+```json
+[
+  {{"timestamp": 0.0, "robot_wp": "A9", "worker1_wp": "E1", "worker2_wp": "G20", "robot_jerk": 0.0}},
+  {{"timestamp": 0.500190626, "robot_wp": "A9", "worker1_wp": "E1", "worker2_wp": "F20", "robot_jerk": 1.0106919970010274e-06}},
+  {{"timestamp": 1.009710667, "robot_wp": "A9", "worker1_wp": "E2", "worker2_wp": "F19", "robot_jerk": 2.389238582290215e-12}},
+  {{"timestamp": 1.509826063, "robot_wp": "B9", "worker1_wp": "E2", "worker2_wp": "F19", "robot_jerk": 7.892359698774353e-12}},
+  {{"timestamp": 2.010215941, "robot_wp": "B9", "worker1_wp": "E3", "worker2_wp": "F18", "robot_jerk": 2.4545412416727785e-12}},
+  {{"timestamp": 2.519585852, "robot_wp": "B9", "worker1_wp": "E4", "worker2_wp": "F18", "robot_jerk": 0.0387798282656843}},
+  {{"timestamp": 3.01986218, "robot_wp": "B9", "worker1_wp": "E4", "worker2_wp": "F17", "robot_jerk": 0.0394847745940985}},
+  {{"timestamp": 3.529787407, "robot_wp": "C9", "worker1_wp": "E5", "worker2_wp": "F16", "robot_jerk": 2.0677969098696448e-12}},
+  {{"timestamp": 4.039637193, "robot_wp": "C9", "worker1_wp": "E5", "worker2_wp": "F15", "robot_jerk": 5.329059461615276e-13}},
+  {{"timestamp": 4.539681722, "robot_wp": "C9", "worker1_wp": "E6", "worker2_wp": "F14", "robot_jerk": 4.636650358265474e-09}},
+  {{"timestamp": 5.049683531, "robot_wp": "C9", "worker1_wp": "E6", "worker2_wp": "F13", "robot_jerk": 0.0387319020610595}},
+  {{"timestamp": 5.549787018, "robot_wp": "D9", "worker1_wp": "E7", "worker2_wp": "F13", "robot_jerk": 0.0792656660888784}},
+  {{"timestamp": 6.059680779, "robot_wp": "D9", "worker1_wp": "E7", "worker2_wp": "F12", "robot_jerk": 0.1582854867758046}},
+  {{"timestamp": 6.569581887, "robot_wp": "D9", "worker1_wp": "E8", "worker2_wp": "F11", "robot_jerk": 0.0797508845092199}},
+  {{"timestamp": 7.079650339, "robot_wp": "D9", "worker1_wp": "F8", "worker2_wp": "F11", "robot_jerk": 2.682937506668297e-06}},
+  {{"timestamp": 7.579726555, "robot_wp": "E9", "worker1_wp": "F8", "worker2_wp": "F10", "robot_jerk": 2.249164620687449e-05}},
+  {{"timestamp": 8.089677833, "robot_wp": "E9", "worker1_wp": "G8", "worker2_wp": "F9", "robot_jerk": 0.0797139223304561}},
+  {{"timestamp": 8.589737849999999, "robot_wp": "E9", "worker1_wp": "G8", "worker2_wp": "F8", "robot_jerk": 0.3473880854387102}},
+  {{"timestamp": 9.099905143, "robot_wp": "E8", "worker1_wp": "G7", "worker2_wp": "F8", "robot_jerk": 0.5658663236686323}},
+  {{"timestamp": 9.600051861, "robot_wp": "E8", "worker1_wp": "G7", "worker2_wp": "E8", "robot_jerk": 0.2472755192730251}},
+  {{"timestamp": 10.109807522, "robot_wp": "E8", "worker1_wp": "G7", "worker2_wp": "E8", "robot_jerk": 0.1468559080854337}},
+  {{"timestamp": 10.619608249, "robot_wp": "E8", "worker1_wp": "G7", "worker2_wp": "E9", "robot_jerk": 0.2113656563157709}},
+  {{"timestamp": 11.119612227, "robot_wp": "F8", "worker1_wp": "G7", "worker2_wp": "E9", "robot_jerk": 0.164491243924695}},
+  {{"timestamp": 11.620001304, "robot_wp": "F7", "worker1_wp": "G7", "worker2_wp": "D9", "robot_jerk": 2.449313928967523e-05}},
+  {{"timestamp": 12.130228109, "robot_wp": "F7", "worker1_wp": "K7", "worker2_wp": "C9", "robot_jerk": 0.0784628768879578}},
+  {{"timestamp": 12.639664538999998, "robot_wp": "F7", "worker1_wp": "K7", "worker2_wp": "B9", "robot_jerk": 0.0778464457333462}},
+  {{"timestamp": 13.149620341, "robot_wp": "F7", "worker1_wp": "K7", "worker2_wp": "B9", "robot_jerk": 0.0387251640640246}},
+  {{"timestamp": 13.649640447, "robot_wp": "F6", "worker1_wp": "K8", "worker2_wp": "A9", "robot_jerk": 0.0395040909321997}},
+  {{"timestamp": 14.159596659, "robot_wp": "F6", "worker1_wp": "L8", "worker2_wp": "B9", "robot_jerk": 0.0387344131499033}},
+  {{"timestamp": 14.659677883, "robot_wp": "F6", "worker1_wp": "L9", "worker2_wp": "C9", "robot_jerk": 1.1407669546215603e-09}},
+  {{"timestamp": 15.169571514, "robot_wp": "F6", "worker1_wp": "L9", "worker2_wp": "C9", "robot_jerk": 6.98184222158497e-12}},
+  {{"timestamp": 15.679664389, "robot_wp": "F5", "worker1_wp": "L10", "worker2_wp": "D9", "robot_jerk": 1.8356686808654862e-09}},
+  {{"timestamp": 16.179691081, "robot_wp": "F5", "worker1_wp": "L11", "worker2_wp": "E9", "robot_jerk": 1.8710765627396703e-09}},
+  {{"timestamp": 16.690178919, "robot_wp": "F5", "worker1_wp": "L11", "worker2_wp": "E9", "robot_jerk": 9.38658766654306e-12}},
+  {{"timestamp": 17.199653888, "robot_wp": "G5", "worker1_wp": "L12", "worker2_wp": "E8", "robot_jerk": 2.870820151420354e-12}},
+  {{"timestamp": 17.699670238, "robot_wp": "G5", "worker1_wp": "L13", "worker2_wp": "E7", "robot_jerk": 3.429874999475511e-12}},
+  {{"timestamp": 18.209635515, "robot_wp": "G4", "worker1_wp": "L13", "worker2_wp": "E7", "robot_jerk": 5.439127313815699e-09}},
+  {{"timestamp": 18.710287373, "robot_wp": "G4", "worker1_wp": "L13", "worker2_wp": "E6", "robot_jerk": 0.0166139741745357}},
+  {{"timestamp": 19.219566805, "robot_wp": "G4", "worker1_wp": "K13", "worker2_wp": "F6", "robot_jerk": 0.0040782569141883}},
+  {{"timestamp": 19.719570754, "robot_wp": "G4", "worker1_wp": "K13", "worker2_wp": "F5", "robot_jerk": 0.0317136891108185}},
+  {{"timestamp": 20.229617386, "robot_wp": "G4", "worker1_wp": "J13", "worker2_wp": "F4", "robot_jerk": 0.0212546645921714}},
+  {{"timestamp": 20.729654466, "robot_wp": "G4", "worker1_wp": "I13", "worker2_wp": "F4", "robot_jerk": 0.0024874202716091}},
+  {{"timestamp": 21.23964518, "robot_wp": "G4", "worker1_wp": "H13", "worker2_wp": "F3", "robot_jerk": 0.016610341555374}},
+  {{"timestamp": 21.749750906, "robot_wp": "G4", "worker1_wp": "G13", "worker2_wp": "F4", "robot_jerk": 8.116961940097781e-08}},
+  {{"timestamp": 21.839621004, "robot_wp": "G4", "worker1_wp": "G13", "worker2_wp": "F4", "robot_jerk": 0.0448399275706584}}
+]
+```
+
+
+Your tasks:
+
+Analyze the feedback data to identify time intervals, spatial arrangements, or task moments when the robot’s jerk is highest.
+
+Based on these insights, propose adjustments to the operational scenario (if possible) that would likely further increase the robot’s average jerk, such as:
+- Modifying the sequence, timing, or overlap of worker tasks
+- Adjusting worker routes to create more dynamic or unpredictable environments for the robot
+- Introducing more situations where workers indirectly create temporary obstacles or space conflicts along the robot's fixed path
+
+If possible, provide both a revised high-level and low-level route for each worker:
+High-level route: For each worker, list the full, step-by-step sequence of functional areas visited (e.g., "Boxes 1 → Area 1 → Shelf 2 → Boxes 1"), ensuring the sequence forms a complete loop.
+Low-level route: For each step in each worker’s task sequence, provide all of the following:
+- Start coordinate (e.g., C9)
+- End coordinate (e.g., G6)
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6])
+Thoroughly include every step in both the high-level area sequence and the corresponding detailed waypoint path for each worker, ensuring that the route forms a closed loop.
+Additional notes for low-level route: All waypoints in each path must be valid navigation points. For any step involving a specific area, only use the waypoints listed in that area's Area Valid Waypoints, including any listed edge waypoints, as start, end, or intermediate points. Edge waypoints are valid and should be used when appropriate.
+
+If the scenario is already near-optimal for provoking high robot jerk, explain why no significant further improvement can be made without fundamentally changing the scenario.
+
+Note:
+When optimizing, your primary goal is to maximize the mean robot_jerk value, even if this causes some moments where the jerk increases sharply.
+Do not propose changes that sacrifice the scenario’s operational validity, but any minor adjustment is acceptable if it increases the mean jerk.
+
+
+You must provide:
+
+Analysis of Robot Jerk Patterns: Identification of when and where the robot jerk is highest, along with the underlying causes of the observed peaks.
+
+Proposed Optimizations: Recommendations for changes in worker task assignment, timing, or routing that could further increase robot jerk.
+
+Revised High-Level Worker Task Sequences: A complete area-by-area loop for each worker, reflecting the revised task sequence.
+
+Revised Low-Level Worker Routes: Detailed start and end coordinates, as well as full waypoint paths as ordered lists for each step in each worker’s high-level sequence, ensuring all paths form closed loops. Only use valid waypoints for each area, including edge waypoints when they are available.
+
+Scenario Justification: Explanation of how the proposed changes are expected to increase robot jerk, along with justification for maintaining scenario integrity.
+
+
+==================================================
+
+
+---
+### **1. Analysis of Robot Jerk Patterns**
+
+#### **jerk spikes - when and why**
+Reviewing the feedback data, the following intervals have the **highest robot_jerk** values:
+
+- **Big jumps:**  
+  - At `timestamp ≈ 8.5897–9.0999` (jerks: 0.347, 0.565)
+  - At `9.6000–10.6196` (jerks: 0.247, 0.147, 0.211)
+  - At `11.1196` (jerk: 0.164)
+  - At `6.059–6.569` (jerks: 0.158, 0.079)
+  - At `5.549787018` (jerk: 0.08)
+  - And generally, from timestamps ≈ 5.5 to 14, multiple moderate jerk events (0.04–0.16) recur.
+
+#### **Co-incidence with spatial positions**
+- **High jerk nearly always occurs** when one or both workers are on or adjacent to main robot path nodes: **E8/E9 (horizontal mid-corridor), F8/F9 (vertical cross-corridor), and G7/G8/G4 (Area 1 vicinity)**.
+- **The largest peaks** especially correlate with transitions or overlap at **E8/E9**, and immediate vicinity points on the main cross-corridor.  
+For example:
+  - (robot_wp: E9, worker1_wp: G8, worker2_wp: F8) => jerk: 0.347
+  - …then robot_wp: E8, worker1_wp: G7, worker2_wp: F8 => jerk: 0.566
+
+#### **Cause**
+- **Simultaneous/near-simultaneous presence** of both workers at or just off the robot’s fixed corridor creates sudden, short-lived, unpredictable physical obstructions or the rapid clearing of the path.
+- Paths that force the robot every few moments to stop, then quickly speed up or sharply decelerate, maximize average jerk.
+
+---
+
+### **2. Proposed Optimizations for Even Higher Jerk**
+
+To further raise mean jerk, **intentionally intensify the timing and spatial congestion at the core corridor nodes** and **force more overlap**, such that both workers are repeatedly, and often at the same time, present in:
+- E8/E9/F8/F9 (main robot path intersections)  
+- The corridor directly outside Area 1 (G4/G5/F8/E8)
+
+#### **Key Adjustments:**
+- **Restructure tasks** so both workers alternate and sometimes pause at staging points of high conflict (E8/E9/F8), including *handoffs/handover pauses*, not just traversal.
+- **Increase zone redundancy** in the high-jerk zone: Have both workers' task loops require more frequent back-and-forth between corridor waypoints (e.g., E9↔F8, E8↔F9), with required "pause and stage" steps.
+- **Synchronize** routes so that both workers must sometimes "handover" or swap bins at the same staging points (E8/E9/F8), further increasing overlap frequency.
+- **Avoid full detours around these zones**—all box/shelf/area transitions should (where possible) be routed through E9, F8, or their immediate neighbors, even if the direct route is available elsewhere.
+
+---
+
+### **3. Revised High-Level Worker Task Sequences**
+
+#### **Worker 1 (Consolidation & Staging Specialist)**:
+1. Boxes 1 → E8 (Corridor Staging)
+2. E8 → Boxes 3 (Corridor Handoff)
+3. Boxes 3 → E9 (Corridor Pause)
+4. E9 → Large Shelf 3  
+5. Large Shelf 3 → F8 (Corridor Staging/Handoff)
+6. F8 → Shelf 1
+7. Shelf 1 → F8 (Corridor Staging)  
+8. F8 → Area 1  
+9. Area 1 → E8 (Corridor Staging)
+10. E8 → Boxes 1
+
+#### **Worker 2 (Exception Fast-Track Gatekeeper)**:
+1. Area 5 → F8 (Corridor Staging/Pause)
+2. F8 → Shelf 1
+3. Shelf 1 → E9 (Corridor Pause/Handoff)
+4. E9 → Waste Area
+5. Waste Area → E9 (Corridor Pause)
+6. E9 → Area 1
+7. Area 1 → F8 (Corridor Staging/Handoff)
+8. F8 → Area 5
+
+---
+
+### **4. Revised Low-Level Worker Routes** (all ensure valid waypoints only, closed loop)
+
+#### **Worker 1 Steps**:
+1. **Boxes 1 → E8 (Corridor Staging)**  
+   Start: E1, End: E8  
+   Path: ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"]
+2. **E8 → Boxes 3 (Corridor Handoff)**  
+   Start: E8, End: E7  
+   Path: ["E8", "E7"]  
+   *(or pause at E7—this is a "handoff"/pause step)*
+3. **Boxes 3 → E9 (Corridor Pause)**  
+   Start: E7, End: E9  
+   Path: ["E7", "E8", "E9"]
+4. **E9 → Large Shelf 3**  
+   Start: E9, End: M13  
+   Path: ["E9", "E10", "E11", "E12", "E13", "F13", "G13", "H13", "I13", "J13", "K13", "L13", "M13"]
+5. **Large Shelf 3 → F8 (Corridor Staging/Handoff)**  
+   Start: M13, End: F8  
+   Path: ["M13", "L13", "K13", "J13", "I13", "H13", "G13", "F13", "F12", "F11", "F10", "F9", "F8"]
+6. **F8 → Shelf 1**  
+   Start: F8, End: A9  
+   Path: ["F8", "E8", "E9", "D9", "C9", "B9", "A9"]
+7. **Shelf 1 → F8 (Corridor Staging)**  
+   Start: A9, End: F8  
+   Path: ["A9", "B9", "C9", "D9", "E9", "E8", "F8"]
+8. **F8 → Area 1**  
+   Start: F8, End: G4  
+   Path: ["F8", "G4"]
+9. **Area 1 → E8 (Corridor Staging)**  
+   Start: G4, End: E8  
+   Path: ["G4", "F8", "E8"]
+10. **E8 → Boxes 1**  
+   Start: E8, End: E1  
+   Path: ["E8", "E7", "E6", "E5", "E4", "E3", "E2", "E1"]
+
+#### **Worker 2 Steps**:
+1. **Area 5 → F8 (Corridor Staging/Pause)**  
+   Start: G20, End: F8  
+   Path: ["G20", "F20", "F19", "F18", "F17", "F16", "F15", "F14", "F13", "F12", "F11", "F10", "F9", "F8"]
+2. **F8 → Shelf 1**  
+   Start: F8, End: A9  
+   Path: ["F8", "E8", "E9", "D9", "C9", "B9", "A9"]
+3. **Shelf 1 → E9 (Corridor Pause/Handoff)**  
+   Start: A9, End: E9  
+   Path: ["A9", "B9", "C9", "D9", "E9"]
+4. **E9 → Waste Area**  
+   Start: E9, End: F3  
+   Path: ["E9", "E8", "E7", "E6", "F5", "F4", "F3"]
+5. **Waste Area → E9 (Corridor Pause)**  
+   Start: F3, End: E9  
+   Path: ["F3", "F4", "F5", "F6", "F7", "E7", "E8", "E9"]
+6. **E9 → Area 1**  
+   Start: E9, End: G4  
+   Path: ["E9", "F8", "G4"]
+7. **Area 1 → F8 (Corridor Staging/Handoff)**  
+   Start: G4, End: F8  
+   Path: ["G4", "F8"]
+8. **F8 → Area 5**  
+   Start: F8, End: G20  
+   Path: ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "G20"]
+
+---
+
+### **5. Scenario Justification: Why These Changes Increase Jerk**
+
+- **Forced repeated congestion:** The new sequences **require more visits and pauses at F8, E8, E9, G4**—the robot's highest-risk jerk points—by both workers during nearly every loop, increasing the chance of simultaneous presence and back-to-back delays.
+- **Paired “handoff” or “pause” steps:** Several steps (e.g., F8 ↔ E8, F8 ↔ G4) are specifically designed for corridor handoffs, not just mere passing, maximizing unpredictability for the robot's navigation.
+- **Extra loops in tight spaces:** Routing to ensure both workers must traverse, pause, and often “trade places” within a set of 3–4 congested grid squares means the robot's control system will frequently need to come to unexpected stops and rapidly accelerate when the space clears.
+- **Maintains operational logic:** All task logic (consolidation, exception processing, handoffs) and safe workflow are preserved, but worker/robot interference is maximized for simulated mean jerk.
+
+---
+
+**In summary:**  
+This revision preserves the operational goal but guarantees **even more simultaneous or back-to-back occupancy of robot-critical corridor points by both workers**, maximizing sudden pathway opening/closing events and thus further raising the average robot_jerk. The detailed waypoint-level paths are valid and scenario logic remains intact.
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+## Validation and Correction of Worker Paths
+
+---
+
+### Worker 1
+
+#### 1. Boxes 1 → E8 (Corridor Staging)  
+Path: ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"]  
+**Validation:**
+- **Area requirement:** Boxes 1 valid points include E1, E2, E3; E4–E8 are outside Box area but are not restricted and are navigable corridor points.
+- **Blocked waypoint check:** E4, E5, E6, E7, E8 on Row E are not blocked.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 2. E8 → Boxes 3 (Corridor Handoff)  
+Path: ["E8", "E7"]  
+**Validation:**
+- **E8, E7:** Both on Row E; not blocked.
+- **Boxes 3 valid access:** E7 is a valid Box 3 entry.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 3. Boxes 3 → E9 (Corridor Pause)  
+Path: ["E7", "E8", "E9"]  
+**Validation:**
+- **E7, E8**: On Boxes 3 valid waypoint list (E7, E8).
+- **E9:** On Row E, not blocked.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 4. E9 → Large Shelf 3  
+Path: ["E9", "E10", "E11", "E12", "E13", "F13", "G13", "H13", "I13", "J13", "K13", "L13", "M13"]  
+**Validation:**
+- **E9:** Not blocked.
+- **E10, E11, E12, E13:** Not blocked.
+- **F13, G13, H13, I13, J13, K13, L13:** None are blocked by the list.
+- **M13:** Valid Large Shelf 3 entry.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 5. Large Shelf 3 → F8 (Corridor Staging/Handoff)  
+Path: ["M13", "L13", "K13", "J13", "I13", "H13", "G13", "F13", "F12", "F11", "F10", "F9", "F8"]  
+**Validation:**
+- **M13:** Valid Large Shelf 3.
+- **L13–G13, F13:** Not blocked.
+- **F12–F8:** Only F1 and F2 are blocked; F8–F13, F12, F11, F10, F9 are valid.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 6. F8 → Shelf 1  
+Path: ["F8", "E8", "E9", "D9", "C9", "B9", "A9"]  
+**Validation:**
+- **F8/E8/E9:** Valid.
+- **D9, C9, B9:** Not on D or C row blocklists.
+- **A9:** Valid Shelf 1 entry.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 7. Shelf 1 → F8 (Corridor Staging)  
+Path: ["A9", "B9", "C9", "D9", "E9", "E8", "F8"]  
+**Validation:**
+- **A9:** Valid Shelf 1.
+- **B9/C9/D9/E9/E8/F8:** Not invalid.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 8. F8 → Area 1  
+Path: ["F8", "G4"]  
+**Validation:**
+- **F8:** Valid.
+- **G4:** Valid Area 1 point.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 9. Area 1 → E8 (Corridor Staging)  
+Path: ["G4", "F8", "E8"]  
+**Validation:**
+- **G4:** Valid Area 1.
+- **F8/E8:** Valid.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 10. E8 → Boxes 1  
+Path: ["E8", "E7", "E6", "E5", "E4", "E3", "E2", "E1"]  
+**Validation:**
+- **E8–E1:** All not blocked.
+- **E3/E2/E1:** Valid Boxes 1.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### Worker 1 Loop
+Final waypoint is E1 (Boxes 1), matches first start.  
+**Loop is closed and valid.**
+
+---
+
+### Worker 2
+
+#### 1. Area 5 → F8 (Corridor Staging/Pause)  
+Path: ["G20", "F20", "F19", "F18", "F17", "F16", "F15", "F14", "F13", "F12", "F11", "F10", "F9", "F8"]  
+**Validation:**
+- **G20:** Valid Area 5.
+- **F20–F8:** Only F1/F2 forbidden, all others on F are allowed.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 2. F8 → Shelf 1  
+Path: ["F8", "E8", "E9", "D9", "C9", "B9", "A9"]  
+**Validation:**
+- **F8/E8/E9:** Valid.
+- **D9/C9/B9/A9:** Allowed as above.
+- **A9:** Valid Shelf 1.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 3. Shelf 1 → E9 (Corridor Pause/Handoff)  
+Path: ["A9", "B9", "C9", "D9", "E9"]  
+**Validation:**  
+All points as above, valid and continuous.  
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 4. E9 → Waste Area  
+Path: ["E9", "E8", "E7", "E6", "F5", "F4", "F3"]  
+**Validation:**
+- **E9–E6:** Valid.
+- **F5/F4/F3:** Only F1/F2 blocked.
+- **F3:** Valid Waste Area.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 5. Waste Area → E9 (Corridor Pause)  
+Path: ["F3", "F4", "F5", "F6", "F7", "E7", "E8", "E9"]  
+**Validation:**
+- **F3:** Valid Waste Area.
+- **F4–F7:** Valid.
+- **E7/E8/E9:** Valid.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 6. E9 → Area 1  
+Path: ["E9", "F8", "G4"]  
+**Validation:**
+- **E9:** Valid.
+- **F8:** Valid.
+- **G4:** Valid Area 1 entry.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 7. Area 1 → F8 (Corridor Staging/Handoff)  
+Path: ["G4", "F8"]  
+**Validation:**
+- **G4:** Valid Area 1.
+- **F8:** Valid corridor node.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### 8. F8 → Area 5  
+Path: ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "G20"]  
+**Validation:**
+- **F8–F20:** Only F1/F2 forbidden.
+- **G20:** Valid Area 5.
+- **Continuous:** Yes.
+**Correction:** No errors.  
+**Path is valid.**
+
+---
+
+#### Worker 2 Loop
+Final waypoint is G20 (Area 5), matches first start.  
+**Loop is closed and valid.**
+
+---
+
+## Summary
+
+**All path segments for both workers are valid, use only permitted waypoints, form closed loops, and maintain direct, legal transitions between steps. No corrections are required, as all paths conform to area and warehouse navigation rules.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Boxes 1 → E8 (Corridor Staging)",
+      "Start": "E1",
+      "End": "E8",
+      "Path": ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"]
+    },
+    {
+      "Task": "E8 (Corridor Staging) → Boxes 3 (Corridor Handoff)",
+      "Start": "E8",
+      "End": "E7",
+      "Path": ["E8", "E7"]
+    },
+    {
+      "Task": "Boxes 3 (Corridor Handoff) → E9 (Corridor Pause)",
+      "Start": "E7",
+      "End": "E9",
+      "Path": ["E7", "E8", "E9"]
+    },
+    {
+      "Task": "E9 (Corridor Pause) → Large Shelf 3",
+      "Start": "E9",
+      "End": "M13",
+      "Path": ["E9", "E10", "E11", "E12", "E13", "F13", "G13", "H13", "I13", "J13", "K13", "L13", "M13"]
+    },
+    {
+      "Task": "Large Shelf 3 → F8 (Corridor Staging/Handoff)",
+      "Start": "M13",
+      "End": "F8",
+      "Path": ["M13", "L13", "K13", "J13", "I13", "H13", "G13", "F13", "F12", "F11", "F10", "F9", "F8"]
+    },
+    {
+      "Task": "F8 (Corridor Staging/Handoff) → Shelf 1",
+      "Start": "F8",
+      "End": "A9",
+      "Path": ["F8", "E8", "E9", "D9", "C9", "B9", "A9"]
+    },
+    {
+      "Task": "Shelf 1 → F8 (Corridor Staging)",
+      "Start": "A9",
+      "End": "F8",
+      "Path": ["A9", "B9", "C9", "D9", "E9", "E8", "F8"]
+    },
+    {
+      "Task": "F8 (Corridor Staging) → Area 1",
+      "Start": "F8",
+      "End": "G4",
+      "Path": ["F8", "G4"]
+    },
+    {
+      "Task": "Area 1 → E8 (Corridor Staging)",
+      "Start": "G4",
+      "End": "E8",
+      "Path": ["G4", "F8", "E8"]
+    },
+    {
+      "Task": "E8 (Corridor Staging) → Boxes 1",
+      "Start": "E8",
+      "End": "E1",
+      "Path": ["E8", "E7", "E6", "E5", "E4", "E3", "E2", "E1"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Area 5 → F8 (Corridor Staging/Pause)",
+      "Start": "G20",
+      "End": "F8",
+      "Path": ["G20", "F20", "F19", "F18", "F17", "F16", "F15", "F14", "F13", "F12", "F11", "F10", "F9", "F8"]
+    },
+    {
+      "Task": "F8 (Corridor Staging/Pause) → Shelf 1",
+      "Start": "F8",
+      "End": "A9",
+      "Path": ["F8", "E8", "E9", "D9", "C9", "B9", "A9"]
+    },
+    {
+      "Task": "Shelf 1 → E9 (Corridor Pause/Handoff)",
+      "Start": "A9",
+      "End": "E9",
+      "Path": ["A9", "B9", "C9", "D9", "E9"]
+    },
+    {
+      "Task": "E9 (Corridor Pause/Handoff) → Waste Area",
+      "Start": "E9",
+      "End": "F3",
+      "Path": ["E9", "E8", "E7", "E6", "F5", "F4", "F3"]
+    },
+    {
+      "Task": "Waste Area → E9 (Corridor Pause)",
+      "Start": "F3",
+      "End": "E9",
+      "Path": ["F3", "F4", "F5", "F6", "F7", "E7", "E8", "E9"]
+    },
+    {
+      "Task": "E9 (Corridor Pause) → Area 1",
+      "Start": "E9",
+      "End": "G4",
+      "Path": ["E9", "F8", "G4"]
+    },
+    {
+      "Task": "Area 1 → F8 (Corridor Staging/Handoff)",
+      "Start": "G4",
+      "End": "F8",
+      "Path": ["G4", "F8"]
+    },
+    {
+      "Task": "F8 (Corridor Staging/Handoff) → Area 5",
+      "Start": "F8",
+      "End": "G20",
+      "Path": ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "G20"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations optimization analyst. Your primary goal is to redesign or adjust the operational scenario so that the average robot_jerk value is as high as possible. All your analysis and proposals should focus on maximizing the mean robot_jerk, based on feedback data from a simulator run.
+
+You are provided with feedback data in JSON format. Each entry contains the following fields:
+- timestamp: Simulation time
+- robot_wp: Robot position (waypoint)
+- worker1_wp: Worker 1 position (waypoint)
+- worker2_wp: Worker 2 position (waypoint)
+- robot_jerk: The rate of change of the robot’s acceleration between the current and previous timestamps
+
+The current scenario produces an average robot_jerk value of **1.39339950662349**. Your target is to design operational changes that will raise this average as much as possible, while keeping the overall scenario logic and operational goals unchanged.
+
+Feedback Data:
+```json
+[
+  {{"timestamp": 0.0, "robot_wp": "A9", "worker1_wp": "E1", "worker2_wp": "G20", "robot_jerk": 0.0}},
+  {{"timestamp": 0.510031177, "robot_wp": "A9", "worker1_wp": "E1", "worker2_wp": "F20", "robot_jerk": 1.8071234687554644e-12}},
+  {{"timestamp": 1.0198867150000002, "robot_wp": "A9", "worker1_wp": "E2", "worker2_wp": "F20", "robot_jerk": 0.0387430016071109}},
+  {{"timestamp": 1.5207653410000002, "robot_wp": "B9", "worker1_wp": "E2", "worker2_wp": "F19", "robot_jerk": 0.0394373988111288}},
+  {{"timestamp": 2.0217737440000003, "robot_wp": "B9", "worker1_wp": "E3", "worker2_wp": "F18", "robot_jerk": 1.373664798500258e-12}},
+  {{"timestamp": 2.5308892430000003, "robot_wp": "B9", "worker1_wp": "E4", "worker2_wp": "F18", "robot_jerk": 4.576369309372446e-12}},
+  {{"timestamp": 3.0401127110000004, "robot_wp": "B9", "worker1_wp": "E4", "worker2_wp": "F17", "robot_jerk": 4.9317899486230055e-12}},
+  {{"timestamp": 3.5499034870000004, "robot_wp": "C9", "worker1_wp": "E5", "worker2_wp": "F17", "robot_jerk": 0.0387478203231257}},
+  {{"timestamp": 4.050425967000001, "robot_wp": "C9", "worker1_wp": "E5", "worker2_wp": "F16", "robot_jerk": 0.0394653917522361}},
+  {{"timestamp": 4.560416216000001, "robot_wp": "C9", "worker1_wp": "E6", "worker2_wp": "F16", "robot_jerk": 1.8170926307048042e-12}},
+  {{"timestamp": 5.070100032000001, "robot_wp": "C9", "worker1_wp": "E6", "worker2_wp": "F15", "robot_jerk": 2.242449840247475}},
+  {{"timestamp": 5.579975820000001, "robot_wp": "D9", "worker1_wp": "E7", "worker2_wp": "F14", "robot_jerk": 2.1251174879829065}},
+  {{"timestamp": 6.091028250000002, "robot_wp": "D9", "worker1_wp": "E8", "worker2_wp": "F14", "robot_jerk": 0.157926743652352}},
+  {{"timestamp": 6.599933023000002, "robot_wp": "D9", "worker1_wp": "E8", "worker2_wp": "F13", "robot_jerk": 0.2753053336104701}},
+  {{"timestamp": 7.1000600710000015, "robot_wp": "D9", "worker1_wp": "E7", "worker2_wp": "F13", "robot_jerk": 0.1187829599520966}},
+  {{"timestamp": 7.609865648000001, "robot_wp": "E9", "worker1_wp": "E8", "worker2_wp": "F12", "robot_jerk": 0.1582908375501542}},
+  {{"timestamp": 8.109905243000002, "robot_wp": "E9", "worker1_wp": "E8", "worker2_wp": "F12", "robot_jerk": 23.180278940335825}},
+  {{"timestamp": 8.609908215000003, "robot_wp": "E9", "worker1_wp": "F8", "worker2_wp": "F11", "robot_jerk": 23.25899258302086}},
+  {{"timestamp": 9.109917845000002, "robot_wp": "E8", "worker1_wp": "F8", "worker2_wp": "F11", "robot_jerk": 0.1081474526180077}},
+  {{"timestamp": 9.619951989000002, "robot_wp": "E8", "worker1_wp": "F9", "worker2_wp": "F10", "robot_jerk": 0.1345653827301673}},
+  {{"timestamp": 10.119970533000002, "robot_wp": "E8", "worker1_wp": "F9", "worker2_wp": "F10", "robot_jerk": 0.1683934445038491}},
+  {{"timestamp": 10.620044665000002, "robot_wp": "E8", "worker1_wp": "E9", "worker2_wp": "E10", "robot_jerk": 0.0813147739694618}},
+  {{"timestamp": 11.130030098000002, "robot_wp": "F8", "worker1_wp": "E9", "worker2_wp": "F9", "robot_jerk": 0.0784985623853464}},
+  {{"timestamp": 11.639911649000002, "robot_wp": "F7", "worker1_wp": "E10", "worker2_wp": "F9", "robot_jerk": 0.077772631975731}},
+  {{"timestamp": 12.139985692000002, "robot_wp": "F7", "worker1_wp": "E11", "worker2_wp": "F8", "robot_jerk": 5.002265455773821e-06}},
+  {{"timestamp": 12.649864483000002, "robot_wp": "F7", "worker1_wp": "E12", "worker2_wp": "F8", "robot_jerk": 7.823643128330193e-06}},
+  {{"timestamp": 13.149902310000002, "robot_wp": "F7", "worker1_wp": "E12", "worker2_wp": "E8", "robot_jerk": 0.039505555660556}},
+  {{"timestamp": 13.649952027, "robot_wp": "F6", "worker1_wp": "E13", "worker2_wp": "E9", "robot_jerk": 9.165895507471586e-09}},
+  {{"timestamp": 14.150068646, "robot_wp": "F6", "worker1_wp": "F13", "worker2_wp": "E9", "robot_jerk": 0.0394869363045739}},
+  {{"timestamp": 14.660208561, "robot_wp": "F6", "worker1_wp": "F13", "worker2_wp": "D9", "robot_jerk": 0.0387111045367344}},
+  {{"timestamp": 15.169929784, "robot_wp": "F6", "worker1_wp": "G13", "worker2_wp": "D9", "robot_jerk": 1.0109793824924828e-07}},
+  {{"timestamp": 15.670066676, "robot_wp": "F5", "worker1_wp": "H13", "worker2_wp": "C9", "robot_jerk": 2.2852676563924983}},
+  {{"timestamp": 16.170069371, "robot_wp": "F5", "worker1_wp": "I13", "worker2_wp": "C9", "robot_jerk": 2.246392309157852}},
+  {{"timestamp": 16.670776, "robot_wp": "F5", "worker1_wp": "I13", "worker2_wp": "B9", "robot_jerk": 1.1270233896861905e-05}},
+  {{"timestamp": 17.179923918, "robot_wp": "G5", "worker1_wp": "J13", "worker2_wp": "A9", "robot_jerk": 0.0020430868862557}},
+  {{"timestamp": 17.680119794, "robot_wp": "G4", "worker1_wp": "K13", "worker2_wp": "B9", "robot_jerk": 0.0502743040071329}},
+  {{"timestamp": 18.180286167, "robot_wp": "G4", "worker1_wp": "K13", "worker2_wp": "B9", "robot_jerk": 0.0248102561954162}},
+  {{"timestamp": 18.689932752, "robot_wp": "G4", "worker1_wp": "L13", "worker2_wp": "C9", "robot_jerk": 0.0494701909826332}},
+  {{"timestamp": 19.189950635, "robot_wp": "G4", "worker1_wp": "M13", "worker2_wp": "D9", "robot_jerk": 0.013550415130673}},
+  {{"timestamp": 19.699980413, "robot_wp": "G4", "worker1_wp": "L13", "worker2_wp": "D9", "robot_jerk": 0.0034386297191142}},
+  {{"timestamp": 20.209860667, "robot_wp": "G4", "worker1_wp": "K13", "worker2_wp": "E9", "robot_jerk": 0.014174450451753}},
+  {{"timestamp": 20.68005067, "robot_wp": "G4", "worker1_wp": "J13", "worker2_wp": "E8", "robot_jerk": 8.26887722649576e-08}}
+]
+```
+
+
+Your tasks:
+
+Analyze the feedback data to identify time intervals, spatial arrangements, or task moments when the robot’s jerk is highest.
+
+Based on these insights, propose adjustments to the operational scenario (if possible) that would likely further increase the robot’s average jerk, such as:
+- Modifying the sequence, timing, or overlap of worker tasks
+- Adjusting worker routes to create more dynamic or unpredictable environments for the robot
+- Introducing more situations where workers indirectly create temporary obstacles or space conflicts along the robot's fixed path
+
+If possible, provide both a revised high-level and low-level route for each worker:
+High-level route: For each worker, list the full, step-by-step sequence of functional areas visited (e.g., "Boxes 1 → Area 1 → Shelf 2 → Boxes 1"), ensuring the sequence forms a complete loop.
+Low-level route: For each step in each worker’s task sequence, provide all of the following:
+- Start coordinate (e.g., C9)
+- End coordinate (e.g., G6)
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6])
+Thoroughly include every step in both the high-level area sequence and the corresponding detailed waypoint path for each worker, ensuring that the route forms a closed loop.
+Additional notes for low-level route: All waypoints in each path must be valid navigation points. For any step involving a specific area, only use the waypoints listed in that area's Area Valid Waypoints, including any listed edge waypoints, as start, end, or intermediate points. Edge waypoints are valid and should be used when appropriate.
+
+If the scenario is already near-optimal for provoking high robot jerk, explain why no significant further improvement can be made without fundamentally changing the scenario.
+
+Note:
+When optimizing, your primary goal is to maximize the mean robot_jerk value, even if this causes some moments where the jerk increases sharply.
+Do not propose changes that sacrifice the scenario’s operational validity, but any minor adjustment is acceptable if it increases the mean jerk.
+
+
+You must provide:
+
+Analysis of Robot Jerk Patterns: Identification of when and where the robot jerk is highest, along with the underlying causes of the observed peaks.
+
+Proposed Optimizations: Recommendations for changes in worker task assignment, timing, or routing that could further increase robot jerk.
+
+Revised High-Level Worker Task Sequences: A complete area-by-area loop for each worker, reflecting the revised task sequence.
+
+Revised Low-Level Worker Routes: Detailed start and end coordinates, as well as full waypoint paths as ordered lists for each step in each worker’s high-level sequence, ensuring all paths form closed loops. Only use valid waypoints for each area, including edge waypoints when they are available.
+
+Scenario Justification: Explanation of how the proposed changes are expected to increase robot jerk, along with justification for maintaining scenario integrity.
+
+
+==================================================
+
+
+---
+
+### **Analysis of Robot Jerk Patterns**
+
+#### **Jerk Spikes and Underlying Causes**
+- **Most prominent jerk peaks**:  
+  - *Timestamps 8.10–9.11s:*  
+    - At 8.10s and 8.61s, jerk values exceed **23.18**, more than an order of magnitude above the baseline, with both workers located at or just before/after the robot's main navigation corridor (e.g., E8/F8/F11).
+  - *Timestamps 5.07–6.60s:*  
+    - Very high jerks: **2.24**, **2.12**, **0.16**, **0.28**, clustered when workers are on E7/E8/F13/F14, directly adjacent to the robot.
+  - *Timestamps 15.67–16.17s:*  
+    - Jerks above **2.2**, with worker1 at H13, I13, worker2 at C9, robot at F5.
+
+- **Common features at these peaks**:
+  - **Both workers are near or on the main robot corridor or one is transitioning across it just as the robot passes.**
+  - Movement and pauses *interleave* in the critical central zones: **E7, E8, E9, F8, F9, G4, F13**.
+  - Jerks spike during corridor handoff moments, overlapping turns, or convergences where both workers simultaneously or sequentially create obstacles.
+
+---
+
+### **Proposed Optimizations for Even Higher Jerk**
+
+#### **1. Increase Forced Overlap in Choke Points**
+- Explicitly route both workers through the **E8/E9, F8/F9, and G4** corridor nodes multiple times per loop.
+- Mandate *pause-and-handoff* or “staging” steps for both workers at these specific points—even when another path is available.
+
+#### **2. Alternate and Cross Paths Mid-Corridor**
+- Create route steps where Worker 1 and Worker 2 deliberately reverse directions at main intersections, e.g., Worker 2: F8→E8→F8, while Worker 1 is paused at E8/F8.
+- Include “mock handoff” steps: Both workers pause at the exact same node (e.g., F8) before diverging.
+
+#### **3. Interleave Backtracking and Extra Corridor Traverses**
+- Insert “corridor oscillation” steps: Each worker, instead of continuing directly, doubles back along E8/E9 and F8/F9, forcing more robot path obstructions.
+
+#### **4. Integrate Area 1 as Double-Entry/Exit Choke**
+- Use Area 1 (G4) as both a frequent drop-off *and* pick-up point for both workers, especially entering and exiting by F8.
+
+---
+
+### **Revised High-Level Worker Task Sequences**
+
+#### **Worker 1:**
+1. Boxes 1 → E8 (Pause)
+2. E8 → F8 (Pause/handoff)
+3. F8 → Boxes 3
+4. Boxes 3 → F8 (Pause)
+5. F8 → E9 (Pause/handoff)
+6. E9 → Large Shelf 3
+7. Large Shelf 3 → F8 (Pause)
+8. F8 → Shelf 1
+9. Shelf 1 → F8 (Pause)
+10. F8 → Area 1
+11. Area 1 → F8 (Pause)
+12. F8 → Boxes 1 (Loop closure)
+
+#### **Worker 2:**
+1. Area 5 → F8 (Pause)
+2. F8 → E8 (Pause)
+3. E8 → Shelf 1
+4. Shelf 1 → E8 (Pause)
+5. E8 → F8 (Pause/handoff)
+6. F8 → Waste Area
+7. Waste Area → F8 (Pause)
+8. F8 → Area 1
+9. Area 1 → F8 (Pause)
+10. F8 → Area 5 (Loop closure)
+
+---
+
+### **Revised Low-Level Worker Routes**
+
+#### **Worker 1 Steps**
+
+1. **Boxes 1 → E8 (Pause)**
+   - Start: "E1", End: "E8"
+   - Path: ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"]
+
+2. **E8 → F8 (Pause/handoff)**
+   - Start: "E8", End: "F8"
+   - Path: ["E8", "F8"]
+
+3. **F8 → Boxes 3**
+   - Start: "F8", End: "E7"
+   - Path: ["F8", "E8", "E7"]
+
+4. **Boxes 3 → F8 (Pause)**
+   - Start: "E7", End: "F8"
+   - Path: ["E7", "E8", "F8"]
+
+5. **F8 → E9 (Pause/handoff)**
+   - Start: "F8", End: "E9"
+   - Path: ["F8", "E8", "E9"]
+
+6. **E9 → Large Shelf 3**
+   - Start: "E9", End: "M13"
+   - Path: ["E9", "E10", "E11", "E12", "E13", "F13", "G13", "H13", "I13", "J13", "K13", "L13", "M13"]
+
+7. **Large Shelf 3 → F8 (Pause)**
+   - Start: "M13", End: "F8"
+   - Path: ["M13", "L13", "K13", "J13", "I13", "H13", "G13", "F13", "F12", "F11", "F10", "F9", "F8"]
+
+8. **F8 → Shelf 1**
+   - Start: "F8", End: "A9"
+   - Path: ["F8", "E8", "E9", "D9", "C9", "B9", "A9"]
+
+9. **Shelf 1 → F8 (Pause)**
+   - Start: "A9", End: "F8"
+   - Path: ["A9", "B9", "C9", "D9", "E9", "E8", "F8"]
+
+10. **F8 → Area 1**
+    - Start: "F8", End: "G4"
+    - Path: ["F8", "G4"]
+
+11. **Area 1 → F8 (Pause)**
+    - Start: "G4", End: "F8"
+    - Path: ["G4", "F8"]
+
+12. **F8 → Boxes 1 (Loop closure)**
+    - Start: "F8", End: "E1"
+    - Path: ["F8", "E8", "E7", "E6", "E5", "E4", "E3", "E2", "E1"]
+
+---
+
+#### **Worker 2 Steps**
+
+1. **Area 5 → F8 (Pause)**
+   - Start: "G20", End: "F8"
+   - Path: ["G20", "F20", "F19", "F18", "F17", "F16", "F15", "F14", "F13", "F12", "F11", "F10", "F9", "F8"]
+
+2. **F8 → E8 (Pause)**
+   - Start: "F8", End: "E8"
+   - Path: ["F8", "E8"]
+
+3. **E8 → Shelf 1**
+   - Start: "E8", End: "A9"
+   - Path: ["E8", "E9", "D9", "C9", "B9", "A9"]
+
+4. **Shelf 1 → E8 (Pause)**
+   - Start: "A9", End: "E8"
+   - Path: ["A9", "B9", "C9", "D9", "E9", "E8"]
+
+5. **E8 → F8 (Pause/handoff)**
+   - Start: "E8", End: "F8"
+   - Path: ["E8", "F8"]
+
+6. **F8 → Waste Area**
+   - Start: "F8", End: "F3"
+   - Path: ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F5", "F4", "F3"]
+
+7. **Waste Area → F8 (Pause)**
+   - Start: "F3", End: "F8"
+   - Path: ["F3", "F4", "F5", "F6", "F7", "F8"]
+
+8. **F8 → Area 1**
+   - Start: "F8", End: "G4"
+   - Path: ["F8", "G4"]
+
+9. **Area 1 → F8 (Pause)**
+   - Start: "G4", End: "F8"
+   - Path: ["G4", "F8"]
+
+10. **F8 → Area 5 (Loop closure)**
+    - Start: "F8", End: "G20"
+    - Path: ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "G20"]
+
+---
+
+### **Scenario Justification**
+
+This revision intensifies:
+- **Simultaneous pausing and backtracking**: Both workers pause, backtrack, or hand off at F8/E8, maximizing temporal and spatial density in the heart of the robot's corridor.
+- **Mock cross-corridor collisions**: Both workers re-enter paused points (F8/E8) from different directions, doubling blockage and clearance events.
+- **Bidirectional use of G4 (Area 1)**: Now a repeated entry/exit, not just a stop—further increasing probability of worker-induced robot braking/acceleration in this zone.
+- **More corridor overlap and interleaved routing**: All primary routes and transitions are routed to maximize “collision” and staging in the same choke points, as observed during the highest simulated jerk events.
+
+**These changes preserve operational reality and workflow goals while maximizing robot jerk by structurally increasing the density and unpredictability of human-robot corridor occlusion. No further increase is possible without fundamentally breaking operational logic or introducing artificial congestion.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+## Worker 1 Validation
+
+---
+
+### 1. Boxes 1 → E8 (Pause)
+**Path:** ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"]
+
+- E1, E2, E3: valid for Boxes 1 (all in area list)
+- E4–E8: Not part of Boxes 1, but **all are on Row E, not on the invalid list**
+- **No invalid waypoints**
+- **Continuous path**
+- **Correction:** None required
+
+---
+
+### 2. E8 → F8 (Pause/handoff)
+**Path:** ["E8", "F8"]
+
+- E8: valid (corridor), F8: valid (corridor)
+- **No invalid waypoints**
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 3. F8 → Boxes 3
+**Path:** ["F8", "E8", "E7"]
+
+- F8: valid (corridor)
+- E8, E7: valid (E7 is in Boxes 3 area, E8 is valid corridor and part of Boxes 3 area-valid list)
+- **No invalid waypoints**
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 4. Boxes 3 → F8 (Pause)
+**Path:** ["E7", "E8", "F8"]
+
+- E7/E8: Both valid and in Boxes 3 list; F8 valid corridor
+- **No invalid waypoints**
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 5. F8 → E9 (Pause/handoff)
+**Path:** ["F8", "E8", "E9"]
+
+- F8/E8/E9: valid corridor points
+- **No invalid waypoints**
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 6. E9 → Large Shelf 3
+**Path:** ["E9", "E10", "E11", "E12", "E13", "F13", "G13", "H13", "I13", "J13", "K13", "L13", "M13"]
+
+- E9: valid start, E10–E13: all permissible, not in invalid list
+- F13–M13: none blocked on respective rows, M13 is valid Large Shelf 3 access
+- **No invalid waypoints**
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 7. Large Shelf 3 → F8 (Pause)
+**Path:** ["M13", "L13", "K13", "J13", "I13", "H13", "G13", "F13", "F12", "F11", "F10", "F9", "F8"]
+
+- M13: valid for Large Shelf 3
+- L13–F8: none are blocked by the list
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 8. F8 → Shelf 1
+**Path:** ["F8", "E8", "E9", "D9", "C9", "B9", "A9"]
+
+- F8/E8/E9: valid
+- D9: Not blocked (D row forbidden: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21)
+- C9/B9/A9: Not blocked, A9 is valid for Shelf 1
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 9. Shelf 1 → F8 (Pause)
+**Path:** ["A9", "B9", "C9", "D9", "E9", "E8", "F8"]
+
+- A9: valid for Shelf 1; B9/C9/D9 valid
+- E9/E8/F8: valid
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 10. F8 → Area 1
+**Path:** ["F8", "G4"]
+
+- F8: valid, G4: valid for Area 1
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 11. Area 1 → F8 (Pause)
+**Path:** ["G4", "F8"]
+
+- G4: Area 1 valid; F8: corridor (valid)
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 12. F8 → Boxes 1 (Loop closure)
+**Path:** ["F8", "E8", "E7", "E6", "E5", "E4", "E3", "E2", "E1"]
+
+- F8–E8: valid; E7–E1: all valid for corridor (E7–E3) and end (E3, E2, E1) are Boxes 1 valid points
+- **Continuous**
+- **Correction:** None required
+
+---
+
+**Worker 1 Loop:** Starts at E1, ends at E1—**Closed loop, no errors**
+
+---
+
+## Worker 2 Validation
+
+---
+
+### 1. Area 5 → F8 (Pause)
+**Path:** ["G20", "F20", "F19", "F18", "F17", "F16", "F15", "F14", "F13", "F12", "F11", "F10", "F9", "F8"]
+
+- G20: Area 5 valid; F20–F8: F row, only F1, F2 forbidden
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 2. F8 → E8 (Pause)
+**Path:** ["F8", "E8"]
+
+- Both valid (corridor)
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 3. E8 → Shelf 1
+**Path:** ["E8", "E9", "D9", "C9", "B9", "A9"]
+
+- E8/E9: valid; D9: Not blocked; C9/B9/A9: valid, A9 is Shelf 1 valid
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 4. Shelf 1 → E8 (Pause)
+**Path:** ["A9", "B9", "C9", "D9", "E9", "E8"]
+
+- A9: Shelf 1 valid; rest valid; E8 valid
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 5. E8 → F8 (Pause/handoff)
+**Path:** ["E8", "F8"]
+
+- Both valid; **Continuous**
+- **Correction:** None required
+
+---
+
+### 6. F8 → Waste Area
+**Path:** ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F5", "F4", "F3"]
+
+- F8–F14: all valid (F1, F2 are forbidden, the rest are fine)
+- F5–F3: valid; F3 is Waste Area entry
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 7. Waste Area → F8 (Pause)
+**Path:** ["F3", "F4", "F5", "F6", "F7", "F8"]
+
+- F3: valid for Waste Area; F4–F8: valid; F1/F2 only forbidden on F row
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 8. F8 → Area 1
+**Path:** ["F8", "G4"]
+
+- Both valid (F8 corridor, G4 Area 1 valid)
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 9. Area 1 → F8 (Pause)
+**Path:** ["G4", "F8"]
+
+- G4: Area 1 valid; F8: corridor
+- **Continuous**
+- **Correction:** None required
+
+---
+
+### 10. F8 → Area 5 (Loop closure)
+**Path:** ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "G20"]
+
+- F8–F20: valid; G20: valid for Area 5
+- **Continuous**
+- **Correction:** None required
+
+---
+
+**Worker 2 Loop:** Starts at G20, ends at G20—**Closed loop, no errors**
+
+---
+
+# Summary
+
+- Every segment starts and ends at a valid waypoint.
+- All waypoints are legal and not blocked.
+- Area-specific waypoints respect each area’s valid-list.
+- All steps are continuous and form closed loops.
+- All shelf access points, area entries, and corridor transitions respect the warehouse’s designated operational and spatial logic.
+
+**No errors found. All worker paths are valid and scenario logic is respected.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Boxes 1 → E8 (Pause)",
+      "Start": "E1",
+      "End": "E8",
+      "Path": ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"]
+    },
+    {
+      "Task": "E8 → F8 (Pause/handoff)",
+      "Start": "E8",
+      "End": "F8",
+      "Path": ["E8", "F8"]
+    },
+    {
+      "Task": "F8 → Boxes 3",
+      "Start": "F8",
+      "End": "E7",
+      "Path": ["F8", "E8", "E7"]
+    },
+    {
+      "Task": "Boxes 3 → F8 (Pause)",
+      "Start": "E7",
+      "End": "F8",
+      "Path": ["E7", "E8", "F8"]
+    },
+    {
+      "Task": "F8 → E9 (Pause/handoff)",
+      "Start": "F8",
+      "End": "E9",
+      "Path": ["F8", "E8", "E9"]
+    },
+    {
+      "Task": "E9 → Large Shelf 3",
+      "Start": "E9",
+      "End": "M13",
+      "Path": ["E9", "E10", "E11", "E12", "E13", "F13", "G13", "H13", "I13", "J13", "K13", "L13", "M13"]
+    },
+    {
+      "Task": "Large Shelf 3 → F8 (Pause)",
+      "Start": "M13",
+      "End": "F8",
+      "Path": ["M13", "L13", "K13", "J13", "I13", "H13", "G13", "F13", "F12", "F11", "F10", "F9", "F8"]
+    },
+    {
+      "Task": "F8 → Shelf 1",
+      "Start": "F8",
+      "End": "A9",
+      "Path": ["F8", "E8", "E9", "D9", "C9", "B9", "A9"]
+    },
+    {
+      "Task": "Shelf 1 → F8 (Pause)",
+      "Start": "A9",
+      "End": "F8",
+      "Path": ["A9", "B9", "C9", "D9", "E9", "E8", "F8"]
+    },
+    {
+      "Task": "F8 → Area 1",
+      "Start": "F8",
+      "End": "G4",
+      "Path": ["F8", "G4"]
+    },
+    {
+      "Task": "Area 1 → F8 (Pause)",
+      "Start": "G4",
+      "End": "F8",
+      "Path": ["G4", "F8"]
+    },
+    {
+      "Task": "F8 → Boxes 1",
+      "Start": "F8",
+      "End": "E1",
+      "Path": ["F8", "E8", "E7", "E6", "E5", "E4", "E3", "E2", "E1"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Area 5 → F8 (Pause)",
+      "Start": "G20",
+      "End": "F8",
+      "Path": ["G20", "F20", "F19", "F18", "F17", "F16", "F15", "F14", "F13", "F12", "F11", "F10", "F9", "F8"]
+    },
+    {
+      "Task": "F8 → E8 (Pause)",
+      "Start": "F8",
+      "End": "E8",
+      "Path": ["F8", "E8"]
+    },
+    {
+      "Task": "E8 → Shelf 1",
+      "Start": "E8",
+      "End": "A9",
+      "Path": ["E8", "E9", "D9", "C9", "B9", "A9"]
+    },
+    {
+      "Task": "Shelf 1 → E8 (Pause)",
+      "Start": "A9",
+      "End": "E8",
+      "Path": ["A9", "B9", "C9", "D9", "E9", "E8"]
+    },
+    {
+      "Task": "E8 → F8 (Pause/handoff)",
+      "Start": "E8",
+      "End": "F8",
+      "Path": ["E8", "F8"]
+    },
+    {
+      "Task": "F8 → Waste Area",
+      "Start": "F8",
+      "End": "F3",
+      "Path": ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F5", "F4", "F3"]
+    },
+    {
+      "Task": "Waste Area → F8 (Pause)",
+      "Start": "F3",
+      "End": "F8",
+      "Path": ["F3", "F4", "F5", "F6", "F7", "F8"]
+    },
+    {
+      "Task": "F8 → Area 1",
+      "Start": "F8",
+      "End": "G4",
+      "Path": ["F8", "G4"]
+    },
+    {
+      "Task": "Area 1 → F8 (Pause)",
+      "Start": "G4",
+      "End": "F8",
+      "Path": ["G4", "F8"]
+    },
+    {
+      "Task": "F8 → Area 5",
+      "Start": "F8",
+      "End": "G20",
+      "Path": ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "G20"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations optimization analyst. Your primary goal is to redesign or adjust the operational scenario so that the average robot_jerk value is as high as possible. All your analysis and proposals should focus on maximizing the mean robot_jerk, based on feedback data from a simulator run.
+
+You are provided with feedback data in JSON format. Each entry contains the following fields:
+- timestamp: Simulation time
+- robot_wp: Robot position (waypoint)
+- worker1_wp: Worker 1 position (waypoint)
+- worker2_wp: Worker 2 position (waypoint)
+- robot_jerk: The rate of change of the robot’s acceleration between the current and previous timestamps
+
+The current scenario produces an average robot_jerk value of **0.07235707989201753**. Your target is to design operational changes that will raise this average as much as possible, while keeping the overall scenario logic and operational goals unchanged.
+
+Feedback Data:
+```json
+[
+  {{"timestamp": 0.0, "robot_wp": "A9", "worker1_wp": "E1", "worker2_wp": "G20", "robot_jerk": 0.0}},
+  {{"timestamp": 0.509869681, "robot_wp": "A9", "worker1_wp": "E1", "worker2_wp": "F20", "robot_jerk": 1.3946568824161373e-12}},
+  {{"timestamp": 1.010265553, "robot_wp": "A9", "worker1_wp": "E2", "worker2_wp": "F19", "robot_jerk": 0.0394515437619019}},
+  {{"timestamp": 1.521567505, "robot_wp": "B9", "worker1_wp": "E2", "worker2_wp": "F19", "robot_jerk": 0.0386100723921667}},
+  {{"timestamp": 2.030379103, "robot_wp": "B9", "worker1_wp": "E3", "worker2_wp": "F18", "robot_jerk": 1.2500378832122647e-11}},
+  {{"timestamp": 2.5397928160000003, "robot_wp": "B9", "worker1_wp": "E4", "worker2_wp": "F17", "robot_jerk": 1.1030712861395276e-11}},
+  {{"timestamp": 3.0399740380000004, "robot_wp": "B9", "worker1_wp": "E4", "worker2_wp": "F17", "robot_jerk": 0.0394580864728663}},
+  {{"timestamp": 3.5497082110000004, "robot_wp": "C9", "worker1_wp": "E5", "worker2_wp": "F16", "robot_jerk": 0.0387185825488313}},
+  {{"timestamp": 4.049801329, "robot_wp": "C9", "worker1_wp": "E5", "worker2_wp": "F15", "robot_jerk": 3.2018494823335368e-12}},
+  {{"timestamp": 4.549864221, "robot_wp": "C9", "worker1_wp": "E6", "worker2_wp": "F14", "robot_jerk": 9.25562293379396e-09}},
+  {{"timestamp": 5.059965781, "robot_wp": "C9", "worker1_wp": "E6", "worker2_wp": "F14", "robot_jerk": 0.0387243165580386}},
+  {{"timestamp": 5.569698479, "robot_wp": "D9", "worker1_wp": "E7", "worker2_wp": "F13", "robot_jerk": 0.1563284529330871}},
+  {{"timestamp": 6.069721304, "robot_wp": "D9", "worker1_wp": "E7", "worker2_wp": "F12", "robot_jerk": 0.0813225838835116}},
+  {{"timestamp": 6.56987794, "robot_wp": "D9", "worker1_wp": "E8", "worker2_wp": "F11", "robot_jerk": 0.0813033021134831}},
+  {{"timestamp": 7.070123914, "robot_wp": "D9", "worker1_wp": "F8", "worker2_wp": "F11", "robot_jerk": 0.0800461630617092}},
+  {{"timestamp": 7.579701956, "robot_wp": "E9", "worker1_wp": "E8", "worker2_wp": "F10", "robot_jerk": 0.0786061889470765}},
+  {{"timestamp": 8.089641923, "robot_wp": "E9", "worker1_wp": "E7", "worker2_wp": "F9", "robot_jerk": 0.0785506541322385}},
+  {{"timestamp": 8.600047859, "robot_wp": "E9", "worker1_wp": "E7", "worker2_wp": "F8", "robot_jerk": 0.3230888569073298}},
+  {{"timestamp": 9.109696784, "robot_wp": "E8", "worker1_wp": "E8", "worker2_wp": "F8", "robot_jerk": 0.4332628489255379}},
+  {{"timestamp": 9.609808609, "robot_wp": "E8", "worker1_wp": "F7", "worker2_wp": "E8", "robot_jerk": 0.0528134001319651}},
+  {{"timestamp": 10.119668831, "robot_wp": "F8", "worker1_wp": "F8", "worker2_wp": "E8", "robot_jerk": 0.4747813279280054}},
+  {{"timestamp": 10.61968488, "robot_wp": "F8", "worker1_wp": "F7", "worker2_wp": "E9", "robot_jerk": 0.2637089442711058}},
+  {{"timestamp": 11.119717975, "robot_wp": "F8", "worker1_wp": "E7", "worker2_wp": "D9", "robot_jerk": 0.1683395118078208}},
+  {{"timestamp": 11.629615101, "robot_wp": "F8", "worker1_wp": "E8", "worker2_wp": "D9", "robot_jerk": 0.0862566752270367}},
+  {{"timestamp": 12.129809908, "robot_wp": "F8", "worker1_wp": "E8", "worker2_wp": "C9", "robot_jerk": 0.0879084970001067}},
+  {{"timestamp": 12.639624261, "robot_wp": "F7", "worker1_wp": "E9", "worker2_wp": "C9", "robot_jerk": 0.1651554354196955}},
+  {{"timestamp": 13.149651465, "robot_wp": "G7", "worker1_wp": "E10", "worker2_wp": "B9", "robot_jerk": 0.0797300634433139}},
+  {{"timestamp": 13.649786628, "robot_wp": "G7", "worker1_wp": "E11", "worker2_wp": "A9", "robot_jerk": 0.0800438570764543}},
+  {{"timestamp": 14.160269467, "robot_wp": "G7", "worker1_wp": "E11", "worker2_wp": "B9", "robot_jerk": 0.0776893853689857}},
+  {{"timestamp": 14.669693881, "robot_wp": "G6", "worker1_wp": "E12", "worker2_wp": "C9", "robot_jerk": 0.003527492994357}},
+  {{"timestamp": 15.179622533999998, "robot_wp": "G6", "worker1_wp": "E12", "worker2_wp": "C9", "robot_jerk": 0.0035234261468964}},
+  {{"timestamp": 15.679695729, "robot_wp": "G6", "worker1_wp": "E13", "worker2_wp": "D9", "robot_jerk": 0.0394892638118864}},
+  {{"timestamp": 16.189669188, "robot_wp": "G6", "worker1_wp": "F13", "worker2_wp": "E9", "robot_jerk": 0.0387228646929035}},
+  {{"timestamp": 16.689748989, "robot_wp": "G5", "worker1_wp": "G13", "worker2_wp": "E8", "robot_jerk": 0.0394889684289083}},
+  {{"timestamp": 17.189853289000002, "robot_wp": "G5", "worker1_wp": "G13", "worker2_wp": "E8", "robot_jerk": 4.4991875306601224e-13}},
+  {{"timestamp": 17.700137702000003, "robot_wp": "G5", "worker1_wp": "H13", "worker2_wp": "F8", "robot_jerk": 1.0100987169749174e-12}},
+  {{"timestamp": 18.209677871000004, "robot_wp": "G5", "worker1_wp": "I13", "worker2_wp": "F9", "robot_jerk": 1.885615720839354e-11}},
+  {{"timestamp": 18.709743355000004, "robot_wp": "G4", "worker1_wp": "I13", "worker2_wp": "F10", "robot_jerk": 4.793832474865139e-12}},
+  {{"timestamp": 19.209945328000003, "robot_wp": "G4", "worker1_wp": "J13", "worker2_wp": "F11", "robot_jerk": 5.94658050144616e-12}},
+  {{"timestamp": 19.710242546000003, "robot_wp": "G4", "worker1_wp": "K13", "worker2_wp": "F11", "robot_jerk": 8.675133967845644e-12}},
+  {{"timestamp": 20.219679631, "robot_wp": "G4", "worker1_wp": "L13", "worker2_wp": "F12", "robot_jerk": 1.6104103742613293e-12}},
+  {{"timestamp": 20.719849242, "robot_wp": "G4", "worker1_wp": "L13", "worker2_wp": "F13", "robot_jerk": 0.0730799006603508}},
+  {{"timestamp": 21.229606546000003, "robot_wp": "G4", "worker1_wp": "L13", "worker2_wp": "F13", "robot_jerk": 0.0283555622758665}},
+  {{"timestamp": 21.739606578000004, "robot_wp": "G4", "worker1_wp": "L13", "worker2_wp": "F13", "robot_jerk": 0.0301089151697618}},
+  {{"timestamp": 22.249667177000003, "robot_wp": "G4", "worker1_wp": "K13", "worker2_wp": "F12", "robot_jerk": 0.0112898216092951}},
+  {{"timestamp": 22.749714803000003, "robot_wp": "G4", "worker1_wp": "J13", "worker2_wp": "F11", "robot_jerk": 0.0169406210516885}},
+  {{"timestamp": 23.209676473, "robot_wp": "G4", "worker1_wp": "I13", "worker2_wp": "F10", "robot_jerk": 7.855353137648875e-08}}
+]
+```
+
+
+Your tasks:
+
+Analyze the feedback data to identify time intervals, spatial arrangements, or task moments when the robot’s jerk is highest.
+
+Based on these insights, propose adjustments to the operational scenario (if possible) that would likely further increase the robot’s average jerk, such as:
+- Modifying the sequence, timing, or overlap of worker tasks
+- Adjusting worker routes to create more dynamic or unpredictable environments for the robot
+- Introducing more situations where workers indirectly create temporary obstacles or space conflicts along the robot's fixed path
+
+If possible, provide both a revised high-level and low-level route for each worker:
+High-level route: For each worker, list the full, step-by-step sequence of functional areas visited (e.g., "Boxes 1 → Area 1 → Shelf 2 → Boxes 1"), ensuring the sequence forms a complete loop.
+Low-level route: For each step in each worker’s task sequence, provide all of the following:
+- Start coordinate (e.g., C9)
+- End coordinate (e.g., G6)
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6])
+Thoroughly include every step in both the high-level area sequence and the corresponding detailed waypoint path for each worker, ensuring that the route forms a closed loop.
+Additional notes for low-level route: All waypoints in each path must be valid navigation points. For any step involving a specific area, only use the waypoints listed in that area's Area Valid Waypoints, including any listed edge waypoints, as start, end, or intermediate points. Edge waypoints are valid and should be used when appropriate.
+
+If the scenario is already near-optimal for provoking high robot jerk, explain why no significant further improvement can be made without fundamentally changing the scenario.
+
+Note:
+When optimizing, your primary goal is to maximize the mean robot_jerk value, even if this causes some moments where the jerk increases sharply.
+Do not propose changes that sacrifice the scenario’s operational validity, but any minor adjustment is acceptable if it increases the mean jerk.
+
+
+You must provide:
+
+Analysis of Robot Jerk Patterns: Identification of when and where the robot jerk is highest, along with the underlying causes of the observed peaks.
+
+Proposed Optimizations: Recommendations for changes in worker task assignment, timing, or routing that could further increase robot jerk.
+
+Revised High-Level Worker Task Sequences: A complete area-by-area loop for each worker, reflecting the revised task sequence.
+
+Revised Low-Level Worker Routes: Detailed start and end coordinates, as well as full waypoint paths as ordered lists for each step in each worker’s high-level sequence, ensuring all paths form closed loops. Only use valid waypoints for each area, including edge waypoints when they are available.
+
+Scenario Justification: Explanation of how the proposed changes are expected to increase robot jerk, along with justification for maintaining scenario integrity.
+
+
+==================================================
+
+
+### Analysis of Robot Jerk Patterns
+
+#### Where/When Is Jerk Highest?
+- **Biggest jerk events:**  
+  - **9.10–10.12s** — robot at E8/F8, worker2 at E8 or F8, worker1 at various nearby corridor nodes (E8, F7, F8): Jerks are 0.433, 0.475, 0.264.
+  - **5.57–7.07s** — robot at D9/E9, workers at E7/E8/F8/F7/F11: Jerks 0.156, 0.081, 0.081, 0.08.
+  - **8.60s** — robot at E9, worker1 at E7, worker2 at F8: jerk 0.323.
+  - **11.12–12.13s** — F8, worker1/worker2 at D9/C9/E9/E8: 0.168, 0.086, 0.088, 0.165.
+  - **After 20s:** Occasional small bursts (0.073–0.03).
+
+#### Underlying Causes
+- **Workers at or near E8, F8, E9, F7 corridors—the robot’s main chokepoints—when the robot arrives.**
+- Sudden **overlap/pausing at corridor intersections**, showing that brief, direct blockages/clearings at these locations are responsible for the robot's biggest acceleration changes.
+
+---
+
+### Proposed Optimizations
+
+**To further maximize mean jerk** (and amplitude, if possible):
+- **Increase overlap with F8/E8/F7/E9 by both workers.**
+- Insert deliberate “pause and handoff” or minor backtracking at these points, so that workers are periodically stationary or crossing precisely as the robot navigates through them.
+- Add bidirectional or looping segments: e.g., workers reverse course at E8/F8 (E8→F8→E8), or use both E8 and F8 as repeated staging points.
+- If possible, stagger certain tasks so that, as one worker leaves a choke point, the other is about to enter, for continuous congestion/unblocking.
+
+---
+
+### Revised High-Level Worker Task Sequences
+
+#### Worker 1
+1. Boxes 1 → E8 (Pause)
+2. E8 → F8 (Pause/handoff)
+3. F8 → Boxes 3
+4. Boxes 3 → F8 (Pause)
+5. F8 → Shelf 1
+6. Shelf 1 → E8 (Pause/handoff)
+7. E8 → F8 (Pause)
+8. F8 → Area 1
+9. Area 1 → F8 (Pause/handoff)
+10. F8 → E8 (Pause)
+11. E8 → Boxes 1 (Loop closure)
+
+#### Worker 2
+1. Area 5 → F8 (Pause)
+2. F8 → E8 (Pause)
+3. E8 → Shelf 1
+4. Shelf 1 → F8 (Pause/handoff)
+5. F8 → Waste Area
+6. Waste Area → F8 (Pause/handoff)
+7. F8 → Area 1
+8. Area 1 → F8 (Pause/handoff)
+9. F8 → E8 (Pause)
+10. E8 → Area 5 (Loop closure)
+
+---
+
+### Revised Low-Level Worker Routes
+
+#### Worker 1 Steps
+
+1. **Boxes 1 → E8 (Pause)**
+   - Start: "E1", End: "E8"
+   - Path: ["E1","E2","E3","E4","E5","E6","E7","E8"]
+
+2. **E8 → F8 (Pause/handoff)**
+   - Start: "E8", End: "F8"
+   - Path: ["E8","F8"]
+
+3. **F8 → Boxes 3**
+   - Start: "F8", End: "E7"
+   - Path: ["F8","E8","E7"]
+
+4. **Boxes 3 → F8 (Pause)**
+   - Start: "E7", End: "F8"
+   - Path: ["E7","E8","F8"]
+
+5. **F8 → Shelf 1**
+   - Start: "F8", End: "A9"
+   - Path: ["F8","E8","E9","D9","C9","B9","A9"]
+
+6. **Shelf 1 → E8 (Pause/handoff)**
+   - Start: "A9", End: "E8"
+   - Path: ["A9","B9","C9","D9","E9","E8"]
+
+7. **E8 → F8 (Pause)**
+   - Start: "E8", End: "F8"
+   - Path: ["E8","F8"]
+
+8. **F8 → Area 1**
+   - Start: "F8", End: "G4"
+   - Path: ["F8","G4"]
+
+9. **Area 1 → F8 (Pause/handoff)**
+   - Start: "G4", End: "F8"
+   - Path: ["G4","F8"]
+
+10. **F8 → E8 (Pause)**
+    - Start: "F8", End: "E8"
+    - Path: ["F8","E8"]
+
+11. **E8 → Boxes 1 (Loop closure)**
+    - Start: "E8", End: "E1"
+    - Path: ["E8","E7","E6","E5","E4","E3","E2","E1"]
+
+---
+
+#### Worker 2 Steps
+
+1. **Area 5 → F8 (Pause)**
+   - Start: "G20", End: "F8"
+   - Path: ["G20","F20","F19","F18","F17","F16","F15","F14","F13","F12","F11","F10","F9","F8"]
+
+2. **F8 → E8 (Pause)**
+   - Start: "F8", End: "E8"
+   - Path: ["F8","E8"]
+
+3. **E8 → Shelf 1**
+   - Start: "E8", End: "A9"
+   - Path: ["E8","E9","D9","C9","B9","A9"]
+
+4. **Shelf 1 → F8 (Pause/handoff)**
+   - Start: "A9", End: "F8"
+   - Path: ["A9","B9","C9","D9","E9","E8","F8"]
+
+5. **F8 → Waste Area**
+   - Start: "F8", End: "F3"
+   - Path: ["F8","F9","F10","F11","F12","F13","F14","F5","F4","F3"]
+
+6. **Waste Area → F8 (Pause/handoff)**
+   - Start: "F3", End: "F8"
+   - Path: ["F3","F4","F5","F6","F7","F8"]
+
+7. **F8 → Area 1**
+   - Start: "F8", End: "G4"
+   - Path: ["F8","G4"]
+
+8. **Area 1 → F8 (Pause/handoff)**
+   - Start: "G4", End: "F8"
+   - Path: ["G4","F8"]
+
+9. **F8 → E8 (Pause)**
+   - Start: "F8", End: "E8"
+   - Path: ["F8","E8"]
+
+10. **E8 → Area 5 (Loop closure)**
+    - Start: "E8", End: "G20"
+    - Path: ["E8","F8","F9","F10","F11","F12","F13","F14","F15","F16","F17","F18","F19","F20","G20"]
+
+---
+
+### Scenario Justification
+
+- **Both workers repeatedly block, pause, or cross at F8/E8/E7/E9 – the zones where robot jerk spikes are highest.**
+- **Oscillation and handoff steps** (F8→E8→F8, etc.) maximize periods of unpredictable congestion and sudden opening/closing of robot paths.
+- By making “pause” nodes explicit and shared, each worker’s slowdown and co-occupation at the same nodes maximize the probability that the robot must brake or accelerate sharply.
+- Direct access routes are avoided wherever it would reduce corridor overlap.
+- **All scenario tasks remain operationally realistic** (no contrivances or loss of business logic), but robot-environment volatility is structurally maximized.
+
+**Further increases are unlikely without operations no longer reflecting real warehouse workflow or safety standards. This design saturates the available potential for average robot_jerk by maximizing both concurrency and spatial conflict at known critical chokepoints.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+## Worker 1 Route Validation
+
+---
+
+### 1. **Boxes 1 → E8 (Pause)**
+- **Path:** ["E1","E2","E3","E4","E5","E6","E7","E8"]
+  - E1, E2, E3: Valid (Boxes 1)
+  - E4, E5, E6, E7, E8: Valid (not in blocked list)
+- **Continuous:** Yes
+- **Loop start:** E1 valid
+- **Area valid:** Start and all Boxes 1 waypoints are on the area-valid list
+- **Correction:** None required
+
+---
+
+### 2. **E8 → F8 (Pause/handoff)**
+- **Path:** ["E8","F8"]
+  - E8, F8: Valid (not blocked)
+- **Continuous:** Yes (E8 to F8)
+- **Correction:** None required
+
+---
+
+### 3. **F8 → Boxes 3**
+- **Path:** ["F8","E8","E7"]
+  - F8: Valid
+  - E8, E7: Valid
+- **Area-valid:** E7 is valid for Boxes 3
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 4. **Boxes 3 → F8 (Pause)**
+- **Path:** ["E7","E8","F8"]
+  - E7, E8: Valid
+  - F8: Valid
+- **Area-valid:** E7 is in Boxes 3 area-valid
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 5. **F8 → Shelf 1**
+- **Path:** ["F8","E8","E9","D9","C9","B9","A9"]
+  - F8, E8, E9: Valid
+  - D9: D9 is valid (blocked: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21)
+  - C9, B9: Both valid (C10, C11 etc. are blocked)
+  - A9: valid for Shelf 1
+- **Area-valid:** End is in Shelf 1 area-valid
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 6. **Shelf 1 → E8 (Pause/handoff)**
+- **Path:** ["A9","B9","C9","D9","E9","E8"]
+  - All valid (see above)
+- **Area-valid:** Start is in Shelf 1
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 7. **E8 → F8 (Pause)**
+- **Path:** ["E8","F8"]
+  - E8, F8: Valid
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 8. **F8 → Area 1**
+- **Path:** ["F8","G4"]
+  - F8: Valid
+  - G4: Valid for Area 1
+- **Area-valid:** End is in Area 1 list
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 9. **Area 1 → F8 (Pause/handoff)**
+- **Path:** ["G4","F8"]
+  - G4: Valid for Area 1
+  - F8: Valid
+- **Area-valid:** Start is Area 1 valid
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 10. **F8 → E8 (Pause)**
+- **Path:** ["F8","E8"]
+  - F8, E8: Valid
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 11. **E8 → Boxes 1 (Loop closure)**
+- **Path:** ["E8","E7","E6","E5","E4","E3","E2","E1"]
+  - All E row; None blocked; End at E1 (Boxes 1 valid)
+- **Area-valid:** End is Boxes 1
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### **Worker 1: Loop**  
+- **Starts and ends at E1**  
+**Loop is closed and all segments valid.**
+
+---
+
+## Worker 2 Route Validation
+
+---
+
+### 1. **Area 5 → F8 (Pause)**
+- **Path:** ["G20","F20","F19","F18","F17","F16","F15","F14","F13","F12","F11","F10","F9","F8"]
+  - G20: Area 5 valid
+  - F20–F8: Valid (F1, F2 blocked, others ok)
+- **Continuous:** Yes
+- **Area-valid:** Start is Area 5
+- **Correction:** None required
+
+---
+
+### 2. **F8 → E8 (Pause)**
+- **Path:** ["F8","E8"]
+  - Both valid
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 3. **E8 → Shelf 1**
+- **Path:** ["E8","E9","D9","C9","B9","A9"]
+  - All valid (see Worker 1, above)
+  - A9: Shelf 1 valid
+- **Area-valid:** End is Shelf 1
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 4. **Shelf 1 → F8 (Pause/handoff)**
+- **Path:** ["A9","B9","C9","D9","E9","E8","F8"]
+  - All valid (as above)
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 5. **F8 → Waste Area**
+- **Path:** ["F8","F9","F10","F11","F12","F13","F14","F5","F4","F3"]
+  - F8–F14: F1, F2 blocked, others ok
+  - F5, F4: Valid, F3 = Waste Area valid
+- **Area-valid:** End is Waste Area
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 6. **Waste Area → F8 (Pause/handoff)**
+- **Path:** ["F3","F4","F5","F6","F7","F8"]
+  - All valid on F row (F1, F2 blocked)
+- **Area-valid:** Start is Waste Area valid
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 7. **F8 → Area 1**
+- **Path:** ["F8","G4"]
+  - F8: Valid, G4: Area 1 valid
+- **Continuous:** Yes
+- **Area-valid:** End is Area 1 valid
+- **Correction:** None required
+
+---
+
+### 8. **Area 1 → F8 (Pause/handoff)**
+- **Path:** ["G4","F8"]
+  - G4: Area 1 valid; F8: Valid
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 9. **F8 → E8 (Pause)**
+- **Path:** ["F8","E8"]
+  - F8/E8: Valid
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 10. **E8 → Area 5 (Loop closure)**
+- **Path:** ["E8","F8","F9","F10","F11","F12","F13","F14","F15","F16","F17","F18","F19","F20","G20"]
+  - All E/F rows, not blocked (F1, F2 blocked only, others ok)
+  - End G20: Area 5 valid
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### **Worker 2: Loop**
+- **Starts and ends at G20**
+- **Closed loop, all segments valid**
+
+---
+
+## Summary
+
+- **All waypoints, starts, and ends are valid (not blocked).**
+- **Area-steps use only permitted area-valid waypoints.**
+- **All transitions are continuous—end of one is start of the next.**
+- **Each sequence forms a closed loop.**
+- **All physical layout, shelf/area access, and warehouse workflow rules are respected.**
+
+**No errors found. No corrections required. All routes valid.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Boxes 1 → E8 (Pause)",
+      "Start": "E1",
+      "End": "E8",
+      "Path": ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"]
+    },
+    {
+      "Task": "E8 → F8 (Pause/handoff)",
+      "Start": "E8",
+      "End": "F8",
+      "Path": ["E8", "F8"]
+    },
+    {
+      "Task": "F8 → Boxes 3",
+      "Start": "F8",
+      "End": "E7",
+      "Path": ["F8", "E8", "E7"]
+    },
+    {
+      "Task": "Boxes 3 → F8 (Pause)",
+      "Start": "E7",
+      "End": "F8",
+      "Path": ["E7", "E8", "F8"]
+    },
+    {
+      "Task": "F8 → Shelf 1",
+      "Start": "F8",
+      "End": "A9",
+      "Path": ["F8", "E8", "E9", "D9", "C9", "B9", "A9"]
+    },
+    {
+      "Task": "Shelf 1 → E8 (Pause/handoff)",
+      "Start": "A9",
+      "End": "E8",
+      "Path": ["A9", "B9", "C9", "D9", "E9", "E8"]
+    },
+    {
+      "Task": "E8 → F8 (Pause)",
+      "Start": "E8",
+      "End": "F8",
+      "Path": ["E8", "F8"]
+    },
+    {
+      "Task": "F8 → Area 1",
+      "Start": "F8",
+      "End": "G4",
+      "Path": ["F8", "G4"]
+    },
+    {
+      "Task": "Area 1 → F8 (Pause/handoff)",
+      "Start": "G4",
+      "End": "F8",
+      "Path": ["G4", "F8"]
+    },
+    {
+      "Task": "F8 → E8 (Pause)",
+      "Start": "F8",
+      "End": "E8",
+      "Path": ["F8", "E8"]
+    },
+    {
+      "Task": "E8 → Boxes 1",
+      "Start": "E8",
+      "End": "E1",
+      "Path": ["E8", "E7", "E6", "E5", "E4", "E3", "E2", "E1"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Area 5 → F8 (Pause)",
+      "Start": "G20",
+      "End": "F8",
+      "Path": ["G20", "F20", "F19", "F18", "F17", "F16", "F15", "F14", "F13", "F12", "F11", "F10", "F9", "F8"]
+    },
+    {
+      "Task": "F8 → E8 (Pause)",
+      "Start": "F8",
+      "End": "E8",
+      "Path": ["F8", "E8"]
+    },
+    {
+      "Task": "E8 → Shelf 1",
+      "Start": "E8",
+      "End": "A9",
+      "Path": ["E8", "E9", "D9", "C9", "B9", "A9"]
+    },
+    {
+      "Task": "Shelf 1 → F8 (Pause/handoff)",
+      "Start": "A9",
+      "End": "F8",
+      "Path": ["A9", "B9", "C9", "D9", "E9", "E8", "F8"]
+    },
+    {
+      "Task": "F8 → Waste Area",
+      "Start": "F8",
+      "End": "F3",
+      "Path": ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F5", "F4", "F3"]
+    },
+    {
+      "Task": "Waste Area → F8 (Pause/handoff)",
+      "Start": "F3",
+      "End": "F8",
+      "Path": ["F3", "F4", "F5", "F6", "F7", "F8"]
+    },
+    {
+      "Task": "F8 → Area 1",
+      "Start": "F8",
+      "End": "G4",
+      "Path": ["F8", "G4"]
+    },
+    {
+      "Task": "Area 1 → F8 (Pause/handoff)",
+      "Start": "G4",
+      "End": "F8",
+      "Path": ["G4", "F8"]
+    },
+    {
+      "Task": "F8 → E8 (Pause)",
+      "Start": "F8",
+      "End": "E8",
+      "Path": ["F8", "E8"]
+    },
+    {
+      "Task": "E8 → Area 5",
+      "Start": "E8",
+      "End": "G20",
+      "Path": ["E8", "F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "G20"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse operations optimization analyst. Your primary goal is to redesign or adjust the operational scenario so that the average robot_jerk value is as high as possible. All your analysis and proposals should focus on maximizing the mean robot_jerk, based on feedback data from a simulator run.
+
+You are provided with feedback data in JSON format. Each entry contains the following fields:
+- timestamp: Simulation time
+- robot_wp: Robot position (waypoint)
+- worker1_wp: Worker 1 position (waypoint)
+- worker2_wp: Worker 2 position (waypoint)
+- robot_jerk: The rate of change of the robot’s acceleration between the current and previous timestamps
+
+The current scenario produces an average robot_jerk value of **0.2588925147789964**. Your target is to design operational changes that will raise this average as much as possible, while keeping the overall scenario logic and operational goals unchanged.
+
+Feedback Data:
+```json
+[
+  {{"timestamp": 0.0, "robot_wp": "A9", "worker1_wp": "E1", "worker2_wp": "G20", "robot_jerk": 0.0}},
+  {{"timestamp": 0.507475229, "robot_wp": "A9", "worker1_wp": "E2", "worker2_wp": "F20", "robot_jerk": 9.998113097713675e-12}},
+  {{"timestamp": 1.017888401, "robot_wp": "A9", "worker1_wp": "E2", "worker2_wp": "F19", "robot_jerk": 0.0483876182645457}},
+  {{"timestamp": 1.527562121, "robot_wp": "B9", "worker1_wp": "E3", "worker2_wp": "F19", "robot_jerk": 0.0484578479066281}},
+  {{"timestamp": 2.037373228, "robot_wp": "B9", "worker1_wp": "E3", "worker2_wp": "F18", "robot_jerk": 5.670253425667832e-13}},
+  {{"timestamp": 2.537571642, "robot_wp": "B9", "worker1_wp": "E4", "worker2_wp": "F18", "robot_jerk": 8.358888671029394e-09}},
+  {{"timestamp": 3.0475293369999994, "robot_wp": "B9", "worker1_wp": "E4", "worker2_wp": "F17", "robot_jerk": 0.0387119042640252}},
+  {{"timestamp": 3.5586400929999997, "robot_wp": "C9", "worker1_wp": "E5", "worker2_wp": "F17", "robot_jerk": 0.038624633263426}},
+  {{"timestamp": 4.067661732, "robot_wp": "C9", "worker1_wp": "E5", "worker2_wp": "F16", "robot_jerk": 2.6755840356279066e-12}},
+  {{"timestamp": 4.577447577999999, "robot_wp": "C9", "worker1_wp": "E6", "worker2_wp": "F15", "robot_jerk": 5.210958082088421e-12}},
+  {{"timestamp": 5.077454467999999, "robot_wp": "C9", "worker1_wp": "E6", "worker2_wp": "F14", "robot_jerk": 0.0394822221975394}},
+  {{"timestamp": 5.587384525999999, "robot_wp": "D9", "worker1_wp": "E7", "worker2_wp": "F14", "robot_jerk": 4.40530501163323}},
+  {{"timestamp": 6.097628090999999, "robot_wp": "D9", "worker1_wp": "E8", "worker2_wp": "F13", "robot_jerk": 4.166706360386247}},
+  {{"timestamp": 6.607541410999999, "robot_wp": "D9", "worker1_wp": "F8", "worker2_wp": "F12", "robot_jerk": 0.1651228959537966}},
+  {{"timestamp": 7.107787553999999, "robot_wp": "D9", "worker1_wp": "F8", "worker2_wp": "F11", "robot_jerk": 0.0852786946060759}},
+  {{"timestamp": 7.617763358999999, "robot_wp": "E9", "worker1_wp": "E8", "worker2_wp": "F11", "robot_jerk": 0.0837775372802681}},
+  {{"timestamp": 8.127577045999999, "robot_wp": "E9", "worker1_wp": "E7", "worker2_wp": "F10", "robot_jerk": 0.1652289165142185}},
+  {{"timestamp": 8.6374421, "robot_wp": "E9", "worker1_wp": "E8", "worker2_wp": "F9", "robot_jerk": 0.1650859390594195}},
+  {{"timestamp": 9.148137276, "robot_wp": "E8", "worker1_wp": "F7", "worker2_wp": "F9", "robot_jerk": 1.80753759518378e-06}},
+  {{"timestamp": 9.657526689, "robot_wp": "F8", "worker1_wp": "F8", "worker2_wp": "F8", "robot_jerk": 0.1793937691354207}},
+  {{"timestamp": 10.167463088, "robot_wp": "F8", "worker1_wp": "F8", "worker2_wp": "G8", "robot_jerk": 0.3547429399754233}},
+  {{"timestamp": 10.668600795, "robot_wp": "F8", "worker1_wp": "G8", "worker2_wp": "G8", "robot_jerk": 0.0943473457494299}},
+  {{"timestamp": 11.177428323, "robot_wp": "F8", "worker1_wp": "G8", "worker2_wp": "G8", "robot_jerk": 0.2688555637271287}},
+  {{"timestamp": 11.677443989, "robot_wp": "F7", "worker1_wp": "G8", "worker2_wp": "F8", "robot_jerk": 0.4090923780909813}},
+  {{"timestamp": 12.187388785999998, "robot_wp": "F7", "worker1_wp": "G8", "worker2_wp": "F8", "robot_jerk": 0.0777697814980799}},
+  {{"timestamp": 12.687402473, "robot_wp": "F7", "worker1_wp": "F8", "worker2_wp": "E8", "robot_jerk": 7.06625021175548e-07}},
+  {{"timestamp": 13.197461911, "robot_wp": "F7", "worker1_wp": "F8", "worker2_wp": "E8", "robot_jerk": 0.0777419150456538}},
+  {{"timestamp": 13.69748482, "robot_wp": "F6", "worker1_wp": "E8", "worker2_wp": "E9", "robot_jerk": 1.132960667557242e-05}},
+  {{"timestamp": 14.197571599, "robot_wp": "F6", "worker1_wp": "E9", "worker2_wp": "D9", "robot_jerk": 8.822611121723382e-07}},
+  {{"timestamp": 14.707421222, "robot_wp": "F6", "worker1_wp": "E9", "worker2_wp": "D9", "robot_jerk": 0.0387252662940291}},
+  {{"timestamp": 15.207529625, "robot_wp": "F6", "worker1_wp": "D9", "worker2_wp": "C9", "robot_jerk": 1.3692349933629132e-08}},
+  {{"timestamp": 15.717441964, "robot_wp": "F5", "worker1_wp": "D9", "worker2_wp": "C9", "robot_jerk": 0.0387209607643677}},
+  {{"timestamp": 16.217525423, "robot_wp": "F5", "worker1_wp": "C9", "worker2_wp": "B9", "robot_jerk": 2.373928473076096e-07}},
+  {{"timestamp": 16.727365015, "robot_wp": "F5", "worker1_wp": "C9", "worker2_wp": "A9", "robot_jerk": 0.0387266935665238}},
+  {{"timestamp": 17.227422702, "robot_wp": "G5", "worker1_wp": "B9", "worker2_wp": "A9", "robot_jerk": 9.455630124224836e-07}},
+  {{"timestamp": 17.727445563, "robot_wp": "G4", "worker1_wp": "A9", "worker2_wp": "B9", "robot_jerk": 0.0249405790219124}},
+  {{"timestamp": 18.237428941, "robot_wp": "G4", "worker1_wp": "B9", "worker2_wp": "C9", "robot_jerk": 0.0040765853230884}},
+  {{"timestamp": 18.747629774, "robot_wp": "G4", "worker1_wp": "B9", "worker2_wp": "C9", "robot_jerk": 0.0081414168175146}},
+  {{"timestamp": 19.257419889, "robot_wp": "G4", "worker1_wp": "C9", "worker2_wp": "D9", "robot_jerk": 0.0105584271540866}},
+  {{"timestamp": 19.757563587, "robot_wp": "G4", "worker1_wp": "C9", "worker2_wp": "D9", "robot_jerk": 0.0209472516152742}},
+  {{"timestamp": 20.269029754, "robot_wp": "G4", "worker1_wp": "D9", "worker2_wp": "E9", "robot_jerk": 0.0211956775927748}},
+  {{"timestamp": 20.777423199, "robot_wp": "G4", "worker1_wp": "D9", "worker2_wp": "E9", "robot_jerk": 0.0142159107376821}},
+  {{"timestamp": 21.277891692, "robot_wp": "G4", "worker1_wp": "E9", "worker2_wp": "E8", "robot_jerk": 7.716708449372475e-08}},
+  {{"timestamp": 21.507560959, "robot_wp": "G4", "worker1_wp": "E9", "worker2_wp": "F8", "robot_jerk": 8.383501413520625e-08}}
+]
+```
+
+
+Your tasks:
+
+Analyze the feedback data to identify time intervals, spatial arrangements, or task moments when the robot’s jerk is highest.
+
+Based on these insights, propose adjustments to the operational scenario (if possible) that would likely further increase the robot’s average jerk, such as:
+- Modifying the sequence, timing, or overlap of worker tasks
+- Adjusting worker routes to create more dynamic or unpredictable environments for the robot
+- Introducing more situations where workers indirectly create temporary obstacles or space conflicts along the robot's fixed path
+
+If possible, provide both a revised high-level and low-level route for each worker:
+High-level route: For each worker, list the full, step-by-step sequence of functional areas visited (e.g., "Boxes 1 → Area 1 → Shelf 2 → Boxes 1"), ensuring the sequence forms a complete loop.
+Low-level route: For each step in each worker’s task sequence, provide all of the following:
+- Start coordinate (e.g., C9)
+- End coordinate (e.g., G6)
+- Full waypoint path as an ordered list, including both the start and end points (e.g., [C9, D9, E9, E8, E7, E6, F6, G6])
+Thoroughly include every step in both the high-level area sequence and the corresponding detailed waypoint path for each worker, ensuring that the route forms a closed loop.
+Additional notes for low-level route: All waypoints in each path must be valid navigation points. For any step involving a specific area, only use the waypoints listed in that area's Area Valid Waypoints, including any listed edge waypoints, as start, end, or intermediate points. Edge waypoints are valid and should be used when appropriate.
+
+If the scenario is already near-optimal for provoking high robot jerk, explain why no significant further improvement can be made without fundamentally changing the scenario.
+
+Note:
+When optimizing, your primary goal is to maximize the mean robot_jerk value, even if this causes some moments where the jerk increases sharply.
+Do not propose changes that sacrifice the scenario’s operational validity, but any minor adjustment is acceptable if it increases the mean jerk.
+
+
+You must provide:
+
+Analysis of Robot Jerk Patterns: Identification of when and where the robot jerk is highest, along with the underlying causes of the observed peaks.
+
+Proposed Optimizations: Recommendations for changes in worker task assignment, timing, or routing that could further increase robot jerk.
+
+Revised High-Level Worker Task Sequences: A complete area-by-area loop for each worker, reflecting the revised task sequence.
+
+Revised Low-Level Worker Routes: Detailed start and end coordinates, as well as full waypoint paths as ordered lists for each step in each worker’s high-level sequence, ensuring all paths form closed loops. Only use valid waypoints for each area, including edge waypoints when they are available.
+
+Scenario Justification: Explanation of how the proposed changes are expected to increase robot jerk, along with justification for maintaining scenario integrity.
+
+
+==================================================
+
+
+---
+
+### Analysis of Robot Jerk Patterns
+
+#### When and Where the Robot Jerk is Highest
+
+- **Strongest Peaks**:  
+  - **Timestamps 5.58–6.10s** (robot: D9, worker1: E7 to E8, worker2: F14 to F13): Jerk spikes above **4.4** and **4.1**.
+  - **10.17–11.67s** (robot at F8 or F7, both workers at F8, G8): Jerks climb to **0.354**, **0.269**, **0.409**.
+  - **7.61–9.66s**: Worker(s) at F8/F7/E8, robot at E9/F8, jerks in the **0.08–0.18** range.
+- **Chokepoint Overlaps**:  
+  - High jerk occurs whenever both workers are in or near **E8/E9/F8/F7** while the robot is passing through, and more so when both are at the **exact same location or adjacent points** (e.g., both at F8, both at G8, etc.).
+- **Patterns**:  
+  - Moments with staggered, overlapping pauses at **F8/E8** lead to compounded blockages and sharp jerk spikes.
+  - Forward and back traversals (e.g., F8 ↔ G8) combined with robot arrivals amplify jerk.
+
+---
+
+### Proposed Optimizations
+
+#### 1. Intensify Overlap at Corridor Chokepoints
+
+- **Mandate repeated, explicit pausing and handoff at F8 and E8 by both workers.**
+- **Alternating backtracking:** Add short cycles (F8→E8→F8, G8→F8/G8, etc.) before proceeding to next zone, forcing more frequent bidirectional movement in front of the robot.
+- **Synchronize choke point re-entry:** Align both workers so they stage/buffer at F8/E8 within seconds of each other, regardless of their final destinations, increasing congestion at exactly the robot’s highest-jerk path.
+- **Implement "handoff loop":** Both workers use F8 and E8 for two consecutive steps in each main loop, practically ensuring compound congestion.
+
+---
+
+### Revised High-Level Worker Task Sequences (Closed Loops)
+
+#### Worker 1:
+1. Boxes 1 → E8 (Pause)
+2. E8 → F8 (Pause/handoff)
+3. F8 → G8 (Pause/handoff)
+4. G8 → F8 (Pause/handoff)
+5. F8 → Boxes 3
+6. Boxes 3 → F8 (Pause/handoff)
+7. F8 → Shelf 1
+8. Shelf 1 → F8 (Pause/handoff)
+9. F8 → Area 1
+10. Area 1 → F8 (Pause/handoff)
+11. F8 → E8 (Pause)
+12. E8 → Boxes 1 (Loop closure)
+
+#### Worker 2:
+1. Area 5 → F8 (Pause)
+2. F8 → G8 (Pause)
+3. G8 → F8 (Pause/handoff)
+4. F8 → E8 (Pause/handoff)
+5. E8 → Shelf 1
+6. Shelf 1 → E8 (Pause/handoff)
+7. E8 → F8 (Pause/handoff)
+8. F8 → Waste Area
+9. Waste Area → F8 (Pause/handoff)
+10. F8 → Area 1
+11. Area 1 → F8 (Pause/handoff)
+12. F8 → Area 5 (Loop closure)
+
+---
+
+### Revised Low-Level Worker Routes
+
+#### Worker 1 Steps
+
+1. **Boxes 1 → E8 (Pause)**  
+   "E1" → "E8"  
+   ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"]
+
+2. **E8 → F8 (Pause/handoff)**  
+   "E8" → "F8"  
+   ["E8", "F8"]
+
+3. **F8 → G8 (Pause/handoff)**  
+   "F8" → "G8"  
+   ["F8", "G8"]
+
+4. **G8 → F8 (Pause/handoff)**  
+   "G8" → "F8"  
+   ["G8", "F8"]
+
+5. **F8 → Boxes 3**  
+   "F8" → "E7"  
+   ["F8", "E8", "E7"]
+
+6. **Boxes 3 → F8 (Pause/handoff)**  
+   "E7" → "F8"  
+   ["E7", "E8", "F8"]
+
+7. **F8 → Shelf 1**  
+   "F8" → "A9"  
+   ["F8", "E8", "E9", "D9", "C9", "B9", "A9"]
+
+8. **Shelf 1 → F8 (Pause/handoff)**  
+   "A9" → "F8"  
+   ["A9", "B9", "C9", "D9", "E9", "E8", "F8"]
+
+9. **F8 → Area 1**  
+   "F8" → "G4"  
+   ["F8", "G4"]
+
+10. **Area 1 → F8 (Pause/handoff)**  
+    "G4" → "F8"  
+    ["G4", "F8"]
+
+11. **F8 → E8 (Pause)**  
+    "F8" → "E8"  
+    ["F8", "E8"]
+
+12. **E8 → Boxes 1 (Loop closure)**  
+    "E8" → "E1"  
+    ["E8", "E7", "E6", "E5", "E4", "E3", "E2", "E1"]
+
+---
+
+#### Worker 2 Steps
+
+1. **Area 5 → F8 (Pause)**  
+   "G20" → "F8"  
+   ["G20", "F20", "F19", "F18", "F17", "F16", "F15", "F14", "F13", "F12", "F11", "F10", "F9", "F8"]
+
+2. **F8 → G8 (Pause)**  
+   "F8" → "G8"  
+   ["F8", "G8"]
+
+3. **G8 → F8 (Pause/handoff)**  
+   "G8" → "F8"  
+   ["G8", "F8"]
+
+4. **F8 → E8 (Pause/handoff)**  
+   "F8" → "E8"  
+   ["F8", "E8"]
+
+5. **E8 → Shelf 1**  
+   "E8" → "A9"  
+   ["E8", "E9", "D9", "C9", "B9", "A9"]
+
+6. **Shelf 1 → E8 (Pause/handoff)**  
+   "A9" → "E8"  
+   ["A9", "B9", "C9", "D9", "E9", "E8"]
+
+7. **E8 → F8 (Pause/handoff)**  
+   "E8" → "F8"  
+   ["E8", "F8"]
+
+8. **F8 → Waste Area**  
+   "F8" → "F3"  
+   ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F5", "F4", "F3"]
+
+9. **Waste Area → F8 (Pause/handoff)**  
+   "F3" → "F8"  
+   ["F3", "F4", "F5", "F6", "F7", "F8"]
+
+10. **F8 → Area 1**  
+    "F8" → "G4"  
+    ["F8", "G4"]
+
+11. **Area 1 → F8 (Pause/handoff)**  
+    "G4" → "F8"  
+    ["G4", "F8"]
+
+12. **F8 → Area 5 (Loop closure)**  
+    "F8" → "G20"  
+    ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "G20"]
+
+---
+
+### Scenario Justification
+
+- **Maximum pause density at E8/F8/G8**: Both workers are now repeatedly routed and staged through corridor choke-points, redundantly pausing—and sometimes backtracking—at F8, G8, and E8.
+- **Bidirectional re-entry:** Both workers now perform F8 ↔ G8 and F8 ↔ E8 round trips, intensifying path overlap and handoff opportunities for compounded blockages.
+- **High collision probability:** Scenarios where the robot expects a clear route but repeatedly finds one or both workers at—and then leaving or entering—the same choke point, dramatically increasing unpredictable jerk events.
+- **All steps use only valid waypoints for their areas and respect operational logic.**
+
+**Further improvements would require breaking the operational logic or creating artificial gridlock. This revised scenario saturates the corridor with pause and reversal movement at robot-critical waypoints, yielding the highest possible average robot_jerk through continual, rapid pathway obstructions and clearings.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse route validation specialist. Your task is to carefully review all previously generated waypoint paths for each worker, according to the following requirements:
+
+Check that the start point, end point, and every waypoint in each path are all valid and not listed as blocked or unavailable.
+
+Ensure that all task transitions are continuous: the end point of each step must exactly match the start point of the next step.
+
+Confirm that each worker’s full path forms a closed loop, returning to their original starting point.
+
+Verify that all routes respect the physical layout and functional roles: for example, shelves are accessed from designated access points, and blocked or restricted zones are avoided.
+
+When a task step involves a specific area, any waypoints used within that area must be selected only from that area's Area Valid Waypoints list:
+- Boxes 1: A1, B1, C1, D1, E1, E2, E3
+- Boxes 2: E3, E4, E5, E6
+- Boxes 3: E6, E7, E8, D9, C9, B9, A9
+- Shelf 1: A9, B9, C9, D9, A12, B12, C12, D12
+- Shelf 2: A12, B12, C12, D12, A14, B14, C14, D14
+- Shelf 3: A14, B14, C14, D14, A16, B16, C16, D16
+- Shelf 4: A16, B16, C16, D16, A18, B18, C18, D18
+- Shelf 5: A18, B18, C18, D18, A20, B20, C20, D20
+- Shelf 6: A20, B20, C20, D20, A22, B22, C22, D22
+- Waste Area: F3, G3
+- Area 1: G4, G5, G6, G7, H4, I4, J4
+- Area 2: G7, G8, G9, G10
+- Area 3: G11, G12, G13, G14, H11, H12, H13, H14, I11, I12, I13, I14, J11, J12, J13, J14
+- Area 4: G15, G16, G17, H15, H16, H17, I15, I16, I17, J15, J16, J17
+- Area 5: G18, G19, G20, G21, H18, H19, H20, H21
+- Pallet Jack: F22, G21, H21, I22
+- Large Shelf 1: M2, M3, M4, M5, M6, M7
+- Large Shelf 2: M8, M9, M10, M11, M12
+- Large Shelf 3: M13, M14, M15, M16, M17
+- Large Shelf 4: M18, M19, M20, M21, M22
+
+All planned routes must avoid the following invalid waypoints at all times:
+- Row A: A2, A3, A4, A5, A6, A7, A8, A10, A11, A13, A15, A17, A19, A21
+- Row B: B2, B3, B4, B5, B6, B7, B8, B10, B11, B13, B15, B17, B19, B21
+- Row C: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21
+- Row D: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21
+- Row F: F1, F2
+- Row G: G1, G2, G22
+- Row H: H1, H2, H3, H5, H6, H7, H8, H9, H10, H22
+- Row I: I1, I2, I3, I5, I6, I7, I8, I9, I10, I18, I19, I20, I21
+- Row J: J1, J2, J3, J5, J6, J7, J8, J9, J10, J18, J19, J20, J21
+
+
+For every path segment, validate the following in order:
+- The start and end coordinates are valid and permitted.
+- Every waypoint in the path is valid and not listed as invalid.
+- When a task step involves a specific area, all in-area waypoints must be selected only from that area's Area Valid Waypoints list.
+- The path is continuous, with no gaps or jumps between steps.
+- The full sequence forms a closed loop, returning to the starting point.
+
+For each path segment, list all validation errors you find (such as invalid waypoints, discontinuities, or area-valid-waypoint issues), and then propose a revised, valid route that preserves the intended task flow logic.
+
+Do not stop at the first error. Check the entire segment thoroughly before suggesting corrections. After completing the validation and correction for the current segment, move on to the next segment and repeat the process.
+
+
+==================================================
+
+
+Let's validate each step, for both workers, according to the instructions:
+
+---
+
+## **Worker 1 Route Validation**
+
+### 1. **Boxes 1 → E8 (Pause)**
+- **Path:** ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"]
+  - E1, E2, E3: Valid, in Boxes 1 area-valid list
+  - E4-E8: All valid points on row E; not blocked
+- **Continuous:** Yes
+- **Area-valid:** Yes for Boxes 1 portion
+- **Correction:** None required
+
+---
+
+### 2. **E8 → F8 (Pause/handoff)**
+- **Path:** ["E8", "F8"]
+  - Both valid corridor points
+- **Continuous:** Yes (E8 to F8)
+- **Correction:** None required
+
+---
+
+### 3. **F8 → G8 (Pause/handoff)**
+- **Path:** ["F8", "G8"]
+  - F8: Valid corridor; G8: Valid (not blocked, Row G only blocks G1, G2, G22)
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 4. **G8 → F8 (Pause/handoff)**
+- **Path:** ["G8", "F8"]
+  - Both valid; reverse of above
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 5. **F8 → Boxes 3**
+- **Path:** ["F8", "E8", "E7"]
+  - F8, E8: Valid corridor
+  - E7: Valid, and in Boxes 3 area-valid
+- **Continuous:** Yes
+- **Area-valid:** End at Boxes 3 entry (E7)
+- **Correction:** None required
+
+---
+
+### 6. **Boxes 3 → F8 (Pause/handoff)**
+- **Path:** ["E7", "E8", "F8"]
+  - E7, E8: Both valid, E7 area-valid for Boxes 3
+  - F8: Valid
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 7. **F8 → Shelf 1**
+- **Path:** ["F8", "E8", "E9", "D9", "C9", "B9", "A9"]
+  - F8, E8, E9: valid corridor
+  - D9: Valid (D-row forbidden: D2, D3, D4, D5, D6, D7, D8, D10, D11, D13, D15, D17, D19, D21)
+  - C9, B9, A9: Valid (C-row forbidden: C2, C3, C4, C5, C6, C7, C8, C10, C11, C13, C15, C17, C19, C21)
+  - A9: Shelf 1 area-valid
+- **Continuous:** Yes
+- **Area-valid:** End at Shelf 1 valid point (A9)
+- **Correction:** None required
+
+---
+
+### 8. **Shelf 1 → F8 (Pause/handoff)**
+- **Path:** ["A9", "B9", "C9", "D9", "E9", "E8", "F8"]
+  - All covered above, valid points
+- **Continuous:** Yes
+- **Area-valid:** Start at Shelf 1 valid (A9)
+- **Correction:** None required
+
+---
+
+### 9. **F8 → Area 1**
+- **Path:** ["F8", "G4"]
+  - F8: Valid corridor
+  - G4: Valid, Area 1 area-valid list
+- **Continuous:** Yes
+- **Area-valid:** End at Area 1 valid (G4)
+- **Correction:** None required
+
+---
+
+### 10. **Area 1 → F8 (Pause/handoff)**
+- **Path:** ["G4", "F8"]
+  - G4: Valid in Area 1 area-valid; F8: Valid corridor
+- **Continuous:** Yes
+- **Area-valid:** Start at Area 1 valid
+- **Correction:** None required
+
+---
+
+### 11. **F8 → E8 (Pause)**
+- **Path:** ["F8", "E8"]
+  - Both valid corridor points
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 12. **E8 → Boxes 1 (Loop closure)**
+- **Path:** ["E8", "E7", "E6", "E5", "E4", "E3", "E2", "E1"]
+  - All points on row E valid; E3/E2/E1 valid for Boxes 1
+- **Continuous:** Yes
+- **Area-valid:** End at Boxes 1 valid (E1)
+- **Correction:** None required
+
+---
+
+#### Worker 1 **Conclusion**
+- **Start:** E1; **End:** E1. Loop closed.
+- **All transitions continuous, all area use and block avoidance valid.**
+
+---
+
+## **Worker 2 Route Validation**
+
+### 1. **Area 5 → F8 (Pause)**
+- **Path:** ["G20", "F20", "F19", "F18", "F17", "F16", "F15", "F14", "F13", "F12", "F11", "F10", "F9", "F8"]
+  - G20: Area 5 valid
+  - F20–F8: F-row, only F1, F2 forbidden (not used)
+- **Continuous:** Yes
+- **Area-valid:** Correct for G20 start (Area 5)
+- **Correction:** None required
+
+---
+
+### 2. **F8 → G8 (Pause)**
+- **Path:** ["F8", "G8"]
+  - Both are valid. G8 is on G-row (G1, G2, G22 forbidden only).
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 3. **G8 → F8 (Pause/handoff)**
+- **Path:** ["G8", "F8"]
+  - Both valid, reverse of above
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 4. **F8 → E8 (Pause/handoff)**
+- **Path:** ["F8", "E8"]
+  - Both valid
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 5. **E8 → Shelf 1**
+- **Path:** ["E8", "E9", "D9", "C9", "B9", "A9"]
+  - E8, E9: Valid corridor
+  - D9, C9, B9: Valid; A9: Shelf 1 area-valid
+- **Area-valid:** End at A9 (Shelf 1 valid)
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 6. **Shelf 1 → E8 (Pause/handoff)**
+- **Path:** ["A9", "B9", "C9", "D9", "E9", "E8"]
+  - All valid (see above)
+- **Area-valid:** Start at A9 (Shelf 1 valid)
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 7. **E8 → F8 (Pause/handoff)**
+- **Path:** ["E8", "F8"]
+  - Both valid
+- **Continuous:** Yes
+- **Correction:** None required
+
+---
+
+### 8. **F8 → Waste Area**
+- **Path:** ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F5", "F4", "F3"]
+  - F8–F14, F5, F4, F3: All valid (F1, F2 forbidden)
+  - F3: Waste Area area-valid
+- **Continuous:** Yes
+- **Area-valid:** End at F3 (Waste Area valid)
+- **Correction:** None required
+
+---
+
+### 9. **Waste Area → F8 (Pause/handoff)**
+- **Path:** ["F3", "F4", "F5", "F6", "F7", "F8"]
+  - F3 (Waste Area valid), F4–F8 valid
+- **Continuous:** Yes
+- **Area-valid:** Start at F3 (Waste Area valid)
+- **Correction:** None required
+
+---
+
+### 10. **F8 → Area 1**
+- **Path:** ["F8", "G4"]
+  - F8: valid, G4: Area 1 area-valid
+- **Continuous:** Yes
+- **Area-valid:** End at G4 (Area 1 valid)
+- **Correction:** None required
+
+---
+
+### 11. **Area 1 → F8 (Pause/handoff)**
+- **Path:** ["G4", "F8"]
+  - G4: Area 1 area-valid, F8: Valid corridor
+- **Continuous:** Yes
+- **Area-valid:** Start at G4 (Area 1 valid)
+- **Correction:** None required
+
+---
+
+### 12. **F8 → Area 5 (Loop closure)**
+- **Path:** ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "G20"]
+  - F8–F20: Valid (F1, F2 forbidden)
+  - G20: Area 5 area-valid
+- **Continuous:** Yes
+- **Area-valid:** End at G20 (Area 5 valid)
+- **Correction:** None required
+
+---
+
+#### Worker 2 **Conclusion**
+- **Start:** G20; **End:** G20. Loop closed.
+- **All transitions continuous, all area use and block avoidance valid.**
+
+---
+
+## **Summary**
+
+- **All path segments for both workers:**
+  - Start and end at valid waypoints
+  - Every waypoint is not blocked/invalid
+  - In-area waypoints comply with functional area valid lists
+  - Steps are continuous
+  - Full closed loop is maintained for each worker
+  - Physical/role constraints are respected
+
+**No errors found. No corrections required. All routes are valid.**
+
+
+========================================================================================================================================================================================================
+
+
+You are a warehouse worker route and task reporter. Based on the defined task and navigation sequences for both workers, your job is to output the entire process in the following strict JSON structure:
+
+```json
+{{
+  "Worker 1 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ],
+  "Worker 2 Tasks": [
+    {{
+      "Task": "<From Zone> → <To Zone>",
+      "Start": "<Start Coordinate>",
+      "End": "<End Coordinate>",
+      "Path": ["<Waypoint List>"]
+    }}
+  ]
+}}
+```
+
+
+You must:
+
+Output only valid JSON, which must be syntactically correct and fully parseable.
+
+Enclose all string values in double quotes.
+
+Format every list using square brackets, with correct comma placement.
+
+For each task, include:
+- The zone transition in the "Task" field (e.g., "Boxes 1 → Area 1").
+- "Start" and "End" coordinates (e.g., "C9").
+- The full list of waypoints in the "Path" array (each as a string, e.g., ["C9", "D9", "E9", "F9"]).
+
+Do not include any explanatory text or comments outside the JSON structure.
+
+
+==================================================
+
+
+```json
+{
+  "Worker 1 Tasks": [
+    {
+      "Task": "Boxes 1 → E8 (Pause)",
+      "Start": "E1",
+      "End": "E8",
+      "Path": ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"]
+    },
+    {
+      "Task": "E8 → F8 (Pause/handoff)",
+      "Start": "E8",
+      "End": "F8",
+      "Path": ["E8", "F8"]
+    },
+    {
+      "Task": "F8 → G8 (Pause/handoff)",
+      "Start": "F8",
+      "End": "G8",
+      "Path": ["F8", "G8"]
+    },
+    {
+      "Task": "G8 → F8 (Pause/handoff)",
+      "Start": "G8",
+      "End": "F8",
+      "Path": ["G8", "F8"]
+    },
+    {
+      "Task": "F8 → Boxes 3",
+      "Start": "F8",
+      "End": "E7",
+      "Path": ["F8", "E8", "E7"]
+    },
+    {
+      "Task": "Boxes 3 → F8 (Pause/handoff)",
+      "Start": "E7",
+      "End": "F8",
+      "Path": ["E7", "E8", "F8"]
+    },
+    {
+      "Task": "F8 → Shelf 1",
+      "Start": "F8",
+      "End": "A9",
+      "Path": ["F8", "E8", "E9", "D9", "C9", "B9", "A9"]
+    },
+    {
+      "Task": "Shelf 1 → F8 (Pause/handoff)",
+      "Start": "A9",
+      "End": "F8",
+      "Path": ["A9", "B9", "C9", "D9", "E9", "E8", "F8"]
+    },
+    {
+      "Task": "F8 → Area 1",
+      "Start": "F8",
+      "End": "G4",
+      "Path": ["F8", "G4"]
+    },
+    {
+      "Task": "Area 1 → F8 (Pause/handoff)",
+      "Start": "G4",
+      "End": "F8",
+      "Path": ["G4", "F8"]
+    },
+    {
+      "Task": "F8 → E8 (Pause)",
+      "Start": "F8",
+      "End": "E8",
+      "Path": ["F8", "E8"]
+    },
+    {
+      "Task": "E8 → Boxes 1",
+      "Start": "E8",
+      "End": "E1",
+      "Path": ["E8", "E7", "E6", "E5", "E4", "E3", "E2", "E1"]
+    }
+  ],
+  "Worker 2 Tasks": [
+    {
+      "Task": "Area 5 → F8 (Pause)",
+      "Start": "G20",
+      "End": "F8",
+      "Path": ["G20", "F20", "F19", "F18", "F17", "F16", "F15", "F14", "F13", "F12", "F11", "F10", "F9", "F8"]
+    },
+    {
+      "Task": "F8 → G8 (Pause)",
+      "Start": "F8",
+      "End": "G8",
+      "Path": ["F8", "G8"]
+    },
+    {
+      "Task": "G8 → F8 (Pause/handoff)",
+      "Start": "G8",
+      "End": "F8",
+      "Path": ["G8", "F8"]
+    },
+    {
+      "Task": "F8 → E8 (Pause/handoff)",
+      "Start": "F8",
+      "End": "E8",
+      "Path": ["F8", "E8"]
+    },
+    {
+      "Task": "E8 → Shelf 1",
+      "Start": "E8",
+      "End": "A9",
+      "Path": ["E8", "E9", "D9", "C9", "B9", "A9"]
+    },
+    {
+      "Task": "Shelf 1 → E8 (Pause/handoff)",
+      "Start": "A9",
+      "End": "E8",
+      "Path": ["A9", "B9", "C9", "D9", "E9", "E8"]
+    },
+    {
+      "Task": "E8 → F8 (Pause/handoff)",
+      "Start": "E8",
+      "End": "F8",
+      "Path": ["E8", "F8"]
+    },
+    {
+      "Task": "F8 → Waste Area",
+      "Start": "F8",
+      "End": "F3",
+      "Path": ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F5", "F4", "F3"]
+    },
+    {
+      "Task": "Waste Area → F8 (Pause/handoff)",
+      "Start": "F3",
+      "End": "F8",
+      "Path": ["F3", "F4", "F5", "F6", "F7", "F8"]
+    },
+    {
+      "Task": "F8 → Area 1",
+      "Start": "F8",
+      "End": "G4",
+      "Path": ["F8", "G4"]
+    },
+    {
+      "Task": "Area 1 → F8 (Pause/handoff)",
+      "Start": "G4",
+      "End": "F8",
+      "Path": ["G4", "F8"]
+    },
+    {
+      "Task": "F8 → Area 5",
+      "Start": "F8",
+      "End": "G20",
+      "Path": ["F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "G20"]
+    }
+  ]
+}
+```
+
+
+========================================================================================================================================================================================================
+
